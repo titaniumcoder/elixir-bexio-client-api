@@ -2,7 +2,7 @@ defmodule BexioApiClient.Contacts.Contact do
   @type t :: %__MODULE__{
           id: integer(),
           nr: String.t(),
-          contact_type: atom(),
+          contact_type: :company | :person,
           name_1: String.t(),
           name_2: String.t(),
           salutation_id: integer(),

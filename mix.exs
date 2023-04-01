@@ -4,10 +4,31 @@ defmodule BexioApiClient.MixProject do
   def project do
     [
       app: :bexio_api_client,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      package: package(),
+      description: description()
+    ]
+  end
+
+  defp description do
+    """
+    Bexio API Client for accessing the API described at https://docs.bexio.com.
+    """
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
+      maintainers: ["Rico Metzger"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/rmse-ch/elixir-bexio-client-api",
+        "Docs" => "https://hexdocs.pm/bexio_api_client/",
+        "Bexio API Docs" => "https://docs.bexio.com"
+      }
     ]
   end
 
@@ -27,11 +48,15 @@ defmodule BexioApiClient.MixProject do
       # The API is completely in JSON, so need this dependency too
       {:jason, ">= 1.0.0"},
 
+      # Not including the dependency because I don't care... as long as Europe/Zurich is supported...
+      {:tz, "~> 0.26.1", only: [:test]},
+
       # Typespecs everywhere...
       {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
 
-      # Not including the dependency because I don't care... as long as Europe/Zurich is supported...
-      {:tz, "~> 0.26.1", only: [:test]}
+      # Create documentation
+      {:ex_doc, "~> 0.29.4", only: :dev},
+      {:earmark, "~> 1.4", only: :dev}
     ]
   end
 end

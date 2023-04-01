@@ -15,6 +15,7 @@ defmodule BexioApiClient do
   * :max_retries (10)
   * :max_delay (4_000)
   * :log_level (:error)
+  * :debug (false)
 
   """
   @spec create_client(String.t(), keyword()) :: Tesla.Client.t()
@@ -31,7 +32,8 @@ defmodule BexioApiClient do
       Tesla.Middleware.JSON,
       {Tesla.Middleware.BearerAuth, token: api_token},
       {Tesla.Middleware.Headers, [{"accept", "application/json"}]},
-      {Tesla.Middleware.Logger, log_level: log_level, filter_headers: ["authorization"], debug: debug},
+      {Tesla.Middleware.Logger,
+       log_level: log_level, filter_headers: ["authorization"], debug: debug},
       {Tesla.Middleware.Retry,
        delay: delay,
        max_retries: max_retries,
