@@ -14,8 +14,9 @@ defmodule BexioApiClient do
   * :delay (500)
   * :max_retries (10)
   * :max_delay (4_000)
-  * :log_level (:error)
+  * :log_level (:info)
   * :debug (false)
+  * :adapter (nil)
 
   """
   @spec create_client(String.t(), keyword()) :: Tesla.Client.t()
@@ -23,7 +24,7 @@ defmodule BexioApiClient do
     delay = Keyword.get(opts, :delay, 500)
     max_retries = Keyword.get(opts, :max_retries, 10)
     max_delay = Keyword.get(opts, :max_delay, 4_000)
-    log_level = Keyword.get(opts, :log_level, :error)
+    log_level = Keyword.get(opts, :log_level, :info)
     adapter = Keyword.get(opts, :adapter)
     debug = Keyword.get(opts, :debug, false)
 
