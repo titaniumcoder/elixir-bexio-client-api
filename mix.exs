@@ -21,8 +21,17 @@ defmodule BexioApiClient.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+      # API Client, for now fixed to tesla, may change later if needed
+      {:tesla, "~> 1.4"},
+
+      # The API is completely in JSON, so need this dependency too
+      {:jason, ">= 1.0.0"},
+
+      # Typespecs everywhere...
+      {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
+
+      # Not including the dependency because I don't care... as long as Europe/Zurich is supported...
+      {:tz, "~> 0.26.1", only: [:test]}
     ]
   end
 end
