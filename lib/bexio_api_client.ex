@@ -59,4 +59,68 @@ defmodule BexioApiClient do
 
     Tesla.client(middleware, adapter)
   end
+
+  @doc """
+  Fetch a new access token for the given refresh token.
+
+  ## Arguments:
+
+    * `refresh_token` -> the refresh token we need the access key for
+    * `client_id` -> the client id of our application that also got the refresh token
+    * `client_secret` -> the client secret of our application
+
+  ## Response
+
+    {:ok, %{access_token: "", expires_in: 3600, id_token: "", refresh_token: "", scope: "openid profile email", token_type: "Bearer}}
+
+    {:error, :unauthorized}
+  """
+  @spec access_token(String.t(), String.t(), String.t(), any()) :: {:ok, map()} | {:error, any()}
+  def access_token(refresh_token, client_id, client_secret, adapter \\ nil) do
+    tesla_response =
+      [
+        {Tesla.Middleware.BasicAuth, username: client_id, password: client_secret},
+        {Tesla.Middleware.Logger,
+         log_level: :info, filter_headers: ["authorization"], debug: false},
+        Tesla.Middleware.FormUrlencoded
+      ]
+      |> Tesla.client(adapter)
+      |> Tesla.post("https://idp.bexio.com/token", %{
+        "grant_type" => "refresh_token",
+        "refresh_token" => refresh_token
+      })
+
+    case tesla_response do
+      {:ok, %Tesla.Env{status: 200, body: json_stringified}} ->
+        case Jason.decode(json_stringified) do
+          {:ok,
+           %{
+             "access_token" => access_token,
+             "expires_in" => expires_in,
+             "id_token" => id_token,
+             "refresh_token" => refresh_token,
+             "scope" => scope,
+             "token_type" => token_type
+           }} ->
+            {:ok,
+             %{
+               access_token: access_token,
+               expires_in: expires_in,
+               id_token: id_token,
+               refresh_token: refresh_token,
+               scope: scope,
+               token_type: token_type
+             }}
+
+          {:ok, map} ->
+            {:error, {:unexpected_response, map}}
+
+          {:error, error} ->
+            {:error, error}
+        end
+
+      {:ok, %Tesla.Env{status: 401}} ->
+        {:error, :unauthorized}
+    end
+  end
 end
