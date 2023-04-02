@@ -135,4 +135,84 @@ defmodule BexioApiClient.ContactsTest do
       assert contact2.updated_at == ~N[2012-01-21 11:56:55]
     end
   end
+
+  describe "single contact" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/contact/33"} ->
+          json(%{
+            "id" => 33,
+            "nr" => "998776",
+            "contact_type_id" => 1,
+            "name_1" => "Tester AG",
+            "name_2" => "Die Testing Firma",
+            "salutation_id" => 0,
+            "salutation_form" => 1,
+            "title_id" => 2,
+            "birthday" => nil,
+            "address" => "Teststrasse 999",
+            "postcode" => "9999",
+            "city" => "Testcity",
+            "country_id" => 3,
+            "mail" => "unknown@testing-ag.inv",
+            "mail_second" => "unknown2@testing-ag.inv",
+            "phone_fixed" => "099 999 99 99",
+            "phone_fixed_second" => "088 888 88 88",
+            "phone_mobile" => "077 777 77 77",
+            "fax" => "066 666 66 66",
+            "url" => "http://unbekannte.url",
+            "skype_name" => "ich.bin.in.skype",
+            "remarks" => "Lange schoene Bemerkungen",
+            "language_id" => 4,
+            "is_lead" => false,
+            "contact_group_ids" => "2,22,2,3",
+            "contact_branch_ids" => "3,33,3,99",
+            "user_id" => 5,
+            "owner_id" => 6,
+            "updated_at" => "2022-09-13 09:14:21"
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/contact/99"} ->
+          %Tesla.Env{status: 404, body: "Contact does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "fetches a single valid contact" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, contact} = BexioApiClient.Contacts.fetch_contact(client, 33)
+      assert contact.id == 33
+      assert contact.nr == 998_776
+      assert contact.contact_type == :company
+      assert contact.name_1 == "Tester AG"
+      assert contact.name_2 == "Die Testing Firma"
+      assert contact.salutation_id == 0
+      assert contact.salutation_form == 1
+      assert contact.title_id == 2
+      assert contact.birthday == nil
+      assert contact.address == "Teststrasse 999"
+      assert contact.postcode == "9999"
+      assert contact.city == "Testcity"
+      assert contact.country_id == 3
+      assert contact.mail == "unknown@testing-ag.inv"
+      assert contact.mail_second == "unknown2@testing-ag.inv"
+      assert contact.phone_fixed == "099 999 99 99"
+      assert contact.phone_fixed_second == "088 888 88 88"
+      assert contact.phone_mobile == "077 777 77 77"
+      assert contact.fax == "066 666 66 66"
+      assert contact.url == "http://unbekannte.url"
+      assert contact.skype_name == "ich.bin.in.skype"
+      assert contact.remarks == "Lange schoene Bemerkungen"
+      assert contact.language_id == 4
+      assert contact.contact_group_ids == [2, 3, 22]
+      assert contact.contact_branch_ids == [3, 33, 99]
+      assert contact.updated_at == ~N[2022-09-13 09:14:21]
+    end
+
+    test "fetches an unknown contact" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact(client, 99)
+    end
+  end
 end

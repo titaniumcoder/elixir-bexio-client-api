@@ -51,9 +51,40 @@ defmodule BexioApiClient.Contacts do
           query: [order_by: order_by, limit: limit, offset: offset, show_archived: show_archived]
         )
       end,
-      fn body -> Enum.map(body, &map_from_client/1) end
+      &map_from_clients/1
     )
   end
+
+  @doc """
+  This action fetches a single contact
+
+  ## Arguments:
+
+    * `:contact_id` - the id of the contact
+    * `:show_archived` - Show archived elements only
+
+  """
+  @spec fetch_contact(
+          client :: Tesla.Client.t(),
+          contact_id :: pos_integer(),
+          show_archived :: boolean() | nil
+        ) :: {:ok, [BexioApiClient.Contacts.Contact.t()]} | {:error, any()}
+  def fetch_contact(
+        client,
+        contact_id,
+        show_archived \\ nil
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/contact/#{contact_id}",
+          query: [show_archived: show_archived]
+        )
+      end,
+      &map_from_client/1
+    )
+  end
+
+  defp map_from_clients(clients), do: Enum.map(clients, &map_from_client/1)
 
   defp map_from_client(%{
          "id" => id,
