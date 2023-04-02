@@ -45,18 +45,14 @@ defmodule BexioApiClient.Contacts do
         offset \\ nil,
         show_archived \\ nil
       ) do
-    case Tesla.get(client, "/2.0/contact",
-           query: [order_by: order_by, limit: limit, offset: offset, show_archived: show_archived]
-         ) do
-      {:ok, %Tesla.Env{status: 200, body: body}} ->
-        {:ok, Enum.map(body, &map_from_client/1)}
-
-      {:ok, %Tesla.Env{status: 401}} ->
-        {:error, :unauthorized}
-
-      {:error, error} ->
-        {:error, error}
-    end
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/contact",
+          query: [order_by: order_by, limit: limit, offset: offset, show_archived: show_archived]
+        )
+      end,
+      fn body -> Enum.map(body, &map_from_client/1) end
+    )
   end
 
   defp map_from_client(%{

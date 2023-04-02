@@ -49,4 +49,59 @@ defmodule BexioApiClient.Helpers do
     |> Enum.uniq()
     |> Enum.sort()
   end
+
+  @spec bexio_return_handling(call :: (() -> any()), callback :: (any() -> any())) ::
+          {:ok, any()}
+          | {:error,
+             :invalid_access
+             | :unauthorized
+             | :not_found
+             | :length_required
+             | :invalid_data
+             | :could_not_be_saved
+             | :rate_limited
+             | :unexpected_api_condition
+             | :api_not_available}
+  def bexio_return_handling(call, callback) do
+    case call.() do
+      {:ok, %Tesla.Env{status: 200, body: body}} ->
+        {:ok, callback.(body)}
+
+      {:ok, %Tesla.Env{status: 201, body: body}} ->
+        {:ok, callback.(body)}
+
+      {:ok, %Tesla.Env{status: 301, body: body}} ->
+        {:ok, callback.(body)}
+
+      {:ok, %Tesla.Env{status: 401}} ->
+        {:error, :invalid_access}
+
+      {:ok, %Tesla.Env{status: 403}} ->
+        {:error, :unauthorized}
+
+      {:ok, %Tesla.Env{status: 404}} ->
+        {:error, :not_found}
+
+      {:ok, %Tesla.Env{status: 411}} ->
+        {:error, :length_required}
+
+      {:ok, %Tesla.Env{status: 415}} ->
+        {:error, :invalid_data}
+
+      {:ok, %Tesla.Env{status: 422}} ->
+        {:error, :could_not_be_saved}
+
+      {:ok, %Tesla.Env{status: 429}} ->
+        {:error, :rate_limited}
+
+      {:ok, %Tesla.Env{status: 500}} ->
+        {:error, :unexpected_api_condition}
+
+      {:ok, %Tesla.Env{status: 503}} ->
+        {:error, :api_not_available}
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
 end
