@@ -4,6 +4,7 @@ defmodule BexioApiClient.Contacts do
   """
 
   import BexioApiClient.Helpers
+  alias BexioApiClient.SearchCriteria
   alias BexioApiClient.Contacts.Contact
 
   @doc """
@@ -56,6 +57,76 @@ defmodule BexioApiClient.Contacts do
   end
 
   @doc """
+  Search contacts via query.
+  The following search fields are supported:
+
+  * id
+  * name_1
+  * name_2
+  * nr
+  * address
+  * mail
+  * mail_second
+  * postcode
+  * city
+  * country_id
+  * contact_group_ids
+  * contact_type_id
+  * updated_at
+  * user_id
+  * phone_fixed
+  * phone_mobile
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:criteria` - a list of search criteria
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+    * `:show_archived` - Show archived elements only
+
+  """
+  @spec search_contacts(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          order_by ::
+            :id
+            | :nr
+            | :name_1
+            | :updated_at
+            | :id_desc
+            | :nr_desc
+            | :offset_desc
+            | :updated_at_desc
+            | :id_asc
+            | :nr_asc
+            | :offset_asc
+            | :updated_at_asc
+            | nil,
+          limit :: pos_integer() | nil,
+          offset :: non_neg_integer() | nil,
+          show_archived :: boolean() | nil
+        ) :: {:ok, [BexioApiClient.Contacts.Contact.t()]} | {:error, any()}
+  def search_contacts(
+        client,
+        criteria,
+        order_by \\ nil,
+        limit \\ nil,
+        offset \\ nil,
+        show_archived \\ nil
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/contact/search", criteria,
+          query: [order_by: order_by, limit: limit, offset: offset, show_archived: show_archived]
+        )
+      end,
+      &map_from_clients/1
+    )
+  end
+
+  @doc """
   This action fetches a single contact
 
   ## Arguments:
@@ -76,9 +147,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_return_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact/#{contact_id}",
-          query: [show_archived: show_archived]
-        )
+        Tesla.get(client, "/2.0/contact/#{contact_id}", query: [show_archived: show_archived])
       end,
       &map_from_client/1
     )
