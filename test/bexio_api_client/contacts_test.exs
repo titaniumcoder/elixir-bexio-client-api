@@ -1,7 +1,8 @@
 defmodule BexioApiClient.ContactsTest do
-  alias BexioApiClient.SearchCriteria
   use ExUnit.Case, async: true
   doctest BexioApiClient.Contacts
+
+  alias BexioApiClient.SearchCriteria
 
   import Tesla.Mock
 
@@ -140,7 +141,7 @@ defmodule BexioApiClient.ContactsTest do
   describe "search contacts" do
     setup do
       mock(fn
-        %{method: :post, url: "https://api.bexio.com/2.0/contact/search", body: body} ->
+        %{method: :post, url: "https://api.bexio.com/2.0/contact/search", body: _body} ->
           json([
             %{
               "id" => 111,
@@ -352,6 +353,134 @@ defmodule BexioApiClient.ContactsTest do
     test "fetches an unknown contact" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact(client, 99)
+    end
+  end
+
+  describe "valid contact relation list" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/contact_relation"} ->
+          json([
+            %{
+              "id" => 111,
+              "contact_id" => 1,
+              "contact_sub_id" => 2,
+              "description" => "Description 1",
+              "updated_at" => "2022-09-13 09:14:21"
+            },
+            %{
+              "id" => 222,
+              "contact_id" => 3,
+              "contact_sub_id" => 4,
+              "description" => "Description 2",
+              "updated_at" => "2023-09-13 09:14:21"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid contact relations" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [contact_relation1, contact_relation2]} =
+               BexioApiClient.Contacts.fetch_contact_relations(client)
+
+      assert contact_relation1.id == 111
+      assert contact_relation1.contact_id == 1
+      assert contact_relation1.contact_sub_id == 2
+      assert contact_relation1.description == "Description 1"
+      assert contact_relation1.updated_at == ~N[2022-09-13 09:14:21]
+
+      assert contact_relation2.id == 222
+      assert contact_relation2.contact_id == 3
+      assert contact_relation2.contact_sub_id == 4
+      assert contact_relation2.description == "Description 2"
+      assert contact_relation2.updated_at == ~N[2023-09-13 09:14:21]
+    end
+  end
+
+  describe "search contact relations" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/contact_relation/search", body: _body} ->
+          json([
+            %{
+              "id" => 111,
+              "contact_id" => 1,
+              "contact_sub_id" => 2,
+              "description" => "Description 1",
+              "updated_at" => "2022-09-13 09:14:21"
+            },
+            %{
+              "id" => 222,
+              "contact_id" => 3,
+              "contact_sub_id" => 4,
+              "description" => "Description 2",
+              "updated_at" => "2023-09-13 09:14:21"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists contact relations" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [contact_relation1, contact_relation2]} =
+               BexioApiClient.Contacts.search_contact_relations(client, [
+                 SearchCriteria.nil?(:name_2),
+                 SearchCriteria.part_of(:name_1, ["fred", "queen"])
+               ])
+
+      assert contact_relation1.id == 111
+      assert contact_relation1.contact_id == 1
+      assert contact_relation1.contact_sub_id == 2
+      assert contact_relation1.description == "Description 1"
+      assert contact_relation1.updated_at == ~N[2022-09-13 09:14:21]
+
+      assert contact_relation2.id == 222
+      assert contact_relation2.contact_id == 3
+      assert contact_relation2.contact_sub_id == 4
+      assert contact_relation2.description == "Description 2"
+      assert contact_relation2.updated_at == ~N[2023-09-13 09:14:21]
+    end
+  end
+
+  describe "single contact relation" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/contact_relation/111"} ->
+          json(%{
+            "id" => 111,
+            "contact_id" => 1,
+            "contact_sub_id" => 2,
+            "description" => "Description 1",
+            "updated_at" => "2022-09-13 09:14:21"
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/contact_relation/99"} ->
+          %Tesla.Env{status: 404, body: "Contact does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "fetches a single valid contact relation" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, contact_relation} = BexioApiClient.Contacts.fetch_contact_relation(client, 111)
+      assert contact_relation.id == 111
+      assert contact_relation.contact_id == 1
+      assert contact_relation.contact_sub_id == 2
+      assert contact_relation.description == "Description 1"
+      assert contact_relation.updated_at == ~N[2022-09-13 09:14:21]
+    end
+
+    test "fetches an unknown contact relation" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact_relation(client, 99)
     end
   end
 end

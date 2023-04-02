@@ -219,4 +219,145 @@ defmodule BexioApiClient.Contacts do
 
   defp contact_type(1), do: :company
   defp contact_type(2), do: :person
+
+  ### Bexio API for the contact relations part of the API.
+
+  alias BexioApiClient.Contacts.ContactRelation
+
+  @doc """
+  Fetch a list of contacts relations.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec fetch_contact_relations(
+          client :: Tesla.Client.t(),
+          order_by ::
+            :id
+            | :id_asc
+            | :id_desc
+            | :contact_id
+            | :contact_id_asc
+            | :contact_id_desc
+            | :contact_sub_id
+            | :contact_sub_id_asc
+            | :contact_sub_id_desc
+            | nil,
+          limit :: pos_integer() | nil,
+          offset :: non_neg_integer() | nil
+        ) :: {:ok, [BexioApiClient.Contacts.ContactRelation.t()]} | {:error, any()}
+  def fetch_contact_relations(
+        client,
+        order_by \\ nil,
+        limit \\ nil,
+        offset \\ nil
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/contact_relation",
+          query: [order_by: order_by, limit: limit, offset: offset]
+        )
+      end,
+      &map_from_client_relations/1
+    )
+  end
+
+  @doc """
+  Search contacts via query.
+  The following search fields are supported:
+
+  * contact_id
+  * contact_sub_id
+  * updated_at
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:criteria` - a list of search criteria
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec search_contact_relations(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          order_by ::
+            :id
+            | :id_asc
+            | :id_desc
+            | :contact_id
+            | :contact_id_asc
+            | :contact_id_desc
+            | :contact_sub_id
+            | :contact_sub_id_asc
+            | :contact_sub_id_desc
+            | nil,
+          limit :: pos_integer() | nil,
+          offset :: non_neg_integer() | nil
+        ) :: {:ok, [BexioApiClient.Contacts.ContactRelation.t()]} | {:error, any()}
+  def search_contact_relations(
+        client,
+        criteria,
+        order_by \\ nil,
+        limit \\ nil,
+        offset \\ nil
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/contact_relation/search", criteria,
+          query: [order_by: order_by, limit: limit, offset: offset]
+        )
+      end,
+      &map_from_client_relations/1
+    )
+  end
+
+  @doc """
+  This action fetches a single contact relation
+
+  ## Arguments:
+
+    * `:contact_relation_id` - the id of the contact relation
+
+  """
+  @spec fetch_contact_relation(
+          client :: Tesla.Client.t(),
+          contact_relation_id :: pos_integer()
+        ) :: {:ok, [BexioApiClient.Contacts.ContactRelation.t()]} | {:error, any()}
+  def fetch_contact_relation(
+        client,
+        contact_relation_id
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/contact_relation/#{contact_relation_id}")
+      end,
+      &map_from_client_relation/1
+    )
+  end
+
+  defp map_from_client_relations(client_relations),
+    do: Enum.map(client_relations, &map_from_client_relation/1)
+
+  defp map_from_client_relation(%{
+         "id" => id,
+         "contact_id" => contact_id,
+         "contact_sub_id" => contact_sub_id,
+         "description" => description,
+         "updated_at" => updated_at
+       }) do
+    %ContactRelation{
+      id: id,
+      contact_id: contact_id,
+      contact_sub_id: contact_sub_id,
+      description: description,
+      updated_at: to_datetime(updated_at)
+    }
+  end
 end

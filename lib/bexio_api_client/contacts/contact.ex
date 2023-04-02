@@ -74,8 +74,7 @@ defmodule BexioApiClient.Contacts.Contact do
     :contact_group_ids,
     :contact_branch_ids,
     :user_id,
-    :owner_id,
-    :updated_at
+    :owner_id
   ]
   defstruct [
     :id,
