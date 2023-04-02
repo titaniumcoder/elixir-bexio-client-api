@@ -26,3 +26,13 @@ The API uses [Tesla](https://github.com/elixir-tesla/tesla) for the client acces
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at <https://hexdocs.pm/bexio_api_client>.
+
+## Building a release
+
+1. Update the versions in README.md, and mix.exs
+2. Actualize the CHANGELOG.md (once present)
+3. Run `mix test` and `mix dialyzer`
+4. Create a git commit.
+5. Create a tag for the new version.
+6. Execute `mix hex.publish`
+
