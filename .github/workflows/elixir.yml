@@ -1,11 +1,24 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Elixir CI
+
 on:
   push:
-    tags:
-      - '*'
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
 
 jobs:
-  publish:
+  build:
+    name: Build and test
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Elixir
@@ -25,7 +38,3 @@ jobs:
       run: mix test
     - name: Run Dialyzer
       run: mix dialyzer
-    - name: Publish package to hex.pm
-      run: mix hex.publish --yes
-      env:
-        HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
