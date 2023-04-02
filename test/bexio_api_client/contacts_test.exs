@@ -81,7 +81,7 @@ defmodule BexioApiClient.ContactsTest do
       client = BexioApiClient.create_client("123", adapter: Tesla.Mock)
       assert {:ok, [contact1, contact2]} = BexioApiClient.Contacts.fetch_contacts(client)
       assert contact1.id == 111
-      assert contact1.nr == "998776"
+      assert contact1.nr == 998776
       assert contact1.contact_type == :company
       assert contact1.name_1 == "Tester AG"
       assert contact1.name_2 == "Die Testing Firma"
@@ -105,10 +105,10 @@ defmodule BexioApiClient.ContactsTest do
       assert contact1.language_id == 4
       assert contact1.contact_group_ids == [2, 3, 22]
       assert contact1.contact_branch_ids == [3, 33, 99]
-      assert contact1.updated_at == ~U[2022-09-13 07:14:21Z]
+      assert contact1.updated_at == ~N[2022-09-13 09:14:21]
 
       assert contact2.id == 311
-      assert contact2.nr == "103370"
+      assert contact2.nr == 103370
       assert contact2.contact_type == :person
       assert contact2.name_1 == "Mueller"
       assert contact2.name_2 == nil
@@ -132,7 +132,7 @@ defmodule BexioApiClient.ContactsTest do
       assert contact2.language_id == nil
       assert contact2.contact_group_ids == []
       assert contact2.contact_branch_ids == []
-      assert contact2.updated_at == ~U[2012-01-21 10:56:55Z]
+      assert contact2.updated_at == ~N[2012-01-21 11:56:55]
     end
   end
 end

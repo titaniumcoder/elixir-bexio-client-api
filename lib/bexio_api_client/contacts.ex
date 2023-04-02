@@ -1,11 +1,23 @@
 defmodule BexioApiClient.Contacts do
   @moduledoc """
-  Bexio API for the contacts
+  Bexio API for the contacts part of the API.
   """
 
   import BexioApiClient.Helpers
   alias BexioApiClient.Contacts.Contact
 
+  @doc """
+  Fetch a list of contacts.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+    * `:show_archived` - Show archived elements only
+
+  """
   @spec fetch_contacts(
           client :: Tesla.Client.t(),
           order_by ::
@@ -20,17 +32,18 @@ defmodule BexioApiClient.Contacts do
             | :id_asc
             | :nr_asc
             | :offset_asc
-            | :updated_at_asc,
-          limit :: pos_integer(),
-          offset :: non_neg_integer(),
-          show_archived :: boolean()
+            | :updated_at_asc
+            | nil,
+          limit :: pos_integer() | nil,
+          offset :: non_neg_integer() | nil,
+          show_archived :: boolean() | nil
         ) :: {:ok, [BexioApiClient.Contacts.Contact.t()]} | {:error, any()}
   def fetch_contacts(
         client,
-        order_by \\ :id,
-        limit \\ 500,
-        offset \\ 0,
-        show_archived \\ false
+        order_by \\ nil,
+        limit \\ nil,
+        offset \\ nil,
+        show_archived \\ nil
       ) do
     case Tesla.get(client, "/2.0/contact",
            query: [order_by: order_by, limit: limit, offset: offset, show_archived: show_archived]
@@ -78,7 +91,7 @@ defmodule BexioApiClient.Contacts do
        }) do
     %Contact{
       id: id,
-      nr: nr,
+      nr: String.to_integer(nr),
       contact_type: contact_type(contact_type_id),
       name_1: name_1,
       name_2: name_2,

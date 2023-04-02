@@ -48,9 +48,6 @@ defmodule BexioApiClient.MixProject do
       # The API is completely in JSON, so need this dependency too
       {:jason, ">= 1.0.0"},
 
-      # Not including the dependency because I don't care... as long as Europe/Zurich is supported...
-      {:tz, "~> 0.26.1", only: [:test]},
-
       # Typespecs everywhere...
       {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
 
