@@ -1,5 +1,7 @@
 defmodule BexioApiClient.Contacts.Contact do
-  @moduledoc false
+  @moduledoc """
+  Bexio Contact Module.
+  """
 
   @typedoc """
   Bexio Contact (company or person).
