@@ -26,6 +26,6 @@ jobs:
     - name: Run Dialyzer
       run: mix dialyzer
     - name: Publish package to hex.pm
-      run: mix hex.publish
+      run: mix hex.publish --yes
       env:
         HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
