@@ -1,6 +1,6 @@
 # Bexio API Client for Elixir
 
-This is a simple client for the API described at [https://docs.bexio.com/](). It will support all functionality while also replacing enums with atoms and
+This is a simple client for the API described at <https://docs.bexio.com/>. It will support all functionality while also replacing enums with atoms and
 making the structs more useful in elixir.
 
 ## Installation
@@ -23,9 +23,8 @@ The API uses [Tesla](https://github.com/elixir-tesla/tesla) for the client acces
 
 ## Documentation 
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/bexio_api_client>.
+Documentation can be generated with [ExDoc](https://github.com/) 
+and can be found at <https://hexdocs.pm/bexio_api_client>.
 
 ## Building a release
 
