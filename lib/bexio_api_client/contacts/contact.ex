@@ -36,7 +36,6 @@ defmodule BexioApiClient.Contacts.Contact do
     * `:user_id` - creator of the record, reference to a TODO: user object
     * `:owner_id` - owner of the record, reference to a TODO: user object
     * `:updated_at` - date time of the last update (zurich time zone)
-
   """
   @type t :: %__MODULE__{
           id: integer(),
