@@ -1,6 +1,15 @@
 defmodule BexioApiClient do
   @moduledoc """
-  Base Module for the API Client
+  Base Module for the API Client.
+
+  The API Documentation for Bexio can be found under https://docs.bexio.com.
+
+  Fields or arguments with date time reference expect them in the time zone Europe/Zurich.
+
+  ## Requirements:
+
+    * Tesla: the api client depends on Tesla. Every API call needs an instance of a `Tesla.Client` to be able to do the rest calls.any()
+
   """
 
   @doc """
