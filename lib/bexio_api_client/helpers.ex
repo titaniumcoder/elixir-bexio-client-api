@@ -1,7 +1,5 @@
 defmodule BexioApiClient.Helpers do
-  @moduledoc """
-  Helper Functionality used in multiple places mostly to work around different type of the api and elixir
-  """
+  @moduledoc false
 
   @doc """
   Convert the given string into an Elixir date.
