@@ -20,16 +20,18 @@ defmodule BexioApiClient do
 
   It also allows an optional setup for retrying to allow to limit if needed. The defaults are listed below:
 
-  * :delay (500)
-  * :max_retries (10)
-  * :max_delay (4_000)
-  * :log_level (:info)
-  * :debug (false)
-  * :adapter (nil)
+  ## Options:
+
+    * `:delay` - Initial Delay for Backoff (Default: 500)
+    * `:max_retries` - Maximal number of retries (Default: 10)
+    * `:max_delay` - Maximal delay between requests (Default: 4_000)
+    * `:log_level` - Log Level for Requests (Default: `:info`)
+    * `:debug` - whether to include debug information (Default: `false`)
+    * `:adapter` - Which adapter to use (Defalt: `nil`, recommended one with SSL support like Hackney)
 
   """
-  @spec create_client(String.t(), keyword()) :: Tesla.Client.t()
-  def create_client(api_token, opts \\ []) do
+  @spec new(String.t(), keyword()) :: Tesla.Client.t()
+  def new(api_token, opts \\ []) do
     delay = Keyword.get(opts, :delay, 500)
     max_retries = Keyword.get(opts, :max_retries, 10)
     max_delay = Keyword.get(opts, :max_delay, 4_000)

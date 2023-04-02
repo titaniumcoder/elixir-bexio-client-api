@@ -78,7 +78,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists valid contacts" do
-      client = BexioApiClient.create_client("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:ok, [contact1, contact2]} = BexioApiClient.Contacts.fetch_contacts(client)
       assert contact1.id == 111
       assert contact1.nr == 998_776

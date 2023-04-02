@@ -4,7 +4,7 @@ defmodule BexioApiClientTest do
 
   test "will create a client and respect the options" do
     %Tesla.Client{pre: pre} =
-      BexioApiClient.create_client("a-very-long-token",
+      BexioApiClient.new("a-very-long-token",
         delay: 1000,
         max_delay: 100_000,
         max_retries: 20,
