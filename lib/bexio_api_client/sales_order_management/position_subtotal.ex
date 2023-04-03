@@ -11,6 +11,7 @@ defmodule BexioApiClient.SalesOrderManagement.PositionSubtotal do
     * `:id` - automatic id given by bexio
     * `:text` - text for the subtotal
     * `:value` - Decimal representation of the value
+    * `:optional?` - is the position optional?
     * `:internal_pos` - Internal position id
     * `:parent_id - if exists or nil
 
