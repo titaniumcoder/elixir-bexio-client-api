@@ -9,7 +9,8 @@ defmodule BexioApiClient.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
-      description: description()
+      description: description(),
+      dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
     ]
   end
 

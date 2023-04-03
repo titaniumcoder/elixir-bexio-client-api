@@ -4,6 +4,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   """
 
   import BexioApiClient.Helpers
+  alias BexioApiClient.SalesOrderManagement.PositionDiscount
   alias BexioApiClient.SalesOrderManagement.PositionItem
   alias BexioApiClient.SalesOrderManagement.PositionDefault
   alias BexioApiClient.SalesOrderManagement.PositionText
@@ -359,7 +360,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     )
   end
 
-  defp map_from_item_positions(default_positions), do: Enum.map(default_positions, &map_from_item_position/1)
+  defp map_from_item_positions(item_positions), do: Enum.map(item_positions, &map_from_item_position/1)
 
   defp map_from_item_position(%{
          "id" => id,
@@ -396,6 +397,92 @@ defmodule BexioApiClient.SalesOrderManagement do
       optional?: optional?,
       article_id: article_id,
       parent_id: parent_id
+    }
+  end
+
+  ### Discount Position
+
+  @doc """
+  This action fetches a list of all discount positions for a document.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:document_type` - the document type that has the text positions
+    * `:document_id` - the id of the document with the text positions
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec fetch_discount_positions(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          limit :: pos_integer() | nil,
+          offset :: non_neg_integer() | nil
+        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionDiscount.t()]} | {:error, any()}
+  def fetch_discount_positions(
+        client,
+        document_type,
+        document_id,
+        limit \\ nil,
+        offset \\ nil
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
+          query: [limit: limit, offset: offset]
+        )
+      end,
+      &map_from_discount_positions/1
+    )
+  end
+
+  @doc """
+  This action fetches a single discount position for a document.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:document_type` - the document type that has the subtotal positions
+    * `:document_id` - the id of the document with the subtotal positions
+    * `:position_id` - the id of the position
+  """
+  @spec fetch_discount_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position_id :: pos_integer()
+        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionDiscount.t()]} | {:error, any()}
+  def fetch_discount_position(
+        client,
+        document_type,
+        document_id,
+        position_id
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{position_id}")
+      end,
+      &map_from_discount_position/1
+    )
+  end
+
+  defp map_from_discount_positions(discount_positions), do: Enum.map(discount_positions, &map_from_discount_position/1)
+
+  defp map_from_discount_position(%{
+         "id" => id,
+         "text" => text,
+         "value" => value,
+         "discount_total" => discount_total,
+         "is_percentual" => percentual?
+       }) do
+    %PositionDiscount{
+      id: id,
+      text: text,
+      value: Decimal.new(value),
+      discount_total: Decimal.new(discount_total),
+      percentual?: percentual?,
     }
   end
 end
