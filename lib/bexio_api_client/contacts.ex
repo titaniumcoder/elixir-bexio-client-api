@@ -9,15 +9,15 @@ defmodule BexioApiClient.Contacts do
 
   @doc """
   Fetch a list of contacts.
-
+  
   ## Arguments:
-
+  
     * `:client` - client to execute the HTTP request with
     * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
     * `:show_archived` - Show archived elements only
-
+  
   """
   @spec fetch_contacts(
           client :: Tesla.Client.t(),
@@ -59,7 +59,7 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search contacts via query.
   The following search fields are supported:
-
+  
   * id
   * name_1
   * name_2
@@ -76,16 +76,16 @@ defmodule BexioApiClient.Contacts do
   * user_id
   * phone_fixed
   * phone_mobile
-
+  
   ## Arguments:
-
+  
     * `:client` - client to execute the HTTP request with
     * `:criteria` - a list of search criteria
     * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
     * `:show_archived` - Show archived elements only
-
+  
   """
   @spec search_contacts(
           client :: Tesla.Client.t(),
@@ -128,12 +128,12 @@ defmodule BexioApiClient.Contacts do
 
   @doc """
   This action fetches a single contact
-
+  
   ## Arguments:
-
+  
     * `:contact_id` - the id of the contact
     * `:show_archived` - Show archived elements only
-
+  
   """
   @spec fetch_contact(
           client :: Tesla.Client.t(),
@@ -226,14 +226,14 @@ defmodule BexioApiClient.Contacts do
 
   @doc """
   Fetch a list of contacts relations.
-
+  
   ## Arguments:
-
+  
     * `:client` - client to execute the HTTP request with
     * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
+  
   """
   @spec fetch_contact_relations(
           client :: Tesla.Client.t(),
@@ -270,19 +270,19 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search contacts via query.
   The following search fields are supported:
-
+  
   * contact_id
   * contact_sub_id
   * updated_at
-
+  
   ## Arguments:
-
+  
     * `:client` - client to execute the HTTP request with
     * `:criteria` - a list of search criteria
     * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
+  
   """
   @spec search_contact_relations(
           client :: Tesla.Client.t(),
@@ -320,11 +320,11 @@ defmodule BexioApiClient.Contacts do
 
   @doc """
   This action fetches a single contact relation
-
+  
   ## Arguments:
-
+  
     * `:contact_relation_id` - the id of the contact relation
-
+  
   """
   @spec fetch_contact_relation(
           client :: Tesla.Client.t(),

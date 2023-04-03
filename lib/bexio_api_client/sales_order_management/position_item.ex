@@ -5,9 +5,9 @@ defmodule BexioApiClient.SalesOrderManagement.PositionItem do
 
   @typedoc """
   Default Position
-
+  
   ## Fields:
-
+  
     * `:id` - automatic id given by bexio
     * `:article_id` - references an item object
     * `:text` - text
@@ -24,10 +24,11 @@ defmodule BexioApiClient.SalesOrderManagement.PositionItem do
     * `:optional?` - is the position optional?
     * `:internal_pos` - Internal position id
     * `:parent_id - if exists or nil
-
+  
   """
   @type t :: %__MODULE__{
           id: integer(),
+          pos: integer(),
           amount: Decimal.t(),
           unit_id: integer(),
           account_id: integer(),

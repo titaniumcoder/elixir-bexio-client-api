@@ -92,7 +92,8 @@ defmodule BexioApiClientTest do
     end
 
     test "will handle invalid response" do
-      assert {:error, {:unexpected_response, _}} = BexioApiClient.access_token("r3", "c1", "c2", Tesla.Mock)
+      assert {:error, {:unexpected_response, _}} =
+               BexioApiClient.access_token("r3", "c1", "c2", Tesla.Mock)
     end
   end
 end

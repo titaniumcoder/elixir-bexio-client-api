@@ -1,34 +1,34 @@
 defmodule BexioApiClient do
   @moduledoc """
   Base Module for the API Client.
-
+  
   The API Documentation for Bexio can be found under https://docs.bexio.com.
-
+  
   Fields or arguments with date time reference expect them in the time zone Europe/Zurich.
-
+  
   ## Requirements:
-
+  
     * Tesla: the api client depends on Tesla. Every API call needs an instance of a `Tesla.Client` to be able to do the rest calls.any()
-
+  
   """
 
   @doc """
   Create Tesla API Client.
-
+  
   This must be given a token from https://office.bexio.com/admin/apiTokens#/ which will then be used as bearer token.
   The client can then be used everywhere where it's useful.
-
+  
   It also allows an optional setup for retrying to allow to limit if needed. The defaults are listed below:
-
+  
   ## Options:
-
+  
     * `:delay` - Initial Delay for Backoff (Default: 500)
     * `:max_retries` - Maximal number of retries (Default: 10)
     * `:max_delay` - Maximal delay between requests (Default: 4_000)
     * `:log_level` - Log Level for Requests (Default: `:info`)
     * `:debug` - whether to include debug information (Default: `false`)
     * `:adapter` - Which adapter to use (Defalt: `nil`, recommended one with SSL support like Hackney)
-
+  
   """
   @spec new(String.t(), keyword()) :: Tesla.Client.t()
   def new(api_token, opts \\ []) do
@@ -62,17 +62,17 @@ defmodule BexioApiClient do
 
   @doc """
   Fetch a new access token for the given refresh token.
-
+  
   ## Arguments:
-
+  
     * `refresh_token` -> the refresh token we need the access key for
     * `client_id` -> the client id of our application that also got the refresh token
     * `client_secret` -> the client secret of our application
-
+  
   ## Response
-
+  
     {:ok, %{access_token: "", expires_in: 3600, id_token: "", refresh_token: "", scope: "openid profile email", token_type: "Bearer}}
-
+  
     {:error, :unauthorized}
   """
   @spec access_token(String.t(), String.t(), String.t(), any()) :: {:ok, map()} | {:error, any()}

@@ -5,9 +5,9 @@ defmodule BexioApiClient.Contacts.ContactRelation do
 
   @typedoc """
   Bexio Contact Relation
-
+  
   ## Fields:
-
+  
     * `:id` - automatic id given by bexio
     * `:contact_id` - References a contact object
     * `:contact_sub_id` - References a contact object

@@ -520,19 +520,131 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, position} =
-               BexioApiClient.SalesOrderManagement.fetch_pagebreak_positions(client, :invoice, 1, 2)
+               BexioApiClient.SalesOrderManagement.fetch_pagebreak_position(
+                 client,
+                 :invoice,
+                 1,
+                 2
+               )
 
-               assert position.id == 1
-               assert position.internal_pos == 1
-               assert position.optional? == false
-               assert position.parent_id == nil
-             end
+      assert position.id == 1
+      assert position.internal_pos == 1
+      assert position.optional? == false
+      assert position.parent_id == nil
+    end
 
     test "fails on unknown position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:error, :not_found} =
-               BexioApiClient.SalesOrderManagement.fetch_pagebreak_positions(client, :invoice, 1, 3)
+               BexioApiClient.SalesOrderManagement.fetch_pagebreak_position(
+                 client,
+                 :invoice,
+                 1,
+                 3
+               )
+    end
+  end
+
+  describe "fetches a list of subposition positions" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition"} ->
+          json([
+            %{
+              "id" => 1,
+              "text" => "This is a container to group other position types",
+              "pos" => 1,
+              "internal_pos" => 1,
+              "show_pos_nr" => true,
+              "is_optional" => false,
+              "total_sum" => "17.800000",
+              "show_pos_prices" => true,
+              "type" => "KbPositionSubposition",
+              "parent_id" => nil
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "fetches valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [position]} =
+               BexioApiClient.SalesOrderManagement.fetch_subposition_positions(
+                 client,
+                 :invoice,
+                 1
+               )
+
+      assert position.id == 1
+      assert position.text == "This is a container to group other position types"
+      assert position.pos == 1
+      assert position.internal_pos == 1
+      assert position.show_pos_nr? == true
+      assert position.optional? == false
+      assert Decimal.equal?(position.total_sum, Decimal.from_float(17.8))
+      assert position.parent_id == nil
+    end
+  end
+
+  describe "fetch a single subposition position" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition/2"} ->
+          json(%{
+            "id" => 1,
+            "text" => "This is a container to group other position types",
+            "pos" => 1,
+            "internal_pos" => 1,
+            "show_pos_nr" => true,
+            "is_optional" => false,
+            "total_sum" => "17.800000",
+            "show_pos_prices" => true,
+            "type" => "KbPositionSubposition",
+            "parent_id" => nil
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition/3"} ->
+          %Tesla.Env{status: 404, body: "Contact does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid positions" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, position} =
+               BexioApiClient.SalesOrderManagement.fetch_subposition_position(
+                 client,
+                 :invoice,
+                 1,
+                 2
+               )
+
+      assert position.id == 1
+      assert position.text == "This is a container to group other position types"
+      assert position.pos == 1
+      assert position.internal_pos == 1
+      assert position.show_pos_nr? == true
+      assert position.optional? == false
+      assert Decimal.equal?(position.total_sum, Decimal.from_float(17.8))
+      assert position.parent_id == nil
+    end
+
+    test "fails on unknown position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:error, :not_found} =
+               BexioApiClient.SalesOrderManagement.fetch_subposition_position(
+                 client,
+                 :invoice,
+                 1,
+                 3
+               )
     end
   end
 end
