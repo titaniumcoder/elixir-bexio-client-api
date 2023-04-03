@@ -4,7 +4,7 @@ defmodule BexioApiClient.SalesOrderManagement.PositionDiscount do
   """
 
   @typedoc """
-  KbPositionDiscount Position
+  Discount Position
 
   ## Fields:
 

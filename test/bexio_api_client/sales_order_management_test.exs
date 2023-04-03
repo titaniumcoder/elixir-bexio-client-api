@@ -465,4 +465,74 @@ defmodule BexioApiClient.SalesOrderManagementTest do
                BexioApiClient.SalesOrderManagement.fetch_discount_position(client, :invoice, 1, 3)
     end
   end
+
+  describe "fetches a list of pagebreak positions" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak"} ->
+          json([
+            %{
+              "id" => 1,
+              "internal_pos" => 1,
+              "is_optional" => false,
+              "type" => "KbPositionPagebreak",
+              "parent_id" => nil
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "fetches valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [position]} =
+               BexioApiClient.SalesOrderManagement.fetch_pagebreak_positions(client, :invoice, 1)
+
+      assert position.id == 1
+      assert position.internal_pos == 1
+      assert position.optional? == false
+      assert position.parent_id == nil
+    end
+  end
+
+  describe "fetch a single pagebreak position" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak/2"} ->
+          json(%{
+            "id" => 1,
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionPagebreak",
+            "parent_id" => nil
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak/3"} ->
+          %Tesla.Env{status: 404, body: "Contact does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid positions" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, position} =
+               BexioApiClient.SalesOrderManagement.fetch_pagebreak_positions(client, :invoice, 1, 2)
+
+               assert position.id == 1
+               assert position.internal_pos == 1
+               assert position.optional? == false
+               assert position.parent_id == nil
+             end
+
+    test "fails on unknown position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:error, :not_found} =
+               BexioApiClient.SalesOrderManagement.fetch_pagebreak_positions(client, :invoice, 1, 3)
+    end
+  end
 end
