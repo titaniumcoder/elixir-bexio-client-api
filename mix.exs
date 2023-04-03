@@ -51,6 +51,9 @@ defmodule BexioApiClient.MixProject do
       # Typespecs everywhere...
       {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
 
+      # Decimal for the money amounts
+      {:decimal, "~> 2.0"},
+
       # Create documentation
       {:ex_doc, "~> 0.29.4", only: :dev},
       {:earmark, "~> 1.4", only: :dev}

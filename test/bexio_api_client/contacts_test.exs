@@ -6,7 +6,7 @@ defmodule BexioApiClient.ContactsTest do
 
   import Tesla.Mock
 
-  describe "valid contact list" do
+  describe "fetch a list of contacts" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact"} ->
@@ -211,7 +211,7 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists contacts" do
+    test "lists found contacts" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [contact1, contact2]} =
@@ -276,7 +276,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "single contact" do
+  describe "fetch a single contact" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact/33"} ->
@@ -319,7 +319,7 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "fetches a single valid contact" do
+    test "shows valid contact" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:ok, contact} = BexioApiClient.Contacts.fetch_contact(client, 33)
       assert contact.id == 33
@@ -350,13 +350,13 @@ defmodule BexioApiClient.ContactsTest do
       assert contact.updated_at == ~N[2022-09-13 09:14:21]
     end
 
-    test "fetches an unknown contact" do
+    test "fails on unknown contact" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact(client, 99)
     end
   end
 
-  describe "valid contact relation list" do
+  describe "fetches a list of contact relations" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact_relation"} ->
@@ -426,7 +426,7 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists contact relations" do
+    test "shows contact relations" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [contact_relation1, contact_relation2]} =
@@ -449,7 +449,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "single contact relation" do
+  describe "fetch a single contact relation" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact_relation/111"} ->
@@ -468,7 +468,7 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "fetches a single valid contact relation" do
+    test "shows valid contact relation" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:ok, contact_relation} = BexioApiClient.Contacts.fetch_contact_relation(client, 111)
       assert contact_relation.id == 111
@@ -478,7 +478,7 @@ defmodule BexioApiClient.ContactsTest do
       assert contact_relation.updated_at == ~N[2022-09-13 09:14:21]
     end
 
-    test "fetches an unknown contact relation" do
+    test "fails on unknown contact relation" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact_relation(client, 99)
     end
