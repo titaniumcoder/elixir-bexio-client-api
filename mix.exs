@@ -55,6 +55,9 @@ defmodule BexioApiClient.MixProject do
       # Decimal for the money amounts
       {:decimal, "~> 2.0"},
 
+      # Credo support
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+
       # Create documentation
       {:ex_doc, "~> 0.29.4", only: :dev},
       {:earmark, "~> 1.4", only: :dev}
