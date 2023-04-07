@@ -4,6 +4,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   """
 
   import BexioApiClient.Helpers
+  alias BexioApiClient.GlobalArguments
   alias BexioApiClient.SalesOrderManagement.PositionSubposition
   alias BexioApiClient.SalesOrderManagement.PositionPagebreak
   alias BexioApiClient.SalesOrderManagement.PositionDiscount
@@ -12,36 +13,36 @@ defmodule BexioApiClient.SalesOrderManagement do
   alias BexioApiClient.SalesOrderManagement.PositionText
   alias BexioApiClient.SalesOrderManagement.PositionSubtotal
 
+  import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
+
   @doc """
   This action fetches a list of all subtotal positions for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the subtotal positions
     * `:document_id` - the id of the document with the subtotal positions
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-  
+
   """
   @spec fetch_subtotal_positions(
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionSubtotal.t()]} | {:error, any()}
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [PositionSubtotal.t()]} | {:error, any()}
   def fetch_subtotal_positions(
         client,
         document_type,
         document_id,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal",
-          query: [limit: limit, offset: offset]
+          query: opts_to_query(opts)
         )
       end,
       &map_from_subtotal_positions/1
@@ -50,9 +51,9 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single subtotal position for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the subtotal positions
     * `:document_id` - the id of the document with the subtotal positions
@@ -63,7 +64,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionSubtotal.t()]} | {:error, any()}
+        ) :: {:ok, [PositionSubtotal.t()]} | {:error, any()}
   def fetch_subtotal_position(
         client,
         document_type,
@@ -106,34 +107,32 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all text positions for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the text positions
     * `:document_id` - the id of the document with the text positions
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-  
+
   """
   @spec fetch_text_positions(
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionText.t()]} | {:error, any()}
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [PositionText.t()]} | {:error, any()}
   def fetch_text_positions(
         client,
         document_type,
         document_id,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
-          query: [limit: limit, offset: offset]
+          query: opts_to_query(opts)
         )
       end,
       &map_from_text_positions/1
@@ -142,9 +141,9 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single text position for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the subtotal positions
     * `:document_id` - the id of the document with the subtotal positions
@@ -200,34 +199,32 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all default positions for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the text positions
     * `:document_id` - the id of the document with the text positions
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-  
+
   """
   @spec fetch_default_positions(
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionDefault.t()]} | {:error, any()}
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [PositionDefault.t()]} | {:error, any()}
   def fetch_default_positions(
         client,
         document_type,
         document_id,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
-          query: [limit: limit, offset: offset]
+          query: opts_to_query(opts)
         )
       end,
       &map_from_default_positions/1
@@ -236,9 +233,9 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single default position for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the subtotal positions
     * `:document_id` - the id of the document with the subtotal positions
@@ -249,7 +246,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionDefault.t()]} | {:error, any()}
+        ) :: {:ok, [PositionDefault.t()]} | {:error, any()}
   def fetch_default_position(
         client,
         document_type,
@@ -310,34 +307,32 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all item positions for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the text positions
     * `:document_id` - the id of the document with the text positions
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-  
+
   """
   @spec fetch_item_positions(
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionItem.t()]} | {:error, any()}
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [PositionItem.t()]} | {:error, any()}
   def fetch_item_positions(
         client,
         document_type,
         document_id,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
-          query: [limit: limit, offset: offset]
+          query: opts_to_query(opts)
         )
       end,
       &map_from_item_positions/1
@@ -346,9 +341,9 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single item position for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the subtotal positions
     * `:document_id` - the id of the document with the subtotal positions
@@ -359,7 +354,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionItem.t()]} | {:error, any()}
+        ) :: {:ok, [PositionItem.t()]} | {:error, any()}
   def fetch_item_position(
         client,
         document_type,
@@ -422,34 +417,32 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all discount positions for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the text positions
     * `:document_id` - the id of the document with the text positions
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-  
+
   """
   @spec fetch_discount_positions(
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionDiscount.t()]} | {:error, any()}
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [PositionDiscount.t()]} | {:error, any()}
   def fetch_discount_positions(
         client,
         document_type,
         document_id,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
-          query: [limit: limit, offset: offset]
+          query: opts_to_query(opts)
         )
       end,
       &map_from_discount_positions/1
@@ -458,9 +451,9 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single discount position for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the subtotal positions
     * `:document_id` - the id of the document with the subtotal positions
@@ -471,7 +464,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionDiscount.t()]} | {:error, any()}
+        ) :: {:ok, [PositionDiscount.t()]} | {:error, any()}
   def fetch_discount_position(
         client,
         document_type,
@@ -512,34 +505,32 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all pagebreak positions for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the text positions
     * `:document_id` - the id of the document with the text positions
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-  
+
   """
   @spec fetch_pagebreak_positions(
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionPagebreak.t()]} | {:error, any()}
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [PositionPagebreak.t()]} | {:error, any()}
   def fetch_pagebreak_positions(
         client,
         document_type,
         document_id,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
-          query: [limit: limit, offset: offset]
+          query: opts_to_query(opts)
         )
       end,
       &map_from_pagebreak_positions/1
@@ -548,9 +539,9 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single pagebreak position for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the subtotal positions
     * `:document_id` - the id of the document with the subtotal positions
@@ -561,7 +552,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionPagebreak.t()]} | {:error, any()}
+        ) :: {:ok, [PositionPagebreak.t()]} | {:error, any()}
   def fetch_pagebreak_position(
         client,
         document_type,
@@ -600,35 +591,33 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all subposition positions for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the text positions
     * `:document_id` - the id of the document with the text positions
     * `:limit` - limit the number of results (default: 500, max: 2000)
     * `:offset` - Skip over a number of elements by specifying an offset value for the query
-  
+
   """
   @spec fetch_subposition_positions(
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) ::
-          {:ok, [BexioApiClient.SalesOrderManagement.PositionSubposition.t()]} | {:error, any()}
+          {:ok, [PositionSubposition.t()]} | {:error, any()}
   def fetch_subposition_positions(
         client,
         document_type,
         document_id,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
-          query: [limit: limit, offset: offset]
+          query: opts_to_query(opts)
         )
       end,
       &map_from_subposition_positions/1
@@ -637,9 +626,9 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single subposition position for a document.
-  
+
   ## Arguments:
-  
+
     * `:client` - client to execute the HTTP request with
     * `:document_type` - the document type that has the subtotal positions
     * `:document_id` - the id of the document with the subtotal positions
@@ -651,7 +640,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_id :: pos_integer(),
           position_id :: pos_integer()
         ) ::
-          {:ok, [BexioApiClient.SalesOrderManagement.PositionSubposition.t()]} | {:error, any()}
+          {:ok, [PositionSubposition.t()]} | {:error, any()}
   def fetch_subposition_position(
         client,
         document_type,

@@ -8,7 +8,7 @@ defmodule BexioApiClient.Purchase do
   alias BexioApiClient.Purchase.Bill
 
   alias BexioApiClient.GlobalArguments
-  import BexioApiClient.GlobalArguments, only: [paging_to_query: 1]
+  import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
   @possible_search_status [:drafts, :todo, :paid, :overdue]
   @possible_bill_status [
@@ -88,7 +88,7 @@ defmodule BexioApiClient.Purchase do
               ],
               Keyword.merge(
                 bill_search_args_to_query(search_args),
-                paging_to_query(opts)
+                opts_to_query(opts)
               )
             )
         )
