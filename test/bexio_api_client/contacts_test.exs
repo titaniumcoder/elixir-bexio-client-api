@@ -9,7 +9,11 @@ defmodule BexioApiClient.ContactsTest do
   describe "fetch a list of contacts" do
     setup do
       mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact"} ->
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/contact",
+          query: [show_archived: true, limit: 100, offset: 50, order_by: :id]
+        } ->
           json([
             %{
               "id" => 111,
@@ -81,7 +85,15 @@ defmodule BexioApiClient.ContactsTest do
 
     test "lists valid contacts" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:ok, [contact1, contact2]} = BexioApiClient.Contacts.fetch_contacts(client)
+
+      assert {:ok, [contact1, contact2]} =
+               BexioApiClient.Contacts.fetch_contacts(client,
+                 show_archived: true,
+                 limit: 100,
+                 offset: 50,
+                 order_by: :id
+               )
+
       assert contact1.id == 111
       assert contact1.nr == 998_776
       assert contact1.contact_type == :company
@@ -141,7 +153,12 @@ defmodule BexioApiClient.ContactsTest do
   describe "search contacts" do
     setup do
       mock(fn
-        %{method: :post, url: "https://api.bexio.com/2.0/contact/search", body: _body} ->
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/contact/search",
+          body: _body,
+          query: [show_archived: true, limit: 100, offset: 50, order_by: :id]
+        } ->
           json([
             %{
               "id" => 111,
@@ -215,10 +232,17 @@ defmodule BexioApiClient.ContactsTest do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [contact1, contact2]} =
-               BexioApiClient.Contacts.search_contacts(client, [
-                 SearchCriteria.nil?(:name_2),
-                 SearchCriteria.part_of(:name_1, ["fred", "queen"])
-               ])
+               BexioApiClient.Contacts.search_contacts(
+                 client,
+                 [
+                   SearchCriteria.nil?(:name_2),
+                   SearchCriteria.part_of(:name_1, ["fred", "queen"])
+                 ],
+                 show_archived: true,
+                 limit: 100,
+                 offset: 50,
+                 order_by: :id
+               )
 
       assert contact1.id == 111
       assert contact1.nr == 998_776
@@ -279,9 +303,42 @@ defmodule BexioApiClient.ContactsTest do
   describe "fetch a single contact" do
     setup do
       mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact/33"} ->
+        %{method: :get, url: "https://api.bexio.com/2.0/contact/33", query: [show_archived: true]} ->
           json(%{
             "id" => 33,
+            "nr" => "998776",
+            "contact_type_id" => 1,
+            "name_1" => "Tester AG",
+            "name_2" => "Die Testing Firma",
+            "salutation_id" => 0,
+            "salutation_form" => 1,
+            "title_id" => 2,
+            "birthday" => nil,
+            "address" => "Teststrasse 999",
+            "postcode" => "9999",
+            "city" => "Testcity",
+            "country_id" => 3,
+            "mail" => "unknown@testing-ag.inv",
+            "mail_second" => "unknown2@testing-ag.inv",
+            "phone_fixed" => "099 999 99 99",
+            "phone_fixed_second" => "088 888 88 88",
+            "phone_mobile" => "077 777 77 77",
+            "fax" => "066 666 66 66",
+            "url" => "http://unbekannte.url",
+            "skype_name" => "ich.bin.in.skype",
+            "remarks" => "Lange schoene Bemerkungen",
+            "language_id" => 4,
+            "is_lead" => false,
+            "contact_group_ids" => "2,22,2,3",
+            "contact_branch_ids" => "3,33,3,99",
+            "user_id" => 5,
+            "owner_id" => 6,
+            "updated_at" => "2022-09-13 09:14:21"
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/contact/33", query: [show_archived: nil]} ->
+          json(%{
+            "id" => 44,
             "nr" => "998776",
             "contact_type_id" => 1,
             "name_1" => "Tester AG",
@@ -319,10 +376,10 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows valid contact" do
+    test "shows valid contact without archive" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:ok, contact} = BexioApiClient.Contacts.fetch_contact(client, 33)
-      assert contact.id == 33
+      assert contact.id == 44
       assert contact.nr == 998_776
       assert contact.contact_type == :company
       assert contact.name_1 == "Tester AG"
@@ -348,6 +405,12 @@ defmodule BexioApiClient.ContactsTest do
       assert contact.contact_group_ids == [2, 3, 22]
       assert contact.contact_branch_ids == [3, 33, 99]
       assert contact.updated_at == ~N[2022-09-13 09:14:21]
+    end
+
+    test "shows valid contact with archive" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, contact} = BexioApiClient.Contacts.fetch_contact(client, 33, true)
+      assert contact.id == 33
     end
 
     test "fails on unknown contact" do
