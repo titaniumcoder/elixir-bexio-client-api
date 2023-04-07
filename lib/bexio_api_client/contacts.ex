@@ -4,10 +4,10 @@ defmodule BexioApiClient.Contacts do
   """
 
   import BexioApiClient.Helpers
-  alias BexioApiClient.GlobalArguments
   alias BexioApiClient.SearchCriteria
   alias BexioApiClient.Contacts.Contact
 
+  alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
   @type fetch_contacts_args :: GlobalArguments | {:show_archived, boolean()}
