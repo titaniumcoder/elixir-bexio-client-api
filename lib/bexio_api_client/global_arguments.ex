@@ -22,7 +22,7 @@ defmodule BexioApiClient.GlobalArguments do
     [limit: limit, offset: offset, order_by: order_by]
   end
 
-  @spec opts_to_query([paging_arg()]) :: [
+  @spec paging_to_query([paging_arg()]) :: [
           limit: pos_integer(),
           offset: non_neg_integer(),
           order: list(:asc | :desc),
