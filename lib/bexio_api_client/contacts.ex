@@ -8,13 +8,15 @@ defmodule BexioApiClient.Contacts do
   alias BexioApiClient.SearchCriteria
   alias BexioApiClient.Contacts.Contact
 
+  import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
+
   @type fetch_contacts_args :: GlobalArguments | {:show_archived, boolean()}
 
-  defp opts_to_query(opts) do
+  defp contact_opts_to_query(opts) do
     show_archived = Keyword.get(opts, :show_archived)
 
     opts
-    |> GlobalArguments.opts_to_query()
+    |> opts_to_query()
     |> Keyword.put(:show_archived, show_archived)
   end
 
@@ -39,7 +41,7 @@ defmodule BexioApiClient.Contacts do
   def fetch_contacts(client, opts \\ []) do
     bexio_return_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact", query: opts_to_query(opts))
+        Tesla.get(client, "/2.0/contact", query: contact_opts_to_query(opts))
       end,
       &map_from_clients/1
     )
@@ -89,7 +91,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_return_handling(
       fn ->
-        Tesla.post(client, "/2.0/contact/search", criteria, query: opts_to_query(opts))
+        Tesla.post(client, "/2.0/contact/search", criteria, query: contact_opts_to_query(opts))
       end,
       &map_from_clients/1
     )
@@ -206,31 +208,15 @@ defmodule BexioApiClient.Contacts do
   """
   @spec fetch_contact_relations(
           client :: Tesla.Client.t(),
-          order_by ::
-            :id
-            | :id_asc
-            | :id_desc
-            | :contact_id
-            | :contact_id_asc
-            | :contact_id_desc
-            | :contact_sub_id
-            | :contact_sub_id_asc
-            | :contact_sub_id_desc
-            | nil,
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
-        ) :: {:ok, [BexioApiClient.Contacts.ContactRelation.t()]} | {:error, any()}
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [ContactRelation.t()]} | {:error, any()}
   def fetch_contact_relations(
         client,
-        order_by \\ nil,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact_relation",
-          query: [order_by: order_by, limit: limit, offset: offset]
-        )
+        Tesla.get(client, "/2.0/contact_relation", query: opts_to_query(opts))
       end,
       &map_from_client_relations/1
     )
@@ -256,32 +242,16 @@ defmodule BexioApiClient.Contacts do
   @spec search_contact_relations(
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
-          order_by ::
-            :id
-            | :id_asc
-            | :id_desc
-            | :contact_id
-            | :contact_id_asc
-            | :contact_id_desc
-            | :contact_sub_id
-            | :contact_sub_id_asc
-            | :contact_sub_id_desc
-            | nil,
-          limit :: pos_integer() | nil,
-          offset :: non_neg_integer() | nil
-        ) :: {:ok, [BexioApiClient.Contacts.ContactRelation.t()]} | {:error, any()}
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [ContactRelation.t()]} | {:error, any()}
   def search_contact_relations(
         client,
         criteria,
-        order_by \\ nil,
-        limit \\ nil,
-        offset \\ nil
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
-        Tesla.post(client, "/2.0/contact_relation/search", criteria,
-          query: [order_by: order_by, limit: limit, offset: offset]
-        )
+        Tesla.post(client, "/2.0/contact_relation/search", criteria, query: opts_to_query(opts))
       end,
       &map_from_client_relations/1
     )
@@ -298,7 +268,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_relation(
           client :: Tesla.Client.t(),
           contact_relation_id :: pos_integer()
-        ) :: {:ok, [BexioApiClient.Contacts.ContactRelation.t()]} | {:error, any()}
+        ) :: {:ok, [ContactRelation.t()]} | {:error, any()}
   def fetch_contact_relation(
         client,
         contact_relation_id

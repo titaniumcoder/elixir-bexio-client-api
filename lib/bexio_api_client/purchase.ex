@@ -7,6 +7,48 @@ defmodule BexioApiClient.Purchase do
   alias BexioApiClient.Global.Paging
   alias BexioApiClient.Purchase.Bill
 
+  alias BexioApiClient.GlobalArguments
+  import BexioApiClient.GlobalArguments, only: [paging_to_query: 1]
+
+  @possible_search_status [:drafts, :todo, :paid, :overdue]
+  @possible_bill_status [
+    :draft,
+    :booked,
+    :partially_created,
+    :created,
+    :partially_sent,
+    :sent,
+    :partially_downloaded,
+    :downloaded,
+    :partially_paid,
+    :paid,
+    :partially_failed,
+    :failed
+  ]
+
+  @type bill_search_args :: [
+          bill_date_start: Date.t(),
+          bill_date_end: Date.t(),
+          due_date_start: Date.t(),
+          due_date_end: Date.t(),
+          vendor_ref: String.t(),
+          title: String.t(),
+          currency_code: String.t(),
+          pending_amount_min: float(),
+          pending_amount_max: float(),
+          vendor: String.t(),
+          gross_min: float(),
+          gross_max: float(),
+          net_min: float(),
+          net_max: float(),
+          document_no: String.t(),
+          supplier_id: integer(),
+          status: :drafts | :todo | :paid | :overdue
+        ]
+  defp bill_search_args_to_query(opts) do
+    opts
+  end
+
   @doc """
   Endpoint for retrieving Bills
 
@@ -23,86 +65,32 @@ defmodule BexioApiClient.Purchase do
   """
   @spec fetch_bills(
           client :: Tesla.Client.t(),
-          limit :: pos_integer() | nil,
-          page :: non_neg_integer() | nil,
-          order :: String.t() | nil,
-          sort :: String.t() | nil,
           search_term :: String.t() | nil,
           fields :: list(String.t()) | nil,
-          status :: :drafts | :todo | :paid | :overdue | nil,
-          bill_date_start :: Date.t() | nil,
-          bill_date_end :: Date.t() | nil,
-          due_date_start :: Date.t() | nil,
-          due_date_end :: Date.t() | nil,
-          vendor_ref :: String.t() | nil,
-          title :: String.t() | nil,
-          currency_code :: String.t() | nil,
-          pending_amount_min :: float() | nil,
-          pending_amount_max :: float() | nil,
-          vendor :: String.t() | nil,
-          gross_min :: float() | nil,
-          gross_max :: float() | nil,
-          net_min :: float() | nil,
-          net_max :: float() | nil,
-          document_no :: String.t() | nil,
-          supplier_id :: String.t() | nil
-        ) ::
-          {:ok, {[BexioApiClient.Purchase.Bill.t()], BexioApiClient.Global.Paging}}
-          | {:error, any()}
+          search_args :: bill_search_args(),
+          opts :: [GlobalArguments.paging_arg()]
+        ) :: {:ok, {[Bill.t()], Paging.t()}} | {:error, any()}
   def fetch_bills(
         client,
-        limit \\ nil,
-        page \\ nil,
-        order \\ nil,
-        sort \\ nil,
         search_term \\ nil,
         fields \\ nil,
-        status \\ nil,
-        bill_date_start \\ nil,
-        bill_date_end \\ nil,
-        due_date_start \\ nil,
-        due_date_end \\ nil,
-        vendor_ref \\ nil,
-        title \\ nil,
-        currency_code \\ nil,
-        pending_amount_min \\ nil,
-        pending_amount_max \\ nil,
-        vendor \\ nil,
-        gross_min \\ nil,
-        gross_max \\ nil,
-        net_min \\ nil,
-        net_max \\ nil,
-        document_no \\ nil,
-        supplier_id \\ nil
+        search_args \\ [],
+        opts \\ []
       ) do
     bexio_return_handling(
       fn ->
         Tesla.get(client, "/4.0/purchase/bills",
-          query: [
-            limit: limit,
-            page: page,
-            order: order,
-            sort: sort,
-            search_term: search_term,
-            fields: fields,
-            status: status,
-            bill_date_start: bill_date_start,
-            bill_date_end: bill_date_end,
-            due_date_start: due_date_start,
-            due_date_end: due_date_end,
-            vendor_ref: vendor_ref,
-            title: title,
-            currency_code: currency_code,
-            pending_amount_min: pending_amount_min,
-            pending_amount_max: pending_amount_max,
-            vendor: vendor,
-            gross_min: gross_min,
-            gross_max: gross_max,
-            net_min: net_min,
-            net_max: net_max,
-            document_no: document_no,
-            supplier_id: supplier_id
-          ]
+          query:
+            Keyword.merge(
+              [
+                search_term: search_term,
+                fields: fields
+              ],
+              Keyword.merge(
+                bill_search_args_to_query(search_args),
+                paging_to_query(opts)
+              )
+            )
         )
       end,
       &map_from_paged_bills/1
