@@ -3,7 +3,20 @@ defmodule BexioApiClient.Purchase.Bill do
   Bill in purchase
   """
 
-  @status [:draft, :booked, :partially_created, :created, :partially_sent, :sent, :partially_downloaded, :downloaded, :partially_paid, :paid, :partially_failed, :failed]
+  @status [
+    :draft,
+    :booked,
+    :partially_created,
+    :created,
+    :partially_sent,
+    :sent,
+    :partially_downloaded,
+    :downloaded,
+    :partially_paid,
+    :paid,
+    :partially_failed,
+    :failed
+  ]
 
   @typedoc """
   Bill in purchase.

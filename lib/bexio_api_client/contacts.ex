@@ -477,4 +477,138 @@ defmodule BexioApiClient.Contacts do
       name: name
     }
   end
+
+  ### Bexio API for the additional address part of the API.
+
+  alias BexioApiClient.Contacts.AdditionalAddress
+
+  @doc """
+  Fetch a list of additional addresses.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:contact_id` - the contact to look up the additional addresses for
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec fetch_additional_addresses(
+          client :: Tesla.Client.t(),
+          contact_id :: integer(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [AdditionalAddress.t()]} | {:error, any()}
+  def fetch_additional_addresses(
+        client,
+        contact_id,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/contact/#{contact_id}/additional_address",
+          query: opts_to_query(opts)
+        )
+      end,
+      &map_from_additional_addresses/1
+    )
+  end
+
+  @doc """
+  Search additional addresses via query.
+  The following search fields are supported:
+
+  * name
+  * address
+  * postcode
+  * city
+  * country_id
+  * subject
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:contact_id` - the id of the contact
+    * `:criteria` - a list of search criteria
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec search_additional_addresses(
+          client :: Tesla.Client.t(),
+          contact_id :: integer(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [AdditionalAddress.t()]} | {:error, any()}
+  def search_additional_addresses(
+        client,
+        contact_id,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/contact/#{contact_id}/additional_address/search", criteria,
+          query: opts_to_query(opts)
+        )
+      end,
+      &map_from_additional_addresses/1
+    )
+  end
+
+  @doc """
+  This action fetches a single additional address
+
+  ## Arguments:
+
+    * `:contact_id` - the id of the contact
+    * `:additional_address_id` - the id of the additional address
+
+  """
+  @spec fetch_additional_address(
+          client :: Tesla.Client.t(),
+          contact_id :: non_neg_integer(),
+          additional_address_id :: non_neg_integer()
+        ) :: {:ok, [AdditionalAddress.t()]} | {:error, any()}
+  def fetch_additional_address(
+        client,
+        contact_id,
+        additional_address_id
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(
+          client,
+          "/2.0/contact/#{contact_id}/additional_address/#{additional_address_id}"
+        )
+      end,
+      &map_from_additional_address/1
+    )
+  end
+
+  defp map_from_additional_addresses(addresses),
+    do: Enum.map(addresses, &map_from_additional_address/1)
+
+  defp map_from_additional_address(%{
+         "id" => id,
+         "name" => name,
+         "address" => address,
+         "postcode" => postcode,
+         "city" => city,
+         "country_id" => country_id,
+         "subject" => subject,
+         "description" => description
+       }) do
+    %AdditionalAddress{
+      id: id,
+      name: name,
+      address: address,
+      postcode: postcode,
+      city: city,
+      country_id: country_id,
+      subject: subject,
+      description: description
+    }
+  end
 end

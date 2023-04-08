@@ -25,7 +25,8 @@ defmodule BexioApiClient.Purchase do
     :failed
   ]
 
-  @status_map Enum.map(@possible_bill_status, fn v -> {Atom.to_string(v) , v} end) |> Enum.into(%{})
+  @status_map Enum.map(@possible_bill_status, fn v -> {Atom.to_string(v), v} end)
+              |> Enum.into(%{})
 
   @type bill_search_args :: [
           bill_date_start: Date.t(),
@@ -161,7 +162,6 @@ defmodule BexioApiClient.Purchase do
   end
 
   defp map_status(status), do: Map.get(@status_map, String.downcase(status))
-
 
   defp convert_date_time(date_time) do
     case DateTime.from_iso8601(date_time) do

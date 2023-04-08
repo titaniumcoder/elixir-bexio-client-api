@@ -5,9 +5,9 @@ defmodule BexioApiClient.Contacts.Contact do
 
   @typedoc """
   Bexio Contact (company or person).
-  
+
   ## Fields:
-  
+
     * `:id` - automatic id given by bexio
     * `:nr` - must be a number, can also be used as integer
     * `:contact_type` - either `:company` or `:person`
@@ -68,6 +68,7 @@ defmodule BexioApiClient.Contacts.Contact do
           updated_at: NaiveDateTime.t()
         }
   @enforce_keys [
+    :id,
     :nr,
     :contact_type,
     :name_1,

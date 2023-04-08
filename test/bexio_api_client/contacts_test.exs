@@ -711,4 +711,144 @@ defmodule BexioApiClient.ContactsTest do
       assert contact_sector2.name == "Contact Sector 2"
     end
   end
+
+  describe "fetches a list of additional addresses" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address"} ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "My new address",
+              "address" => "Walter Street 22",
+              "postcode" => 9000,
+              "city" => "St. Gallen",
+              "country_id" => 1,
+              "subject" => "Additional address",
+              "description" => "This is an internal description"
+            },
+            %{
+              "id" => 2,
+              "name" => "My new address",
+              "address" => "Walter Street 22",
+              "postcode" => 9000,
+              "city" => "St. Gallen",
+              "country_id" => 1,
+              "subject" => "Additional address",
+              "description" => "This is an internal description"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid addresses" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [rec1, rec2]} = BexioApiClient.Contacts.fetch_additional_addresses(client, 3)
+
+      assert rec1.id == 1
+      assert rec1.name == "My new address"
+      assert rec1.address == "Walter Street 22"
+      assert rec1.postcode == 9000
+      assert rec1.city == "St. Gallen"
+      assert rec1.country_id == 1
+      assert rec1.subject == "Additional address"
+      assert rec1.description == "This is an internal description"
+
+      assert rec2.id == 2
+    end
+  end
+
+  describe "search additional addresses" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/contact/3/additional_address/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "My new address",
+              "address" => "Walter Street 22",
+              "postcode" => 9000,
+              "city" => "St. Gallen",
+              "country_id" => 1,
+              "subject" => "Additional address",
+              "description" => "This is an internal description"
+            },
+            %{
+              "id" => 2,
+              "name" => "My new address",
+              "address" => "Walter Street 22",
+              "postcode" => 9000,
+              "city" => "St. Gallen",
+              "country_id" => 1,
+              "subject" => "Additional address",
+              "description" => "This is an internal description"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "shows addresses" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [rec1, rec2]} =
+               BexioApiClient.Contacts.search_additional_addresses(client, 3, [
+                 SearchCriteria.part_of(:name, ["fred", "queen"])
+               ])
+
+      assert rec1.id == 1
+
+      assert rec2.id == 2
+    end
+  end
+
+  describe "fetch a single additional address" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address/1"} ->
+          json( %{
+            "id" => 1,
+            "name" => "My new address",
+            "address" => "Walter Street 22",
+            "postcode" => 9000,
+            "city" => "St. Gallen",
+            "country_id" => 1,
+            "subject" => "Additional address",
+            "description" => "This is an internal description"
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address/3"} ->
+          %Tesla.Env{status: 404, body: "Contact group does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid additional address" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, rec1} = BexioApiClient.Contacts.fetch_additional_address(client, 3, 1)
+      assert rec1.id == 1
+      assert rec1.name == "My new address"
+      assert rec1.address == "Walter Street 22"
+      assert rec1.postcode == 9000
+      assert rec1.city == "St. Gallen"
+      assert rec1.country_id == 1
+      assert rec1.subject == "Additional address"
+      assert rec1.description == "This is an internal description"
+
+    end
+
+    test "fails on unknown additional address" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:error, :not_found} = BexioApiClient.Contacts.fetch_additional_address(client, 3, 3)
+    end
+  end
 end
