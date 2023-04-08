@@ -10,7 +10,6 @@ defmodule BexioApiClient.Purchase do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
-  @possible_search_status [:drafts, :todo, :paid, :overdue]
   @possible_bill_status [
     :draft,
     :booked,
@@ -25,6 +24,8 @@ defmodule BexioApiClient.Purchase do
     :partially_failed,
     :failed
   ]
+
+  @status_map Enum.map(@possible_bill_status, fn v -> {Atom.to_string(v) , v} end) |> Enum.into(%{})
 
   @type bill_search_args :: [
           bill_date_start: Date.t(),
@@ -141,7 +142,7 @@ defmodule BexioApiClient.Purchase do
       id: id,
       created_at: convert_date_time(created_at),
       document_no: document_no,
-      status: status |> String.downcase() |> String.to_existing_atom(),
+      status: map_status(status),
       vendor_ref: vendor_ref,
       firstname_suffix: firstname_suffix,
       lastname_company: lastname_company,
@@ -158,6 +159,9 @@ defmodule BexioApiClient.Purchase do
       attachment_ids: attachment_ids
     }
   end
+
+  defp map_status(status), do: Map.get(@status_map, String.downcase(status))
+
 
   defp convert_date_time(date_time) do
     case DateTime.from_iso8601(date_time) do

@@ -223,7 +223,7 @@ defmodule BexioApiClient.Contacts do
   end
 
   @doc """
-  Search contacts via query.
+  Search contacts groups via query.
   The following search fields are supported:
 
   * contact_id
@@ -297,6 +297,107 @@ defmodule BexioApiClient.Contacts do
       contact_sub_id: contact_sub_id,
       description: description,
       updated_at: to_datetime(updated_at)
+    }
+  end
+
+  ### Bexio API for the contact group part of the API.
+
+  alias BexioApiClient.Contacts.ContactGroup
+
+  @doc """
+  Fetch a list of contacts groups.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec fetch_contact_groups(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [ContactGroup.t()]} | {:error, any()}
+  def fetch_contact_groups(
+        client,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/contact_group", query: opts_to_query(opts))
+      end,
+      &map_from_contact_groups/1
+    )
+  end
+
+  @doc """
+  Search contact groups via query.
+  The following search fields are supported:
+
+  * name
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:criteria` - a list of search criteria
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec search_contact_groups(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [ContactGroup.t()]} | {:error, any()}
+  def search_contact_groups(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/contact_group/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_contact_groups/1
+    )
+  end
+
+  @doc """
+  This action fetches a single contact group
+
+  ## Arguments:
+
+    * `:contact_group_id` - the id of the contact group
+
+  """
+  @spec fetch_contact_group(
+          client :: Tesla.Client.t(),
+          contact_group_id :: pos_integer()
+        ) :: {:ok, [ContactRelation.t()]} | {:error, any()}
+  def fetch_contact_group(
+        client,
+        contact_group_id
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/contact_group/#{contact_group_id}")
+      end,
+      &map_from_contact_group/1
+    )
+  end
+
+  defp map_from_contact_groups(contact_groups),
+    do: Enum.map(contact_groups, &map_from_contact_group/1)
+
+  defp map_from_contact_group(%{
+         "id" => id,
+         "name" => name
+       }) do
+    %ContactGroup{
+      id: id,
+      name: name
     }
   end
 end

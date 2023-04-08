@@ -2,8 +2,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
   use ExUnit.Case, async: true
   doctest BexioApiClient.Contacts
 
-  alias BexioApiClient.SearchCriteria
-
   import Tesla.Mock
 
   describe "fetches a list of subtotal positions" do

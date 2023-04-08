@@ -546,4 +546,102 @@ defmodule BexioApiClient.ContactsTest do
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact_relation(client, 99)
     end
   end
+
+  describe "fetches a list of contact groups" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/contact_group"} ->
+          json([
+            %{
+              "id" => 111,
+              "name" => "Contact Group 1"
+            },
+            %{
+              "id" => 222,
+              "name" => "Contact Group 2"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid contact relations" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [contact_group1, contact_group2]} =
+               BexioApiClient.Contacts.fetch_contact_groups(client)
+
+      assert contact_group1.id == 111
+      assert contact_group1.name == "Contact Group 1"
+
+      assert contact_group2.id == 222
+      assert contact_group2.name == "Contact Group 2"
+    end
+  end
+
+  describe "search contact groups" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/contact_group/search", body: _body} ->
+          json([
+            %{
+              "id" => 111,
+              "name" => "Contact Group 1"
+            },
+            %{
+              "id" => 222,
+              "name" => "Contact Group 2"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "shows contact groups" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [contact_group1, contact_group2]} =
+               BexioApiClient.Contacts.search_contact_groups(client, [
+                 SearchCriteria.nil?(:name_2),
+                 SearchCriteria.part_of(:name_1, ["fred", "queen"])
+               ])
+
+      assert contact_group1.id == 111
+      assert contact_group1.name == "Contact Group 1"
+
+      assert contact_group2.id == 222
+      assert contact_group2.name == "Contact Group 2"
+    end
+  end
+
+  describe "fetch a single contact group" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/contact_group/111"} ->
+          json(%{
+            "id" => 111,
+            "name" => "Contact Group 1"
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/contact_group/99"} ->
+          %Tesla.Env{status: 404, body: "Contact group does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid contact group" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, contact_group} = BexioApiClient.Contacts.fetch_contact_group(client, 111)
+      assert contact_group.id == 111
+      assert contact_group.name == "Contact Group 1"
+    end
+
+    test "fails on unknown contact group" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact_group(client, 99)
+    end
+  end
 end
