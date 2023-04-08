@@ -400,4 +400,81 @@ defmodule BexioApiClient.Contacts do
       name: name
     }
   end
+
+  ### Bexio API for the contact sector part of the API.
+
+  alias BexioApiClient.Contacts.ContactSector
+
+  @doc """
+  Fetch a list of contacts sectors.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec fetch_contact_sectors(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [ContactSector.t()]} | {:error, any()}
+  def fetch_contact_sectors(
+        client,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/contact_branch", query: opts_to_query(opts))
+      end,
+      &map_from_contact_sectors/1
+    )
+  end
+
+  @doc """
+  Search contact sectors via query.
+  The following search fields are supported:
+
+  * name
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:criteria` - a list of search criteria
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec search_contact_sectors(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [ContactSector.t()]} | {:error, any()}
+  def search_contact_sectors(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/contact_branch/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_contact_sectors/1
+    )
+  end
+
+  defp map_from_contact_sectors(contact_sectors),
+    do: Enum.map(contact_sectors, &map_from_contact_sector/1)
+
+  defp map_from_contact_sector(%{
+         "id" => id,
+         "name" => name
+       }) do
+    %ContactSector{
+      id: id,
+      name: name
+    }
+  end
 end

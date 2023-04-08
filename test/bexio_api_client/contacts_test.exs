@@ -566,7 +566,7 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists valid contact relations" do
+    test "lists valid contact groups" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [contact_group1, contact_group2]} =
@@ -604,8 +604,7 @@ defmodule BexioApiClient.ContactsTest do
 
       assert {:ok, [contact_group1, contact_group2]} =
                BexioApiClient.Contacts.search_contact_groups(client, [
-                 SearchCriteria.nil?(:name_2),
-                 SearchCriteria.part_of(:name_1, ["fred", "queen"])
+                 SearchCriteria.part_of(:name, ["fred", "queen"])
                ])
 
       assert contact_group1.id == 111
@@ -642,6 +641,74 @@ defmodule BexioApiClient.ContactsTest do
     test "fails on unknown contact group" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact_group(client, 99)
+    end
+  end
+
+  describe "fetches a list of contact sectors" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/contact_branch"} ->
+          json([
+            %{
+              "id" => 111,
+              "name" => "Contact Sector 1"
+            },
+            %{
+              "id" => 222,
+              "name" => "Contact Sector 2"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid contact sectors" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [contact_sector1, contact_sector2]} =
+               BexioApiClient.Contacts.fetch_contact_sectors(client)
+
+      assert contact_sector1.id == 111
+      assert contact_sector1.name == "Contact Sector 1"
+
+      assert contact_sector2.id == 222
+      assert contact_sector2.name == "Contact Sector 2"
+    end
+  end
+
+  describe "search contact sectors" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/contact_branch/search", body: _body} ->
+          json([
+            %{
+              "id" => 111,
+              "name" => "Contact Sector 1"
+            },
+            %{
+              "id" => 222,
+              "name" => "Contact Sector 2"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "shows contact sectors" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [contact_sector1, contact_sector2]} =
+               BexioApiClient.Contacts.search_contact_sectors(client, [
+                 SearchCriteria.part_of(:name, ["fred", "queen"])
+               ])
+
+      assert contact_sector1.id == 111
+      assert contact_sector1.name == "Contact Sector 1"
+
+      assert contact_sector2.id == 222
+      assert contact_sector2.name == "Contact Sector 2"
     end
   end
 end
