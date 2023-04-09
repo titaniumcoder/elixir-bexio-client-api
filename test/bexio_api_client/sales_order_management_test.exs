@@ -4,7 +4,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
   import Tesla.Mock
 
-  describe "fetches a list of subtotal positions" do
+  describe "fetching a list of subtotal positions" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subtotal"} ->
@@ -24,7 +24,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       :ok
     end
 
-    test "fetches valid position" do
+    test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [position]} =
@@ -39,7 +39,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetch a single subtotal position" do
+  describe "fetching a single subtotal position" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subtotal/2"} ->
@@ -74,7 +74,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert Decimal.equal?(position.value, Decimal.new("17.8"))
     end
 
-    test "fails on unknown position" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:error, :not_found} =
@@ -82,7 +82,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetches a list of text positions" do
+  describe "fetching a list of text positions" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_text"} ->
@@ -103,7 +103,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       :ok
     end
 
-    test "fetches valid position" do
+    test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [position]} =
@@ -118,7 +118,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetch a single text position" do
+  describe "fetching a single text position" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_text/2"} ->
@@ -154,7 +154,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert position.parent_id == nil
     end
 
-    test "fails on unknown position" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:error, :not_found} =
@@ -162,7 +162,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetches a list of default positions" do
+  describe "fetching a list of default positions" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_custom"} ->
@@ -191,7 +191,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       :ok
     end
 
-    test "fetches valid position" do
+    test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [position]} =
@@ -214,7 +214,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetch a single default position" do
+  describe "fetching a single default position" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_custom/2"} ->
@@ -266,7 +266,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert position.parent_id == nil
     end
 
-    test "fails on unknown position" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:error, :not_found} =
@@ -274,7 +274,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetches a list of item positions" do
+  describe "fetching a list of item positions" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_article"} ->
@@ -304,7 +304,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       :ok
     end
 
-    test "fetches valid position" do
+    test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [position]} =
@@ -328,7 +328,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetch a single item position" do
+  describe "fetching a single item position" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_article/2"} ->
@@ -382,7 +382,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert position.parent_id == nil
     end
 
-    test "fails on unknown position" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:error, :not_found} =
@@ -390,7 +390,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetches a list of discount positions" do
+  describe "fetching a list of discount positions" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_discount"} ->
@@ -409,7 +409,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       :ok
     end
 
-    test "fetches valid position" do
+    test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [position]} =
@@ -423,7 +423,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetch a single discount position" do
+  describe "fetching a single discount position" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_discount/2"} ->
@@ -456,7 +456,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert Decimal.equal?(position.discount_total, Decimal.from_float(1.78))
     end
 
-    test "fails on unknown position" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:error, :not_found} =
@@ -464,7 +464,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetches a list of pagebreak positions" do
+  describe "fetching a list of pagebreak positions" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak"} ->
@@ -482,7 +482,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       :ok
     end
 
-    test "fetches valid position" do
+    test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [position]} =
@@ -495,7 +495,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetch a single pagebreak position" do
+  describe "fetching a single pagebreak position" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak/2"} ->
@@ -531,7 +531,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert position.parent_id == nil
     end
 
-    test "fails on unknown position" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:error, :not_found} =
@@ -544,7 +544,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetches a list of subposition positions" do
+  describe "fetching a list of subposition positions" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition"} ->
@@ -567,7 +567,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       :ok
     end
 
-    test "fetches valid position" do
+    test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [position]} =
@@ -588,7 +588,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-  describe "fetch a single subposition position" do
+  describe "fetching a single subposition position" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition/2"} ->
@@ -633,7 +633,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert position.parent_id == nil
     end
 
-    test "fails on unknown position" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:error, :not_found} =

@@ -6,7 +6,7 @@ defmodule BexioApiClient.ContactsTest do
 
   import Tesla.Mock
 
-  describe "fetch a list of contacts" do
+  describe "fetching a list of contacts" do
     setup do
       mock(fn
         %{
@@ -150,7 +150,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "search contacts" do
+  describe "searching contacts" do
     setup do
       mock(fn
         %{
@@ -300,7 +300,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "fetch a single contact" do
+  describe "fetching a single contact" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact/33", query: [show_archived: true]} ->
@@ -419,7 +419,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "fetches a list of contact relations" do
+  describe "fetching a list of contact relations" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact_relation"} ->
@@ -463,7 +463,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "search contact relations" do
+  describe "searching contact relations" do
     setup do
       mock(fn
         %{method: :post, url: "https://api.bexio.com/2.0/contact_relation/search", body: _body} ->
@@ -511,7 +511,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "fetch a single contact relation" do
+  describe "fetching a single contact relation" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact_relation/111"} ->
@@ -546,7 +546,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "fetches a list of contact groups" do
+  describe "fetching a list of contact groups" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact_group"} ->
@@ -578,7 +578,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "search contact groups" do
+  describe "searching contact groups" do
     setup do
       mock(fn
         %{method: :post, url: "https://api.bexio.com/2.0/contact_group/search", body: _body} ->
@@ -613,7 +613,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "fetch a single contact group" do
+  describe "fetching a single contact group" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact_group/111"} ->
@@ -642,7 +642,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "fetches a list of contact sectors" do
+  describe "fetching a list of contact sectors" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact_branch"} ->
@@ -674,7 +674,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "search contact sectors" do
+  describe "searching contact sectors" do
     setup do
       mock(fn
         %{method: :post, url: "https://api.bexio.com/2.0/contact_branch/search", body: _body} ->
@@ -709,7 +709,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "fetches a list of additional addresses" do
+  describe "fetching a list of additional addresses" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address"} ->
@@ -759,7 +759,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "search additional addresses" do
+  describe "searching additional addresses" do
     setup do
       mock(fn
         %{
@@ -815,7 +815,7 @@ defmodule BexioApiClient.ContactsTest do
     end
   end
 
-  describe "fetch a single additional address" do
+  describe "fetching a single additional address" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address/1"} ->
