@@ -83,10 +83,10 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists valid contacts" do
+    test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [contact1, contact2]} =
+      assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.fetch_contacts(client,
                  show_archived: true,
                  limit: 100,
@@ -94,59 +94,59 @@ defmodule BexioApiClient.ContactsTest do
                  order_by: :id
                )
 
-      assert contact1.id == 111
-      assert contact1.nr == 998_776
-      assert contact1.contact_type == :company
-      assert contact1.name_1 == "Tester AG"
-      assert contact1.name_2 == "Die Testing Firma"
-      assert contact1.salutation_id == 0
-      assert contact1.salutation_form == 1
-      assert contact1.title_id == 2
-      assert contact1.birthday == nil
-      assert contact1.address == "Teststrasse 999"
-      assert contact1.postcode == "9999"
-      assert contact1.city == "Testcity"
-      assert contact1.country_id == 3
-      assert contact1.mail == "unknown@testing-ag.inv"
-      assert contact1.mail_second == "unknown2@testing-ag.inv"
-      assert contact1.phone_fixed == "099 999 99 99"
-      assert contact1.phone_fixed_second == "088 888 88 88"
-      assert contact1.phone_mobile == "077 777 77 77"
-      assert contact1.fax == "066 666 66 66"
-      assert contact1.url == "http://unbekannte.url"
-      assert contact1.skype_name == "ich.bin.in.skype"
-      assert contact1.remarks == "Lange schoene Bemerkungen"
-      assert contact1.language_id == 4
-      assert contact1.contact_group_ids == [2, 3, 22]
-      assert contact1.contact_branch_ids == [3, 33, 99]
-      assert contact1.updated_at == ~N[2022-09-13 09:14:21]
+      assert result1.id == 111
+      assert result1.nr == 998_776
+      assert result1.contact_type == :company
+      assert result1.name_1 == "Tester AG"
+      assert result1.name_2 == "Die Testing Firma"
+      assert result1.salutation_id == 0
+      assert result1.salutation_form == 1
+      assert result1.title_id == 2
+      assert result1.birthday == nil
+      assert result1.address == "Teststrasse 999"
+      assert result1.postcode == "9999"
+      assert result1.city == "Testcity"
+      assert result1.country_id == 3
+      assert result1.mail == "unknown@testing-ag.inv"
+      assert result1.mail_second == "unknown2@testing-ag.inv"
+      assert result1.phone_fixed == "099 999 99 99"
+      assert result1.phone_fixed_second == "088 888 88 88"
+      assert result1.phone_mobile == "077 777 77 77"
+      assert result1.fax == "066 666 66 66"
+      assert result1.url == "http://unbekannte.url"
+      assert result1.skype_name == "ich.bin.in.skype"
+      assert result1.remarks == "Lange schoene Bemerkungen"
+      assert result1.language_id == 4
+      assert result1.contact_group_ids == [2, 3, 22]
+      assert result1.contact_branch_ids == [3, 33, 99]
+      assert result1.updated_at == ~N[2022-09-13 09:14:21]
 
-      assert contact2.id == 311
-      assert contact2.nr == 103_370
-      assert contact2.contact_type == :person
-      assert contact2.name_1 == "Mueller"
-      assert contact2.name_2 == nil
-      assert contact2.salutation_id == nil
-      assert contact2.salutation_form == nil
-      assert contact2.title_id == nil
-      assert contact2.birthday == ~D[1973-06-29]
-      assert contact2.address == nil
-      assert contact2.postcode == nil
-      assert contact2.city == nil
-      assert contact2.country_id == nil
-      assert contact2.mail == nil
-      assert contact2.mail_second == nil
-      assert contact2.phone_fixed == nil
-      assert contact2.phone_fixed_second == nil
-      assert contact2.phone_mobile == nil
-      assert contact2.fax == nil
-      assert contact2.url == nil
-      assert contact2.skype_name == nil
-      assert contact2.remarks == nil
-      assert contact2.language_id == nil
-      assert contact2.contact_group_ids == []
-      assert contact2.contact_branch_ids == []
-      assert contact2.updated_at == ~N[2012-01-21 11:56:55]
+      assert result2.id == 311
+      assert result2.nr == 103_370
+      assert result2.contact_type == :person
+      assert result2.name_1 == "Mueller"
+      assert result2.name_2 == nil
+      assert result2.salutation_id == nil
+      assert result2.salutation_form == nil
+      assert result2.title_id == nil
+      assert result2.birthday == ~D[1973-06-29]
+      assert result2.address == nil
+      assert result2.postcode == nil
+      assert result2.city == nil
+      assert result2.country_id == nil
+      assert result2.mail == nil
+      assert result2.mail_second == nil
+      assert result2.phone_fixed == nil
+      assert result2.phone_fixed_second == nil
+      assert result2.phone_mobile == nil
+      assert result2.fax == nil
+      assert result2.url == nil
+      assert result2.skype_name == nil
+      assert result2.remarks == nil
+      assert result2.language_id == nil
+      assert result2.contact_group_ids == []
+      assert result2.contact_branch_ids == []
+      assert result2.updated_at == ~N[2012-01-21 11:56:55]
     end
   end
 
@@ -228,10 +228,10 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists found contacts" do
+    test "lists found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [contact1, contact2]} =
+      assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.search_contacts(
                  client,
                  [
@@ -244,59 +244,59 @@ defmodule BexioApiClient.ContactsTest do
                  order_by: :id
                )
 
-      assert contact1.id == 111
-      assert contact1.nr == 998_776
-      assert contact1.contact_type == :company
-      assert contact1.name_1 == "Tester AG"
-      assert contact1.name_2 == "Die Testing Firma"
-      assert contact1.salutation_id == 0
-      assert contact1.salutation_form == 1
-      assert contact1.title_id == 2
-      assert contact1.birthday == nil
-      assert contact1.address == "Teststrasse 999"
-      assert contact1.postcode == "9999"
-      assert contact1.city == "Testcity"
-      assert contact1.country_id == 3
-      assert contact1.mail == "unknown@testing-ag.inv"
-      assert contact1.mail_second == "unknown2@testing-ag.inv"
-      assert contact1.phone_fixed == "099 999 99 99"
-      assert contact1.phone_fixed_second == "088 888 88 88"
-      assert contact1.phone_mobile == "077 777 77 77"
-      assert contact1.fax == "066 666 66 66"
-      assert contact1.url == "http://unbekannte.url"
-      assert contact1.skype_name == "ich.bin.in.skype"
-      assert contact1.remarks == "Lange schoene Bemerkungen"
-      assert contact1.language_id == 4
-      assert contact1.contact_group_ids == [2, 3, 22]
-      assert contact1.contact_branch_ids == [3, 33, 99]
-      assert contact1.updated_at == ~N[2022-09-13 09:14:21]
+      assert result1.id == 111
+      assert result1.nr == 998_776
+      assert result1.contact_type == :company
+      assert result1.name_1 == "Tester AG"
+      assert result1.name_2 == "Die Testing Firma"
+      assert result1.salutation_id == 0
+      assert result1.salutation_form == 1
+      assert result1.title_id == 2
+      assert result1.birthday == nil
+      assert result1.address == "Teststrasse 999"
+      assert result1.postcode == "9999"
+      assert result1.city == "Testcity"
+      assert result1.country_id == 3
+      assert result1.mail == "unknown@testing-ag.inv"
+      assert result1.mail_second == "unknown2@testing-ag.inv"
+      assert result1.phone_fixed == "099 999 99 99"
+      assert result1.phone_fixed_second == "088 888 88 88"
+      assert result1.phone_mobile == "077 777 77 77"
+      assert result1.fax == "066 666 66 66"
+      assert result1.url == "http://unbekannte.url"
+      assert result1.skype_name == "ich.bin.in.skype"
+      assert result1.remarks == "Lange schoene Bemerkungen"
+      assert result1.language_id == 4
+      assert result1.contact_group_ids == [2, 3, 22]
+      assert result1.contact_branch_ids == [3, 33, 99]
+      assert result1.updated_at == ~N[2022-09-13 09:14:21]
 
-      assert contact2.id == 311
-      assert contact2.nr == 103_370
-      assert contact2.contact_type == :person
-      assert contact2.name_1 == "Mueller"
-      assert contact2.name_2 == nil
-      assert contact2.salutation_id == nil
-      assert contact2.salutation_form == nil
-      assert contact2.title_id == nil
-      assert contact2.birthday == ~D[1973-06-29]
-      assert contact2.address == nil
-      assert contact2.postcode == nil
-      assert contact2.city == nil
-      assert contact2.country_id == nil
-      assert contact2.mail == nil
-      assert contact2.mail_second == nil
-      assert contact2.phone_fixed == nil
-      assert contact2.phone_fixed_second == nil
-      assert contact2.phone_mobile == nil
-      assert contact2.fax == nil
-      assert contact2.url == nil
-      assert contact2.skype_name == nil
-      assert contact2.remarks == nil
-      assert contact2.language_id == nil
-      assert contact2.contact_group_ids == []
-      assert contact2.contact_branch_ids == []
-      assert contact2.updated_at == ~N[2012-01-21 11:56:55]
+      assert result2.id == 311
+      assert result2.nr == 103_370
+      assert result2.contact_type == :person
+      assert result2.name_1 == "Mueller"
+      assert result2.name_2 == nil
+      assert result2.salutation_id == nil
+      assert result2.salutation_form == nil
+      assert result2.title_id == nil
+      assert result2.birthday == ~D[1973-06-29]
+      assert result2.address == nil
+      assert result2.postcode == nil
+      assert result2.city == nil
+      assert result2.country_id == nil
+      assert result2.mail == nil
+      assert result2.mail_second == nil
+      assert result2.phone_fixed == nil
+      assert result2.phone_fixed_second == nil
+      assert result2.phone_mobile == nil
+      assert result2.fax == nil
+      assert result2.url == nil
+      assert result2.skype_name == nil
+      assert result2.remarks == nil
+      assert result2.language_id == nil
+      assert result2.contact_group_ids == []
+      assert result2.contact_branch_ids == []
+      assert result2.updated_at == ~N[2012-01-21 11:56:55]
     end
   end
 
@@ -376,44 +376,44 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows valid contact without archive" do
+    test "shows valid result" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:ok, contact} = BexioApiClient.Contacts.fetch_contact(client, 33)
-      assert contact.id == 44
-      assert contact.nr == 998_776
-      assert contact.contact_type == :company
-      assert contact.name_1 == "Tester AG"
-      assert contact.name_2 == "Die Testing Firma"
-      assert contact.salutation_id == 0
-      assert contact.salutation_form == 1
-      assert contact.title_id == 2
-      assert contact.birthday == nil
-      assert contact.address == "Teststrasse 999"
-      assert contact.postcode == "9999"
-      assert contact.city == "Testcity"
-      assert contact.country_id == 3
-      assert contact.mail == "unknown@testing-ag.inv"
-      assert contact.mail_second == "unknown2@testing-ag.inv"
-      assert contact.phone_fixed == "099 999 99 99"
-      assert contact.phone_fixed_second == "088 888 88 88"
-      assert contact.phone_mobile == "077 777 77 77"
-      assert contact.fax == "066 666 66 66"
-      assert contact.url == "http://unbekannte.url"
-      assert contact.skype_name == "ich.bin.in.skype"
-      assert contact.remarks == "Lange schoene Bemerkungen"
-      assert contact.language_id == 4
-      assert contact.contact_group_ids == [2, 3, 22]
-      assert contact.contact_branch_ids == [3, 33, 99]
-      assert contact.updated_at == ~N[2022-09-13 09:14:21]
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_contact(client, 33)
+      assert result.id == 44
+      assert result.nr == 998_776
+      assert result.contact_type == :company
+      assert result.name_1 == "Tester AG"
+      assert result.name_2 == "Die Testing Firma"
+      assert result.salutation_id == 0
+      assert result.salutation_form == 1
+      assert result.title_id == 2
+      assert result.birthday == nil
+      assert result.address == "Teststrasse 999"
+      assert result.postcode == "9999"
+      assert result.city == "Testcity"
+      assert result.country_id == 3
+      assert result.mail == "unknown@testing-ag.inv"
+      assert result.mail_second == "unknown2@testing-ag.inv"
+      assert result.phone_fixed == "099 999 99 99"
+      assert result.phone_fixed_second == "088 888 88 88"
+      assert result.phone_mobile == "077 777 77 77"
+      assert result.fax == "066 666 66 66"
+      assert result.url == "http://unbekannte.url"
+      assert result.skype_name == "ich.bin.in.skype"
+      assert result.remarks == "Lange schoene Bemerkungen"
+      assert result.language_id == 4
+      assert result.contact_group_ids == [2, 3, 22]
+      assert result.contact_branch_ids == [3, 33, 99]
+      assert result.updated_at == ~N[2022-09-13 09:14:21]
     end
 
-    test "shows valid contact with archive" do
+    test "shows valid result with archive" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:ok, contact} = BexioApiClient.Contacts.fetch_contact(client, 33, true)
-      assert contact.id == 33
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_contact(client, 33, true)
+      assert result.id == 33
     end
 
-    test "fails on unknown contact" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact(client, 99)
     end
@@ -444,23 +444,22 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists valid contact relations" do
+    test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [contact_relation1, contact_relation2]} =
-               BexioApiClient.Contacts.fetch_contact_relations(client)
+      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_contact_relations(client)
 
-      assert contact_relation1.id == 111
-      assert contact_relation1.contact_id == 1
-      assert contact_relation1.contact_sub_id == 2
-      assert contact_relation1.description == "Description 1"
-      assert contact_relation1.updated_at == ~N[2022-09-13 09:14:21]
+      assert result1.id == 111
+      assert result1.contact_id == 1
+      assert result1.contact_sub_id == 2
+      assert result1.description == "Description 1"
+      assert result1.updated_at == ~N[2022-09-13 09:14:21]
 
-      assert contact_relation2.id == 222
-      assert contact_relation2.contact_id == 3
-      assert contact_relation2.contact_sub_id == 4
-      assert contact_relation2.description == "Description 2"
-      assert contact_relation2.updated_at == ~N[2023-09-13 09:14:21]
+      assert result2.id == 222
+      assert result2.contact_id == 3
+      assert result2.contact_sub_id == 4
+      assert result2.description == "Description 2"
+      assert result2.updated_at == ~N[2023-09-13 09:14:21]
     end
   end
 
@@ -489,26 +488,26 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows contact relations" do
+    test "shows found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [contact_relation1, contact_relation2]} =
+      assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.search_contact_relations(client, [
                  SearchCriteria.nil?(:name_2),
                  SearchCriteria.part_of(:name_1, ["fred", "queen"])
                ])
 
-      assert contact_relation1.id == 111
-      assert contact_relation1.contact_id == 1
-      assert contact_relation1.contact_sub_id == 2
-      assert contact_relation1.description == "Description 1"
-      assert contact_relation1.updated_at == ~N[2022-09-13 09:14:21]
+      assert result1.id == 111
+      assert result1.contact_id == 1
+      assert result1.contact_sub_id == 2
+      assert result1.description == "Description 1"
+      assert result1.updated_at == ~N[2022-09-13 09:14:21]
 
-      assert contact_relation2.id == 222
-      assert contact_relation2.contact_id == 3
-      assert contact_relation2.contact_sub_id == 4
-      assert contact_relation2.description == "Description 2"
-      assert contact_relation2.updated_at == ~N[2023-09-13 09:14:21]
+      assert result2.id == 222
+      assert result2.contact_id == 3
+      assert result2.contact_sub_id == 4
+      assert result2.description == "Description 2"
+      assert result2.updated_at == ~N[2023-09-13 09:14:21]
     end
   end
 
@@ -531,17 +530,17 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows valid contact relation" do
+    test "shows valid result" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:ok, contact_relation} = BexioApiClient.Contacts.fetch_contact_relation(client, 111)
-      assert contact_relation.id == 111
-      assert contact_relation.contact_id == 1
-      assert contact_relation.contact_sub_id == 2
-      assert contact_relation.description == "Description 1"
-      assert contact_relation.updated_at == ~N[2022-09-13 09:14:21]
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_contact_relation(client, 111)
+      assert result.id == 111
+      assert result.contact_id == 1
+      assert result.contact_sub_id == 2
+      assert result.description == "Description 1"
+      assert result.updated_at == ~N[2022-09-13 09:14:21]
     end
 
-    test "fails on unknown contact relation" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact_relation(client, 99)
     end
@@ -566,17 +565,16 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists valid contact groups" do
+    test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [contact_group1, contact_group2]} =
-               BexioApiClient.Contacts.fetch_contact_groups(client)
+      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_contact_groups(client)
 
-      assert contact_group1.id == 111
-      assert contact_group1.name == "Contact Group 1"
+      assert result1.id == 111
+      assert result1.name == "Contact Group 1"
 
-      assert contact_group2.id == 222
-      assert contact_group2.name == "Contact Group 2"
+      assert result2.id == 222
+      assert result2.name == "Contact Group 2"
     end
   end
 
@@ -599,19 +597,19 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows contact groups" do
+    test "shows found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [contact_group1, contact_group2]} =
+      assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.search_contact_groups(client, [
                  SearchCriteria.part_of(:name, ["fred", "queen"])
                ])
 
-      assert contact_group1.id == 111
-      assert contact_group1.name == "Contact Group 1"
+      assert result1.id == 111
+      assert result1.name == "Contact Group 1"
 
-      assert contact_group2.id == 222
-      assert contact_group2.name == "Contact Group 2"
+      assert result2.id == 222
+      assert result2.name == "Contact Group 2"
     end
   end
 
@@ -631,14 +629,14 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows valid contact group" do
+    test "shows valid result" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:ok, contact_group} = BexioApiClient.Contacts.fetch_contact_group(client, 111)
-      assert contact_group.id == 111
-      assert contact_group.name == "Contact Group 1"
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_contact_group(client, 111)
+      assert result.id == 111
+      assert result.name == "Contact Group 1"
     end
 
-    test "fails on unknown contact group" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_contact_group(client, 99)
     end
@@ -663,17 +661,16 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists valid contact sectors" do
+    test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [contact_sector1, contact_sector2]} =
-               BexioApiClient.Contacts.fetch_contact_sectors(client)
+      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_contact_sectors(client)
 
-      assert contact_sector1.id == 111
-      assert contact_sector1.name == "Contact Sector 1"
+      assert result1.id == 111
+      assert result1.name == "Contact Sector 1"
 
-      assert contact_sector2.id == 222
-      assert contact_sector2.name == "Contact Sector 2"
+      assert result2.id == 222
+      assert result2.name == "Contact Sector 2"
     end
   end
 
@@ -696,19 +693,19 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows contact sectors" do
+    test "shows found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [contact_sector1, contact_sector2]} =
+      assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.search_contact_sectors(client, [
                  SearchCriteria.part_of(:name, ["fred", "queen"])
                ])
 
-      assert contact_sector1.id == 111
-      assert contact_sector1.name == "Contact Sector 1"
+      assert result1.id == 111
+      assert result1.name == "Contact Sector 1"
 
-      assert contact_sector2.id == 222
-      assert contact_sector2.name == "Contact Sector 2"
+      assert result2.id == 222
+      assert result2.name == "Contact Sector 2"
     end
   end
 
@@ -743,21 +740,22 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "lists valid addresses" do
+    test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [rec1, rec2]} = BexioApiClient.Contacts.fetch_additional_addresses(client, 3)
+      assert {:ok, [result1, result2]} =
+               BexioApiClient.Contacts.fetch_additional_addresses(client, 3)
 
-      assert rec1.id == 1
-      assert rec1.name == "My new address"
-      assert rec1.address == "Walter Street 22"
-      assert rec1.postcode == 9000
-      assert rec1.city == "St. Gallen"
-      assert rec1.country_id == 1
-      assert rec1.subject == "Additional address"
-      assert rec1.description == "This is an internal description"
+      assert result1.id == 1
+      assert result1.name == "My new address"
+      assert result1.address == "Walter Street 22"
+      assert result1.postcode == 9000
+      assert result1.city == "St. Gallen"
+      assert result1.country_id == 1
+      assert result1.subject == "Additional address"
+      assert result1.description == "This is an internal description"
 
-      assert rec2.id == 2
+      assert result2.id == 2
     end
   end
 
@@ -796,17 +794,24 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows addresses" do
+    test "shows found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [rec1, rec2]} =
+      assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.search_additional_addresses(client, 3, [
                  SearchCriteria.part_of(:name, ["fred", "queen"])
                ])
 
-      assert rec1.id == 1
+      assert result1.id == 1
+      assert result1.name == "My new address"
+      assert result1.address == "Walter Street 22"
+      assert result1.postcode == 9000
+      assert result1.city == "St. Gallen"
+      assert result1.country_id == 1
+      assert result1.subject == "Additional address"
+      assert result1.description == "This is an internal description"
 
-      assert rec2.id == 2
+      assert result2.id == 2
     end
   end
 
@@ -814,7 +819,7 @@ defmodule BexioApiClient.ContactsTest do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address/1"} ->
-          json( %{
+          json(%{
             "id" => 1,
             "name" => "My new address",
             "address" => "Walter Street 22",
@@ -832,21 +837,20 @@ defmodule BexioApiClient.ContactsTest do
       :ok
     end
 
-    test "shows valid additional address" do
+    test "shows valid result" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:ok, rec1} = BexioApiClient.Contacts.fetch_additional_address(client, 3, 1)
-      assert rec1.id == 1
-      assert rec1.name == "My new address"
-      assert rec1.address == "Walter Street 22"
-      assert rec1.postcode == 9000
-      assert rec1.city == "St. Gallen"
-      assert rec1.country_id == 1
-      assert rec1.subject == "Additional address"
-      assert rec1.description == "This is an internal description"
-
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_additional_address(client, 3, 1)
+      assert result.id == 1
+      assert result.name == "My new address"
+      assert result.address == "Walter Street 22"
+      assert result.postcode == 9000
+      assert result.city == "St. Gallen"
+      assert result.country_id == 1
+      assert result.subject == "Additional address"
+      assert result.description == "This is an internal description"
     end
 
-    test "fails on unknown additional address" do
+    test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_additional_address(client, 3, 3)
     end
