@@ -855,4 +855,202 @@ defmodule BexioApiClient.ContactsTest do
       assert {:error, :not_found} = BexioApiClient.Contacts.fetch_additional_address(client, 3, 3)
     end
   end
+
+  describe "fetching a list of salutations" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/salutation"} ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Herr",
+            },
+            %{
+              "id" => 2,
+              "name" => "Frau",
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result1, result2]} =
+               BexioApiClient.Contacts.fetch_salutations(client)
+
+      assert result1.id == 1
+      assert result1.name == "Herr"
+
+      assert result2.id == 2
+    end
+  end
+
+  describe "searching salutations" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/salutation/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Herr",
+            },
+            %{
+              "id" => 2,
+              "name" => "Frau",
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "shows found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result1, result2]} =
+               BexioApiClient.Contacts.search_salutations(client, [
+                 SearchCriteria.part_of(:name, ["fred", "queen"])
+               ])
+
+      assert result1.id == 1
+      assert result1.name == "Herr"
+
+      assert result2.id == 2
+    end
+  end
+
+  describe "fetching a single salutation" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/salutation/1"} ->
+          json(%{
+            "id" => 1,
+            "name" => "Herr",
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/salutation/2"} ->
+          %Tesla.Env{status: 404, body: "Salutation does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid result" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_salutation(client, 1)
+      assert result.id == 1
+      assert result.name == "Herr"
+    end
+
+    test "fails on unknown id" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:error, :not_found} = BexioApiClient.Contacts.fetch_salutation(client, 2)
+    end
+  end
+
+  describe "fetching a list of titles" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/title"} ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Dr.",
+            },
+            %{
+              "id" => 2,
+              "name" => "Prof.",
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result1, result2]} =
+               BexioApiClient.Contacts.fetch_titles(client)
+
+      assert result1.id == 1
+      assert result1.name == "Dr."
+
+      assert result2.id == 2
+    end
+  end
+
+  describe "searching titles" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/title/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Dr.",
+            },
+            %{
+              "id" => 2,
+              "name" => "Prof.",
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "shows found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result1, result2]} =
+               BexioApiClient.Contacts.search_titles(client, [
+                 SearchCriteria.part_of(:name, ["fred", "queen"])
+               ])
+
+      assert result1.id == 1
+      assert result1.name == "Dr."
+
+      assert result2.id == 2
+    end
+  end
+
+  describe "fetching a single title" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/title/1"} ->
+          json(%{
+            "id" => 1,
+            "name" => "Dr.",
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/title/2"} ->
+          %Tesla.Env{status: 404, body: "Contact group does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid result" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_title(client, 1)
+      assert result.id == 1
+      assert result.name == "Dr."
+    end
+
+    test "fails on unknown id" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:error, :not_found} = BexioApiClient.Contacts.fetch_title(client, 2)
+    end
+  end
 end

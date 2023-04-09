@@ -611,4 +611,212 @@ defmodule BexioApiClient.Contacts do
       description: description
     }
   end
+
+  ### Bexio API for salutations
+
+  alias BexioApiClient.Contacts.Salutation
+
+  @doc """
+  Fetch a list of additional addresses.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec fetch_salutations(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Salutation.t()]} | {:error, any()}
+  def fetch_salutations(
+        client,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/salutation", query: opts_to_query(opts))
+      end,
+      &map_from_salutations/1
+    )
+  end
+
+  @doc """
+  Search salutations via query.
+  The following search fields are supported:
+
+  * name
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:criteria` - a list of search criteria
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec search_salutations(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Salutation.t()]} | {:error, any()}
+  def search_salutations(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/salutation/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_salutations/1
+    )
+  end
+
+  @doc """
+  This action fetches a single salutation
+
+  ## Arguments:
+
+    * `:salutation_id` - the id of the salutation
+
+  """
+  @spec fetch_salutation(
+          client :: Tesla.Client.t(),
+          salutation_id :: non_neg_integer()
+        ) :: {:ok, [Salutation.t()]} | {:error, any()}
+  def fetch_salutation(
+        client,
+        salutation_id
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(
+          client,
+          "/2.0/salutation/#{salutation_id}"
+        )
+      end,
+      &map_from_salutation/1
+    )
+  end
+
+  defp map_from_salutations(salutations),
+    do: Enum.map(salutations, &map_from_salutation/1)
+
+  defp map_from_salutation(%{
+         "id" => id,
+         "name" => name
+       }) do
+    %Salutation{
+      id: id,
+      name: name,
+    }
+  end
+
+  ### Bexio API for the titles part of the API.
+
+  alias BexioApiClient.Contacts.Title
+
+  @doc """
+  Fetch a list of titles.
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec fetch_titles(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Title.t()]} | {:error, any()}
+  def fetch_titles(
+        client,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/title", query: opts_to_query(opts))
+      end,
+      &map_from_titles/1
+    )
+  end
+
+  @doc """
+  Search title via query.
+  The following search fields are supported:
+
+  * name
+
+  ## Arguments:
+
+    * `:client` - client to execute the HTTP request with
+    * `:criteria` - a list of search criteria
+    * `:order_by` - field for ordering the records, appending `_asc` or `_desc` defines whether it's ascending (default) or descending
+    * `:limit` - limit the number of results (default: 500, max: 2000)
+    * `:offset` - Skip over a number of elements by specifying an offset value for the query
+
+  """
+  @spec search_titles(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Title.t()]} | {:error, any()}
+  def search_titles(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/title/search", criteria,query: opts_to_query(opts))
+      end,
+      &map_from_titles/1
+    )
+  end
+
+  @doc """
+  This action fetches a single title
+
+  ## Arguments:
+
+    * `:title_id` - the id of the title
+
+  """
+  @spec fetch_title(
+          client :: Tesla.Client.t(),
+          title_id :: non_neg_integer()
+        ) :: {:ok, [Title.t()]} | {:error, any()}
+  def fetch_title(
+        client,
+        title_id
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(
+          client,
+          "/2.0/title/#{title_id}"
+        )
+      end,
+      &map_from_title/1
+    )
+  end
+
+  defp map_from_titles(titles),
+    do: Enum.map(titles, &map_from_title/1)
+
+  defp map_from_title(%{
+         "id" => id,
+         "name" => name
+       }) do
+    %Title{
+      id: id,
+      name: name,
+    }
+  end
 end
