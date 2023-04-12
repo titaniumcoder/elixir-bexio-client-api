@@ -5,9 +5,9 @@ defmodule BexioApiClient.SalesOrderManagement.Quote do
 
   @typedoc """
   Quote
-  
+
   ## Fields:
-  
+
     * `:contact_id` - references a contact object
     * `:contact_sub_id` - references a contact object
     * `:user_id` - references a user object
@@ -57,7 +57,7 @@ defmodule BexioApiClient.SalesOrderManagement.Quote do
           show_total?: boolean(),
           updated_at: NaiveDateTime.t(),
           template_slug: String.t() | nil,
-          taxs: list(map()),
+          taxs: list(%{percentage: Decimal.t(), value: Decimal.t()}),
           network_link: String.t() | nil
         }
   @enforce_keys [
