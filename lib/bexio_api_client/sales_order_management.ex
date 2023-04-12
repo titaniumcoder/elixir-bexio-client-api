@@ -17,15 +17,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all subtotal positions for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the subtotal positions
-    * `:document_id` - the id of the document with the subtotal positions
-    * `:limit` - limit the number of results (default: 500, max: 2000)
-    * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
   """
   @spec fetch_subtotal_positions(
           client :: Tesla.Client.t(),
@@ -51,13 +42,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single subtotal position for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the subtotal positions
-    * `:document_id` - the id of the document with the subtotal positions
-    * `:position_id` - the id of the position
   """
   @spec fetch_subtotal_position(
           client :: Tesla.Client.t(),
@@ -107,15 +91,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all text positions for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the text positions
-    * `:document_id` - the id of the document with the text positions
-    * `:limit` - limit the number of results (default: 500, max: 2000)
-    * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
   """
   @spec fetch_text_positions(
           client :: Tesla.Client.t(),
@@ -141,13 +116,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single text position for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the subtotal positions
-    * `:document_id` - the id of the document with the subtotal positions
-    * `:position_id` - the id of the position
   """
   @spec fetch_text_position(
           client :: Tesla.Client.t(),
@@ -199,15 +167,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all default positions for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the text positions
-    * `:document_id` - the id of the document with the text positions
-    * `:limit` - limit the number of results (default: 500, max: 2000)
-    * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
   """
   @spec fetch_default_positions(
           client :: Tesla.Client.t(),
@@ -233,13 +192,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single default position for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the subtotal positions
-    * `:document_id` - the id of the document with the subtotal positions
-    * `:position_id` - the id of the position
   """
   @spec fetch_default_position(
           client :: Tesla.Client.t(),
@@ -307,15 +259,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all item positions for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the text positions
-    * `:document_id` - the id of the document with the text positions
-    * `:limit` - limit the number of results (default: 500, max: 2000)
-    * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
   """
   @spec fetch_item_positions(
           client :: Tesla.Client.t(),
@@ -341,13 +284,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single item position for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the subtotal positions
-    * `:document_id` - the id of the document with the subtotal positions
-    * `:position_id` - the id of the position
   """
   @spec fetch_item_position(
           client :: Tesla.Client.t(),
@@ -417,15 +353,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all discount positions for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the text positions
-    * `:document_id` - the id of the document with the text positions
-    * `:limit` - limit the number of results (default: 500, max: 2000)
-    * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
   """
   @spec fetch_discount_positions(
           client :: Tesla.Client.t(),
@@ -451,13 +378,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single discount position for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the subtotal positions
-    * `:document_id` - the id of the document with the subtotal positions
-    * `:position_id` - the id of the position
   """
   @spec fetch_discount_position(
           client :: Tesla.Client.t(),
@@ -505,15 +425,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all pagebreak positions for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the text positions
-    * `:document_id` - the id of the document with the text positions
-    * `:limit` - limit the number of results (default: 500, max: 2000)
-    * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
   """
   @spec fetch_pagebreak_positions(
           client :: Tesla.Client.t(),
@@ -539,13 +450,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single pagebreak position for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the subtotal positions
-    * `:document_id` - the id of the document with the subtotal positions
-    * `:position_id` - the id of the position
   """
   @spec fetch_pagebreak_position(
           client :: Tesla.Client.t(),
@@ -591,15 +495,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a list of all subposition positions for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the text positions
-    * `:document_id` - the id of the document with the text positions
-    * `:limit` - limit the number of results (default: 500, max: 2000)
-    * `:offset` - Skip over a number of elements by specifying an offset value for the query
-
   """
   @spec fetch_subposition_positions(
           client :: Tesla.Client.t(),
@@ -626,13 +521,6 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   @doc """
   This action fetches a single subposition position for a document.
-
-  ## Arguments:
-
-    * `:client` - client to execute the HTTP request with
-    * `:document_type` - the document type that has the subtotal positions
-    * `:document_id` - the id of the document with the subtotal positions
-    * `:position_id` - the id of the position
   """
   @spec fetch_subposition_position(
           client :: Tesla.Client.t(),

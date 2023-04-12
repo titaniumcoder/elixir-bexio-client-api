@@ -87,8 +87,9 @@ defmodule BexioApiClient.ContactsTest do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, [result1, result2]} =
-               BexioApiClient.Contacts.fetch_contacts(client,
-                 show_archived: true,
+               BexioApiClient.Contacts.fetch_contacts(
+                 client,
+                 true,
                  limit: 100,
                  offset: 50,
                  order_by: :id
@@ -238,7 +239,7 @@ defmodule BexioApiClient.ContactsTest do
                    SearchCriteria.nil?(:name_2),
                    SearchCriteria.part_of(:name_1, ["fred", "queen"])
                  ],
-                 show_archived: true,
+                 true,
                  limit: 100,
                  offset: 50,
                  order_by: :id
@@ -863,11 +864,11 @@ defmodule BexioApiClient.ContactsTest do
           json([
             %{
               "id" => 1,
-              "name" => "Herr",
+              "name" => "Herr"
             },
             %{
               "id" => 2,
-              "name" => "Frau",
+              "name" => "Frau"
             }
           ])
       end)
@@ -878,8 +879,7 @@ defmodule BexioApiClient.ContactsTest do
     test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} =
-               BexioApiClient.Contacts.fetch_salutations(client)
+      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_salutations(client)
 
       assert result1.id == 1
       assert result1.name == "Herr"
@@ -899,11 +899,11 @@ defmodule BexioApiClient.ContactsTest do
           json([
             %{
               "id" => 1,
-              "name" => "Herr",
+              "name" => "Herr"
             },
             %{
               "id" => 2,
-              "name" => "Frau",
+              "name" => "Frau"
             }
           ])
       end)
@@ -932,7 +932,7 @@ defmodule BexioApiClient.ContactsTest do
         %{method: :get, url: "https://api.bexio.com/2.0/salutation/1"} ->
           json(%{
             "id" => 1,
-            "name" => "Herr",
+            "name" => "Herr"
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/salutation/2"} ->
@@ -962,11 +962,11 @@ defmodule BexioApiClient.ContactsTest do
           json([
             %{
               "id" => 1,
-              "name" => "Dr.",
+              "name" => "Dr."
             },
             %{
               "id" => 2,
-              "name" => "Prof.",
+              "name" => "Prof."
             }
           ])
       end)
@@ -977,8 +977,7 @@ defmodule BexioApiClient.ContactsTest do
     test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} =
-               BexioApiClient.Contacts.fetch_titles(client)
+      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_titles(client)
 
       assert result1.id == 1
       assert result1.name == "Dr."
@@ -998,11 +997,11 @@ defmodule BexioApiClient.ContactsTest do
           json([
             %{
               "id" => 1,
-              "name" => "Dr.",
+              "name" => "Dr."
             },
             %{
               "id" => 2,
-              "name" => "Prof.",
+              "name" => "Prof."
             }
           ])
       end)
@@ -1031,7 +1030,7 @@ defmodule BexioApiClient.ContactsTest do
         %{method: :get, url: "https://api.bexio.com/2.0/title/1"} ->
           json(%{
             "id" => 1,
-            "name" => "Dr.",
+            "name" => "Dr."
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/title/2"} ->

@@ -2,8 +2,6 @@ defmodule BexioApiClient.PurchaseTest do
   use ExUnit.Case, async: true
   doctest BexioApiClient.Contacts
 
-  alias BexioApiClient.SearchCriteria
-
   import Tesla.Mock
 
   describe "fetching a list of bills" do
@@ -130,6 +128,7 @@ defmodule BexioApiClient.PurchaseTest do
       assert result2.due_date == ~D[2019-05-27]
       assert result2.overdue == true
       assert result2.booking_account_ids == [12, 134, 9]
+
       assert result2.attachment_ids == [
                "1f1ef73d-6b4a-4de5-812c-27f8732be88b",
                "d9d3a328-8c0b-4889-9b15-d3e9abc24df0"
