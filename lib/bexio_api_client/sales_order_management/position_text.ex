@@ -5,9 +5,9 @@ defmodule BexioApiClient.SalesOrderManagement.PositionText do
 
   @typedoc """
   Text Position
-  
+
   ## Fields:
-  
+
     * `:id` - automatic id given by bexio
     * `:show_pos_nr` - show position number
     * `:pos` - position
@@ -15,7 +15,7 @@ defmodule BexioApiClient.SalesOrderManagement.PositionText do
     * `:text` - text for the subtotal
     * `:internal_pos` - Internal position id
     * `:parent_id - if exists or nil
-  
+
   """
   @type t :: %__MODULE__{
           id: integer(),

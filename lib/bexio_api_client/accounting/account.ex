@@ -5,9 +5,9 @@ defmodule BexioApiClient.Accounting.Account do
 
   @typedoc """
   Bexio Account
-  
+
   ## Fields:
-  
+
     * `:id` - automatic id given by bexio
     * `:account_no` - No of the account
     * `:name` - Name of the account

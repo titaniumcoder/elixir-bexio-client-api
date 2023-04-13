@@ -29,7 +29,7 @@ defmodule BexioApiClient.Accounting do
   @doc """
   Search accounts via query.
   The following search fields are supported:
-  
+
   * account_no
   * fibo_account_group_id (TODO: test this)
   * name

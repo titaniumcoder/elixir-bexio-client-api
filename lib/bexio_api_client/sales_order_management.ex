@@ -1,9 +1,11 @@
 defmodule BexioApiClient.SalesOrderManagement do
   @moduledoc """
-  Bexio API for the ales order management part of the API.
+  Bexio API for the sales order management part of the API.
   """
 
   import BexioApiClient.Helpers
+
+  alias BexioApiClient.SalesOrderManagement.Quote
   alias BexioApiClient.GlobalArguments
   alias BexioApiClient.SalesOrderManagement.PositionSubposition
   alias BexioApiClient.SalesOrderManagement.PositionPagebreak
@@ -14,6 +16,114 @@ defmodule BexioApiClient.SalesOrderManagement do
   alias BexioApiClient.SalesOrderManagement.PositionSubtotal
 
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
+
+  # Quotes
+
+  @doc """
+  This action fetches a list of all quotes.
+  """
+  @spec fetch_quotes(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Quote.t()]} | {:error, any()}
+  def fetch_quotes(client, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_offer", query: opts_to_query(opts))
+      end,
+      &map_from_quotes/1
+    )
+  end
+
+  defp map_from_quotes(quotes), do: Enum.map(quotes, &map_from_quote/1)
+
+  defp map_from_quote(%{
+         "id" => id,
+         "document_nr" => document_nr,
+         "title" => title,
+         "contact_id" => contact_id,
+         "contact_sub_id" => contact_sub_id,
+         "user_id" => user_id,
+         "project_id" => project_id,
+         "language_id" => language_id,
+         "bank_account_id" => bank_account_id,
+         "currency_id" => currency_id,
+         "payment_type_id" => payment_type_id,
+         "header" => header,
+         "footer" => footer,
+         "total_gross" => total_gross,
+         "total_net" => total_net,
+         "total_taxes" => total_taxes,
+         "total" => total,
+         "total_rounding_difference" => total_rounding_difference,
+         "mwst_type" => mwst_type_id,
+         "mwst_is_net" => mwst_is_net?,
+         "show_position_taxes" => show_position_taxes?,
+         "is_valid_from" => is_valid_from,
+         "is_valid_until" => is_valid_until,
+         "contact_address" => contact_address,
+         "delivery_address_type" => delivery_address_type,
+         "delivery_address" => delivery_address,
+         "kb_item_status_id" => kb_item_status_id,
+         "api_reference" => api_reference,
+         "viewed_by_client_at" => viewed_by_client_at,
+         "kb_terms_of_payment_template_id" => kb_terms_of_payment_template_id,
+         "show_total" => show_total?,
+         "updated_at" => updated_at,
+         "template_slug" => template_slug,
+         "taxs" => taxs,
+         "network_link" => network_link
+       }) do
+    %Quote{
+      id: id,
+      document_nr: document_nr,
+      title: title,
+      contact_id: contact_id,
+      contact_sub_id: contact_sub_id,
+      user_id: user_id,
+      project_id: project_id,
+      language_id: language_id,
+      bank_account_id: bank_account_id,
+      currency_id: currency_id,
+      payment_type_id: payment_type_id,
+      header: header,
+      footer: footer,
+      total_gross: to_decimal(total_gross),
+      total_net: to_decimal(total_net),
+      total_taxes: to_decimal(total_taxes),
+      total: to_decimal(total),
+      total_rounding_difference: total_rounding_difference,
+      mwst_type: mwst_type(mwst_type_id),
+      mwst_is_net?: mwst_is_net?,
+      show_position_taxes?: show_position_taxes?,
+      is_valid_from: to_date(is_valid_from),
+      is_valid_until: to_date(is_valid_until),
+      contact_address: contact_address,
+      delivery_address_type: delivery_address_type,
+      delivery_address: delivery_address,
+      kb_item_status: kb_item_status(kb_item_status_id),
+      api_reference: api_reference,
+      viewed_by_client_at: to_datetime(viewed_by_client_at),
+      kb_terms_of_payment_template_id: kb_terms_of_payment_template_id,
+      show_total?: show_total?,
+      updated_at: to_datetime(updated_at),
+      template_slug: template_slug,
+      taxs: Enum.map(taxs, &to_tax/1),
+      network_link: network_link
+    }
+  end
+
+  defp mwst_type(0), do: :including
+  defp mwst_type(1), do: :excluding
+  defp mwst_type(2), do: :exempt
+
+  defp kb_item_status(1), do: :draft
+  defp kb_item_status(2), do: :pending
+  defp kb_item_status(3), do: :confirmed
+  defp kb_item_status(4), do: :declined
+
+  defp to_tax(%{"percentage" => percentage, "value" => value}),
+    do: %{percentage: percentage, value: value}
 
   @doc """
   This action fetches a list of all subtotal positions for a document.
