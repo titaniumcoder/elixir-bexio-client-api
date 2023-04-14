@@ -8,6 +8,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   alias BexioApiClient.GlobalArguments
 
   alias BexioApiClient.SalesOrderManagement.{
+    Comment,
     Order,
     Quote,
     PositionSubposition,
@@ -341,6 +342,128 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp order_kb_item_status_id(:done), do: 6
   defp order_kb_item_status_id(:partial), do: 15
   defp order_kb_item_status_id(:canceled), do: 21
+
+  # Comments
+
+  @doc """
+  This action fetches a list of comments.
+  """
+  @spec fetch_comments(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [Comment.t()]} | {:error, any()}
+  def fetch_comments(
+        client,
+        document_type,
+        document_id,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/comment",
+          query: opts_to_query(opts)
+        )
+      end,
+      &map_from_comments/1
+    )
+  end
+
+  @doc """
+  This action fetches a single comment.
+  """
+  @spec fetch_comment(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          comment_id :: pos_integer()
+        ) :: {:ok, [Comment.t()]} | {:error, any()}
+  def fetch_comment(
+        client,
+        document_type,
+        document_id,
+        comment_id
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/comment/#{comment_id}"
+        )
+      end,
+      &map_from_comment/1
+    )
+  end
+
+  @doc """
+  Create a comment
+  """
+  @spec create_comment(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          comment :: Comment.t()
+        ) :: {:ok, [Comment.t()]} | {:error, any()}
+  def create_comment(
+        client,
+        document_type,
+        document_id,
+        comment
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/comment",
+          mapped_comment(comment)
+        )
+      end,
+      &map_from_comment/1
+    )
+  end
+
+  defp mapped_comment(%{
+         text: text,
+         user_id: user_id,
+         user_email: user_email,
+         user_name: user_name,
+         public?: public?
+       }) do
+    %{
+      text: text,
+      user_id: user_id,
+      user_email: user_email,
+      user_name: user_name,
+      is_public: public?
+    }
+  end
+
+  defp map_from_comments(comments), do: Enum.map(comments, &map_from_comment/1)
+
+  defp map_from_comment(%{
+         "id" => id,
+         "text" => text,
+         "user_id" => user_id,
+         "user_email" => user_email,
+         "user_name" => user_name,
+         "date" => date,
+         "is_public" => public?,
+         "image" => image,
+         "image_path" => image_path
+       }) do
+    %Comment{
+      id: id,
+      text: text,
+      user_id: user_id,
+      user_email: user_email,
+      user_name: user_name,
+      date: to_datetime(date),
+      public?: public?,
+      image: image,
+      image_path: image_path
+    }
+  end
 
   # Subtotal Positions
 

@@ -660,6 +660,147 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
+  describe "fetching a list of comments" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/comment"} ->
+          json([
+            %{
+              "id" => 1,
+              "text" => "Comment",
+              "user_id" => 1,
+              "user_email" => nil,
+              "user_name" => "Peter Smith",
+              "date" => "2019-07-18 15:41:53",
+              "is_public" => false,
+              "image" => "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=",
+              "image_path" =>
+                "https://my.bexio.com/img/profile_picture/j2cbWl-yp3zT9oOh9jHTAA/Ds8buEV0HXZsvuBm3df8SQ.png?type=thumb"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [position]} =
+               BexioApiClient.SalesOrderManagement.fetch_comments(client, :invoice, 1)
+
+      assert position.id == 1
+      assert position.text == "Comment"
+      assert position.user_id == 1
+      assert position.user_email == nil
+      assert position.user_name == "Peter Smith"
+      assert position.date == ~N[2019-07-18 15:41:53]
+      assert position.public? == false
+      assert position.image == "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+
+      assert position.image_path ==
+               "https://my.bexio.com/img/profile_picture/j2cbWl-yp3zT9oOh9jHTAA/Ds8buEV0HXZsvuBm3df8SQ.png?type=thumb"
+    end
+  end
+
+  describe "fetching a single comment" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/comment/2"} ->
+          json(%{
+            "id" => 1,
+            "text" => "Comment",
+            "user_id" => 1,
+            "user_email" => nil,
+            "user_name" => "Peter Smith",
+            "date" => "2019-07-18 15:41:53",
+            "is_public" => false,
+            "image" => "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=",
+            "image_path" =>
+              "https://my.bexio.com/img/profile_picture/j2cbWl-yp3zT9oOh9jHTAA/Ds8buEV0HXZsvuBm3df8SQ.png?type=thumb"
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/comment/3"} ->
+          %Tesla.Env{status: 404, body: "Contact does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, position} =
+               BexioApiClient.SalesOrderManagement.fetch_comment(client, :invoice, 1, 2)
+
+      assert position.id == 1
+      assert position.text == "Comment"
+      assert position.user_id == 1
+      assert position.user_email == nil
+      assert position.user_name == "Peter Smith"
+      assert position.date == ~N[2019-07-18 15:41:53]
+      assert position.public? == false
+      assert position.image == "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+
+      assert position.image_path ==
+               "https://my.bexio.com/img/profile_picture/j2cbWl-yp3zT9oOh9jHTAA/Ds8buEV0HXZsvuBm3df8SQ.png?type=thumb"
+    end
+
+    test "fails on unknown id" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:error, :not_found} =
+               BexioApiClient.SalesOrderManagement.fetch_comment(client, :invoice, 1, 3)
+    end
+  end
+
+  describe "creates a comment" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_invoice/1/comment"} ->
+          json(%{
+            "id" => 1,
+            "text" => "Sample comment",
+            "user_id" => 1,
+            "user_email" => nil,
+            "user_name" => "Peter Smith",
+            "date" => "2019-07-18 15:41:53",
+            "is_public" => false,
+            "image" => "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=",
+            "image_path" =>
+              "https://my.bexio.com/img/profile_picture/j2cbWl-yp3zT9oOh9jHTAA/Ds8buEV0HXZsvuBm3df8SQ.png?type=thumb"
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, position} =
+               BexioApiClient.SalesOrderManagement.create_comment(client, :invoice, 1, %{
+                 text: "Sample comment",
+                 user_id: 1,
+                 user_email: nil,
+                 user_name: "Peter Smith",
+                 public?: false
+               })
+
+      assert position.id == 1
+      assert position.text == "Sample comment"
+      assert position.user_id == 1
+      assert position.user_email == nil
+      assert position.user_name == "Peter Smith"
+      assert position.date == ~N[2019-07-18 15:41:53]
+      assert position.public? == false
+      assert position.image == "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+
+      assert position.image_path ==
+               "https://my.bexio.com/img/profile_picture/j2cbWl-yp3zT9oOh9jHTAA/Ds8buEV0HXZsvuBm3df8SQ.png?type=thumb"
+    end
+  end
+
   describe "fetching a list of subtotal positions" do
     setup do
       mock(fn
