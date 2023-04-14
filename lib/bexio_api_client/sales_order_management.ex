@@ -5,15 +5,19 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   import BexioApiClient.Helpers
 
-  alias BexioApiClient.SalesOrderManagement.Quote
   alias BexioApiClient.GlobalArguments
-  alias BexioApiClient.SalesOrderManagement.PositionSubposition
-  alias BexioApiClient.SalesOrderManagement.PositionPagebreak
-  alias BexioApiClient.SalesOrderManagement.PositionDiscount
-  alias BexioApiClient.SalesOrderManagement.PositionItem
-  alias BexioApiClient.SalesOrderManagement.PositionDefault
-  alias BexioApiClient.SalesOrderManagement.PositionText
-  alias BexioApiClient.SalesOrderManagement.PositionSubtotal
+
+  alias BexioApiClient.SalesOrderManagement.{
+    Order,
+    Quote,
+    PositionSubposition,
+    PositionPagebreak,
+    PositionDiscount,
+    PositionItem,
+    PositionDefault,
+    PositionText,
+    PositionSubtotal
+  }
 
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
@@ -176,8 +180,169 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp kb_item_status(3), do: :confirmed
   defp kb_item_status(4), do: :declined
 
+  defp kb_item_status_id(:draft), do: 1
+  defp kb_item_status_id(:pending), do: 2
+  defp kb_item_status_id(:confirmed), do: 3
+  defp kb_item_status_id(:declined), do: 4
+
   defp to_tax(%{"percentage" => percentage, "value" => value}),
     do: %{percentage: percentage, value: value}
+
+  # Orders
+
+  @doc """
+  This action fetches a list of all orders.
+  """
+  @spec fetch_orders(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Order.t()]} | {:error, any()}
+  def fetch_orders(client, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_order", query: opts_to_query(opts))
+      end,
+      &map_from_orders/1
+    )
+  end
+
+  @doc """
+  Search orders via query.
+  The following search fields are supported:
+
+  * id
+  * kb_item_status
+  * document_nr
+  * title
+  * contact_id
+  * contact_sub_id
+  * user_id
+  * currency_id
+  * total_gross
+  * total_net
+  * total
+  * is_valid_from
+  * updated_at
+  """
+  @spec search_orders(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Order.t()]} | {:error, any()}
+  def search_orders(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_order/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_orders/1
+    )
+  end
+
+  @doc """
+  This action fetches a single order
+  """
+  @spec fetch_order(
+          client :: Tesla.Client.t(),
+          order_id :: pos_integer()
+        ) :: {:ok, [Order.t()]} | {:error, any()}
+  def fetch_order(client, order_id) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_order/#{order_id}")
+      end,
+      &map_from_order/1
+    )
+  end
+
+  defp map_from_orders(orders), do: Enum.map(orders, &map_from_order/1)
+
+  defp map_from_order(%{
+         "id" => id,
+         "document_nr" => document_nr,
+         "title" => title,
+         "contact_id" => contact_id,
+         "contact_sub_id" => contact_sub_id,
+         "user_id" => user_id,
+         "project_id" => project_id,
+         "language_id" => language_id,
+         "bank_account_id" => bank_account_id,
+         "currency_id" => currency_id,
+         "payment_type_id" => payment_type_id,
+         "header" => header,
+         "footer" => footer,
+         "total_gross" => total_gross,
+         "total_net" => total_net,
+         "total_taxes" => total_taxes,
+         "total" => total,
+         "total_rounding_difference" => total_rounding_difference,
+         "mwst_type" => mwst_type_id,
+         "mwst_is_net" => mwst_is_net?,
+         "show_position_taxes" => show_position_taxes?,
+         "is_valid_from" => is_valid_from,
+         "contact_address" => contact_address,
+         "delivery_address_type" => delivery_address_type,
+         "delivery_address" => delivery_address,
+         "kb_item_status_id" => kb_item_status_id,
+         "is_recurring" => is_recurring?,
+         "api_reference" => api_reference,
+         "viewed_by_client_at" => viewed_by_client_at,
+         "updated_at" => updated_at,
+         "template_slug" => template_slug,
+         "taxs" => taxs,
+         "network_link" => network_link
+       }) do
+    %Order{
+      id: id,
+      document_nr: document_nr,
+      title: title,
+      contact_id: contact_id,
+      contact_sub_id: contact_sub_id,
+      user_id: user_id,
+      project_id: project_id,
+      language_id: language_id,
+      bank_account_id: bank_account_id,
+      currency_id: currency_id,
+      payment_type_id: payment_type_id,
+      header: header,
+      footer: footer,
+      total_gross: to_decimal(total_gross),
+      total_net: to_decimal(total_net),
+      total_taxes: to_decimal(total_taxes),
+      total: to_decimal(total),
+      total_rounding_difference: total_rounding_difference,
+      mwst_type: mwst_type(mwst_type_id),
+      mwst_is_net?: mwst_is_net?,
+      show_position_taxes?: show_position_taxes?,
+      is_valid_from: to_date(is_valid_from),
+      contact_address: contact_address,
+      delivery_address_type: delivery_address_type,
+      delivery_address: delivery_address,
+      kb_item_status: order_kb_item_status(kb_item_status_id),
+      api_reference: api_reference,
+      viewed_by_client_at: to_datetime(viewed_by_client_at),
+      is_recurring?: is_recurring?,
+      updated_at: to_datetime(updated_at),
+      template_slug: template_slug,
+      taxs: Enum.map(taxs, &to_tax/1),
+      network_link: network_link
+    }
+  end
+
+  defp order_kb_item_status(5), do: :pending
+  defp order_kb_item_status(6), do: :done
+  defp order_kb_item_status(15), do: :partial
+  defp order_kb_item_status(21), do: :canceled
+
+  defp order_kb_item_status_id(:pending), do: 5
+  defp order_kb_item_status_id(:done), do: 6
+  defp order_kb_item_status_id(:partial), do: 15
+  defp order_kb_item_status_id(:canceled), do: 21
+
+  # Subtotal Positions
 
   @doc """
   This action fetches a list of all subtotal positions for a document.

@@ -339,6 +339,327 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
+  describe "fetching a list of orders" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_order"} ->
+          json([
+            %{
+              "id" => 4,
+              "document_nr" => "O-00001",
+              "title" => nil,
+              "contact_id" => 14,
+              "contact_sub_id" => nil,
+              "user_id" => 1,
+              "project_id" => nil,
+              "logopaper_id" => 1,
+              "language_id" => 1,
+              "bank_account_id" => 1,
+              "currency_id" => 1,
+              "payment_type_id" => 1,
+              "header" =>
+                "Thank you very much for your inquiry. We would be pleased to make you the following offer:",
+              "footer" =>
+                "We hope that our offer meets your expectations and will be happy to answer your questions.",
+              "total_gross" => "17.800000",
+              "total_net" => "17.800000",
+              "total_taxes" => "1.3706",
+              "total" => "19.150000",
+              "total_rounding_difference" => -0.02,
+              "mwst_type" => 0,
+              "mwst_is_net" => true,
+              "show_position_taxes" => false,
+              "is_valid_from" => "2019-06-24",
+              "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+              "delivery_address_type" => 0,
+              "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+              "kb_item_status_id" => 6,
+              "api_reference" => nil,
+              "viewed_by_client_at" => nil,
+              "is_recurring" => false,
+              "updated_at" => "2019-04-08 13:17:32",
+              "template_slug" => "581a8010821e01426b8b456b",
+              "taxs" => [
+                %{
+                  "percentage" => "7.70",
+                  "value" => "1.3706"
+                }
+              ],
+              "network_link" => ""
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "shows valid records" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [record]} = BexioApiClient.SalesOrderManagement.fetch_orders(client)
+
+      assert record.id == 4
+      assert record.document_nr == "O-00001"
+      assert record.title == nil
+      assert record.contact_id == 14
+      assert record.contact_sub_id == nil
+      assert record.user_id == 1
+      assert record.project_id == nil
+      assert record.language_id == 1
+      assert record.bank_account_id == 1
+      assert record.currency_id == 1
+      assert record.payment_type_id == 1
+
+      assert record.header ==
+               "Thank you very much for your inquiry. We would be pleased to make you the following offer:"
+
+      assert record.footer ==
+               "We hope that our offer meets your expectations and will be happy to answer your questions."
+
+      assert Decimal.equal?(record.total_gross, Decimal.new("17.8"))
+      assert Decimal.equal?(record.total_net, Decimal.new("17.8"))
+      assert Decimal.equal?(record.total_taxes, Decimal.new("1.3706"))
+      assert Decimal.equal?(record.total, Decimal.new("19.15"))
+      assert record.total_rounding_difference == -0.02
+      assert record.mwst_type == :including
+      assert record.mwst_is_net? == true
+      assert record.show_position_taxes? == false
+      assert record.is_valid_from == ~D[2019-06-24]
+      assert record.contact_address == "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden"
+      assert record.delivery_address_type == 0
+      assert record.delivery_address == "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden"
+      assert record.kb_item_status == :done
+      assert record.api_reference == nil
+      assert record.viewed_by_client_at == nil
+      assert record.is_recurring? == false
+      assert record.updated_at == ~N[2019-04-08 13:17:32]
+      assert record.template_slug == "581a8010821e01426b8b456b"
+      assert record.network_link == ""
+      assert Decimal.equal?(hd(record.taxs).percentage, Decimal.new("7.7"))
+      assert Decimal.equal?(hd(record.taxs).value, Decimal.new("1.3706"))
+    end
+  end
+
+  describe "searching orders" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_order/search",
+          body: _body,
+          query: [limit: 100, offset: 50, order_by: :id]
+        } ->
+          json([
+            %{
+              "id" => 4,
+              "document_nr" => "O-00001",
+              "title" => nil,
+              "contact_id" => 14,
+              "contact_sub_id" => nil,
+              "user_id" => 1,
+              "project_id" => nil,
+              "logopaper_id" => 1,
+              "language_id" => 1,
+              "bank_account_id" => 1,
+              "currency_id" => 1,
+              "payment_type_id" => 1,
+              "header" =>
+                "Thank you very much for your inquiry. We would be pleased to make you the following offer:",
+              "footer" =>
+                "We hope that our offer meets your expectations and will be happy to answer your questions.",
+              "total_gross" => "17.800000",
+              "total_net" => "17.800000",
+              "total_taxes" => "1.3706",
+              "total" => "19.150000",
+              "total_rounding_difference" => -0.02,
+              "mwst_type" => 0,
+              "mwst_is_net" => true,
+              "show_position_taxes" => false,
+              "is_valid_from" => "2019-06-24",
+              "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+              "delivery_address_type" => 0,
+              "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+              "kb_item_status_id" => 6,
+              "api_reference" => nil,
+              "viewed_by_client_at" => nil,
+              "is_recurring" => false,
+              "updated_at" => "2019-04-08 13:17:32",
+              "template_slug" => "581a8010821e01426b8b456b",
+              "taxs" => [
+                %{
+                  "percentage" => "7.70",
+                  "value" => "1.3706"
+                }
+              ],
+              "network_link" => ""
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [record]} =
+               BexioApiClient.SalesOrderManagement.search_orders(
+                 client,
+                 [
+                   SearchCriteria.equal(:id, 4)
+                 ],
+                 limit: 100,
+                 offset: 50,
+                 order_by: :id
+               )
+
+      assert record.id == 4
+      assert record.document_nr == "O-00001"
+      assert record.title == nil
+      assert record.contact_id == 14
+      assert record.contact_sub_id == nil
+      assert record.user_id == 1
+      assert record.project_id == nil
+      assert record.language_id == 1
+      assert record.bank_account_id == 1
+      assert record.currency_id == 1
+      assert record.payment_type_id == 1
+
+      assert record.header ==
+               "Thank you very much for your inquiry. We would be pleased to make you the following offer:"
+
+      assert record.footer ==
+               "We hope that our offer meets your expectations and will be happy to answer your questions."
+
+      assert Decimal.equal?(record.total_gross, Decimal.new("17.8"))
+      assert Decimal.equal?(record.total_net, Decimal.new("17.8"))
+      assert Decimal.equal?(record.total_taxes, Decimal.new("1.3706"))
+      assert Decimal.equal?(record.total, Decimal.new("19.15"))
+      assert record.total_rounding_difference == -0.02
+      assert record.mwst_type == :including
+      assert record.mwst_is_net? == true
+      assert record.show_position_taxes? == false
+      assert record.is_valid_from == ~D[2019-06-24]
+      assert record.contact_address == "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden"
+      assert record.delivery_address_type == 0
+      assert record.delivery_address == "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden"
+      assert record.kb_item_status == :done
+      assert record.api_reference == nil
+      assert record.viewed_by_client_at == nil
+      assert record.is_recurring? == false
+      assert record.updated_at == ~N[2019-04-08 13:17:32]
+      assert record.template_slug == "581a8010821e01426b8b456b"
+      assert record.network_link == ""
+      assert Decimal.equal?(hd(record.taxs).percentage, Decimal.new("7.7"))
+      assert Decimal.equal?(hd(record.taxs).value, Decimal.new("1.3706"))
+    end
+  end
+
+  describe "fetching a single order" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_order/4"} ->
+          json(%{
+            "id" => 4,
+            "document_nr" => "O-00001",
+            "title" => nil,
+            "contact_id" => 14,
+            "contact_sub_id" => nil,
+            "user_id" => 1,
+            "project_id" => nil,
+            "logopaper_id" => 1,
+            "language_id" => 1,
+            "bank_account_id" => 1,
+            "currency_id" => 1,
+            "payment_type_id" => 1,
+            "header" =>
+              "Thank you very much for your inquiry. We would be pleased to make you the following offer:",
+            "footer" =>
+              "We hope that our offer meets your expectations and will be happy to answer your questions.",
+            "total_gross" => "17.800000",
+            "total_net" => "17.800000",
+            "total_taxes" => "1.3706",
+            "total" => "19.150000",
+            "total_rounding_difference" => -0.02,
+            "mwst_type" => 0,
+            "mwst_is_net" => true,
+            "show_position_taxes" => false,
+            "is_valid_from" => "2019-06-24",
+            "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "delivery_address_type" => 0,
+            "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "kb_item_status_id" => 6,
+            "api_reference" => nil,
+            "viewed_by_client_at" => nil,
+            "is_recurring" => false,
+            "updated_at" => "2019-04-08 13:17:32",
+            "template_slug" => "581a8010821e01426b8b456b",
+            "taxs" => [
+              %{
+                "percentage" => "7.70",
+                "value" => "1.3706"
+              }
+            ],
+            "network_link" => ""
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_order/99"} ->
+          %Tesla.Env{status: 404, body: "Contact does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid result" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, record} = BexioApiClient.SalesOrderManagement.fetch_order(client, 4)
+      assert record.id == 4
+      assert record.document_nr == "O-00001"
+      assert record.title == nil
+      assert record.contact_id == 14
+      assert record.contact_sub_id == nil
+      assert record.user_id == 1
+      assert record.project_id == nil
+      assert record.language_id == 1
+      assert record.bank_account_id == 1
+      assert record.currency_id == 1
+      assert record.payment_type_id == 1
+
+      assert record.header ==
+               "Thank you very much for your inquiry. We would be pleased to make you the following offer:"
+
+      assert record.footer ==
+               "We hope that our offer meets your expectations and will be happy to answer your questions."
+
+      assert Decimal.equal?(record.total_gross, Decimal.new("17.8"))
+      assert Decimal.equal?(record.total_net, Decimal.new("17.8"))
+      assert Decimal.equal?(record.total_taxes, Decimal.new("1.3706"))
+      assert Decimal.equal?(record.total, Decimal.new("19.15"))
+      assert record.total_rounding_difference == -0.02
+      assert record.mwst_type == :including
+      assert record.mwst_is_net? == true
+      assert record.show_position_taxes? == false
+      assert record.is_valid_from == ~D[2019-06-24]
+      assert record.contact_address == "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden"
+      assert record.delivery_address_type == 0
+      assert record.delivery_address == "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden"
+      assert record.kb_item_status == :done
+      assert record.api_reference == nil
+      assert record.viewed_by_client_at == nil
+      assert record.is_recurring? == false
+      assert record.updated_at == ~N[2019-04-08 13:17:32]
+      assert record.template_slug == "581a8010821e01426b8b456b"
+      assert record.network_link == ""
+      assert Decimal.equal?(hd(record.taxs).percentage, Decimal.new("7.7"))
+      assert Decimal.equal?(hd(record.taxs).value, Decimal.new("1.3706"))
+    end
+
+    test "fails on unknown id" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:error, :not_found} = BexioApiClient.SalesOrderManagement.fetch_order(client, 99)
+    end
+  end
+
   describe "fetching a list of subtotal positions" do
     setup do
       mock(fn
