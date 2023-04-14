@@ -128,4 +128,38 @@ defmodule BexioApiClient.AccountingTest do
       assert result2.locked? == true
     end
   end
+
+  describe "fetching a list of account groups" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/account_groups"} ->
+          json([
+            %{
+              "id" => 1,
+              "account_no" => "1",
+              "name" => "Assets",
+              "parent_fibu_account_group_id" => 3,
+              "is_active" => true,
+              "is_locked" => false
+              }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Accounting.fetch_account_groups(client)
+
+      assert result.id == 1
+      assert result.account_no == 1
+      assert result.name == "Assets"
+      assert result.parent_fibu_account_group_id == 3
+      assert result.active? == true
+      assert result.locked? == false
+    end
+  end
+
 end

@@ -5,7 +5,7 @@ defmodule BexioApiClient.Accounting do
 
   import BexioApiClient.Helpers
   alias BexioApiClient.SearchCriteria
-  alias BexioApiClient.Accounting.Account
+  alias BexioApiClient.Accounting.{Account, AccountGroup}
 
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
@@ -29,7 +29,7 @@ defmodule BexioApiClient.Accounting do
   @doc """
   Search accounts via query.
   The following search fields are supported:
-  
+
   * account_no
   * fibo_account_group_id (TODO: test this)
   * name
@@ -108,4 +108,40 @@ defmodule BexioApiClient.Accounting do
   defp account_type(3), do: :active_account
   defp account_type(4), do: :passive_account
   defp account_type(5), do: :complete_account
+
+  @doc """
+  Fetch a list of account groups.
+  """
+  @spec fetch_account_groups(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [AccountGroup.t()]} | {:error, any()}
+  def fetch_account_groups(client, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/account_groups", query: opts_to_query(opts))
+      end,
+      &map_from_account_groups/1
+    )
+  end
+
+  defp map_from_account_groups(accounts), do: Enum.map(accounts, &map_from_account_group/1)
+
+  defp map_from_account_group(%{
+         "id" => id,
+         "account_no" => account_no,
+         "name" => name,
+         "parent_fibu_account_group_id" => parent_fibu_account_group_id,
+         "is_active" => active?,
+         "is_locked" => locked?
+       }) do
+    %AccountGroup{
+      id: id,
+      account_no: String.to_integer(account_no),
+      name: name,
+      parent_fibu_account_group_id: parent_fibu_account_group_id,
+      active?: active?,
+      locked?: locked?
+    }
+  end
 end
