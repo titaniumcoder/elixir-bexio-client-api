@@ -35,6 +35,60 @@ defmodule BexioApiClient.SalesOrderManagement do
     )
   end
 
+  @doc """
+  Search quotes via query.
+  The following search fields are supported:
+
+  * id
+  * kb_item_status
+  * document_nr
+  * title
+  * contact_id
+  * contact_sub_id
+  * user_id
+  * currency_id
+  * total_gross
+  * total_net
+  * total
+  * is_valid_from
+  * is_valid_until
+  * is_valid_to (?)
+  * updated_at
+  """
+  @spec search_quotes(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Quote.t()]} | {:error, any()}
+  def search_quotes(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_quotes/1
+    )
+  end
+
+  @doc """
+  This action fetches a single quote
+  """
+  @spec fetch_quote(
+          client :: Tesla.Client.t(),
+          quote_id :: pos_integer()
+        ) :: {:ok, [Quote.t()]} | {:error, any()}
+  def fetch_quote(client, quote_id) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_offer/#{quote_id}")
+      end,
+      &map_from_quote/1
+    )
+  end
+
   defp map_from_quotes(quotes), do: Enum.map(quotes, &map_from_quote/1)
 
   defp map_from_quote(%{
