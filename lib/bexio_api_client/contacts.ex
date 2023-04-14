@@ -22,7 +22,7 @@ defmodule BexioApiClient.Contacts do
 
   @doc """
   Fetch a list of contacts.
-
+  
   ## Arguments:
     * `:opts` - paging and ordering options
       * `:show_archived` - Show archived elements only,
@@ -44,7 +44,7 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search contacts via query.
   The following search fields are supported:
-
+  
   * id
   * name_1
   * name_2
@@ -198,7 +198,7 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search contacts groups via query.
   The following search fields are supported:
-
+  
   * contact_id
   * contact_sub_id
   * updated_at
@@ -285,7 +285,7 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search contact groups via query.
   The following search fields are supported:
-
+  
   * name
   """
   @spec search_contact_groups(
@@ -364,7 +364,7 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search contact sectors via query.
   The following search fields are supported:
-
+  
   * name
   """
   @spec search_contact_sectors(
@@ -428,7 +428,7 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search additional addresses via query.
   The following search fields are supported:
-
+  
   * name
   * address
   * postcode
@@ -533,7 +533,7 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search salutations via query.
   The following search fields are supported:
-
+  
   * name
   """
   @spec search_salutations(
@@ -615,7 +615,7 @@ defmodule BexioApiClient.Contacts do
   @doc """
   Search title via query.
   The following search fields are supported:
-
+  
   * name
   """
   @spec search_titles(

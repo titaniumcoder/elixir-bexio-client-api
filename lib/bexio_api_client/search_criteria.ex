@@ -9,9 +9,9 @@ defmodule BexioApiClient.SearchCriteria do
 
   @typedoc """
   One search criteria argument
-
+  
   ## Fields:
-
+  
     * `:name` - The name of the parameter to look up
     * `:criteria` - the criteria to fulfill
     * `:value` - the value to search for

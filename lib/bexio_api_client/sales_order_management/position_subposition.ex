@@ -5,9 +5,9 @@ defmodule BexioApiClient.SalesOrderManagement.PositionSubposition do
 
   @typedoc """
   Subposition Position
-
+  
   ## Fields:
-
+  
     * `:id` - automatic id given by bexio
     * `:text` - text
     * `:pos` - position

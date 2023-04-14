@@ -5,16 +5,16 @@ defmodule BexioApiClient.SalesOrderManagement.PositionSubtotal do
 
   @typedoc """
   Subtotal Position
-
+  
   ## Fields:
-
+  
     * `:id` - automatic id given by bexio
     * `:text` - text for the subtotal
     * `:value` - Decimal representation of the value
     * `:optional?` - is the position optional?
     * `:internal_pos` - Internal position id
     * `:parent_id - if exists or nil
-
+  
   """
   @type t :: %__MODULE__{
           id: integer(),

@@ -179,8 +179,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
                BexioApiClient.SalesOrderManagement.search_quotes(
                  client,
                  [
-                   SearchCriteria.nil?(:contact_sub_id),
-                   SearchCriteria.part_of(:name, ["fred", "queen"])
+                   SearchCriteria.equal(:id, 4)
                  ],
                  limit: 100,
                  offset: 50,

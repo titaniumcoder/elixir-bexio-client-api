@@ -3,11 +3,11 @@ defmodule BexioApiClient.Helpers do
 
   @doc """
   Convert the given string into an Elixir date.
-
+  
   Examples:
       iex> BexioApiClient.Helpers.to_date(nil)
       nil
-
+  
       iex> BexioApiClient.Helpers.to_date("2013-02-22")
       ~D[2013-02-22]
   """
@@ -20,11 +20,11 @@ defmodule BexioApiClient.Helpers do
 
   @doc """
   Convert the given string into an Elixir decimal.
-
+  
   Examples:
       iex> BexioApiClient.Helpers.to_decimal(nil)
       nil
-
+  
       iex> BexioApiClient.Helpers.to_decimal("2.331")
       #Decimal<2.331>
   """
@@ -35,11 +35,11 @@ defmodule BexioApiClient.Helpers do
   # The format from Bexio is 2022-09-13 09:14:21
   @doc """
   Convert the given string into an Elixir date.
-
+  
   Examples:
       iex> BexioApiClient.Helpers.to_datetime(nil)
       nil
-
+  
       iex> BexioApiClient.Helpers.to_datetime("2022-09-13 09:14:21")
       ~N[2022-09-13 09:14:21]
   """

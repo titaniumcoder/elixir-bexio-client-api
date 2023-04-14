@@ -5,9 +5,9 @@ defmodule BexioApiClient.SalesOrderManagement.PositionPagebreak do
 
   @typedoc """
   Pagebreak Position
-
+  
   ## Fields:
-
+  
     * `:id` - automatic id given by bexio
     * `:internal_pos` - internal position
     * `:optional?` - if pagebreak is optional

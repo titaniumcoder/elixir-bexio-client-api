@@ -5,9 +5,9 @@ defmodule BexioApiClient.SalesOrderManagement.PositionDiscount do
 
   @typedoc """
   Discount Position
-
+  
   ## Fields:
-
+  
     * `:id` - automatic id given by bexio
     * `:text` - text
     * `:value` - discount value
