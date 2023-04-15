@@ -190,4 +190,68 @@ defmodule BexioApiClient.Others do
       iso3166_alpha2: iso3166_alpha2
     }
   end
+
+  @doc """
+  Fetch a list of languages.
+  """
+  @spec fetch_languages(client :: Tesla.Client.t()) ::
+          {:ok, [Language.t()]} | {:error, any()}
+  def fetch_languages(client) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/language")
+      end,
+      &map_from_languages/1
+    )
+  end
+
+  @doc """
+  Search languages via query.
+  The following search fields are supported:
+
+  * name
+  * iso_639_1
+  """
+  @spec search_languages(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Language.t()]} | {:error, any()}
+  def search_languages(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/language/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_languages/1
+    )
+  end
+
+  defp map_from_languages(languages), do: Enum.map(languages, &map_from_language/1)
+
+  defp map_from_language(%{
+         "id" => id,
+         "name" => name,
+         "decimal_point" => decimal_point,
+         "thousands_separator" => thousands_separator,
+         "date_format_id" => date_format_id_bexio,
+         "date_format" => date_format,
+         "iso_639_1" => iso_639_1
+       }) do
+    %Language{
+      id: id,
+      name: name,
+      decimal_point: decimal_point,
+      thousands_separator: thousands_separator,
+      date_format: date_format,
+      date_format_id: date_format_id(date_format_id_bexio),
+      iso_639_1: iso_639_1
+    }
+  end
+
+  defp date_format_id(1), do: :dmy
+  defp date_format_id(2), do: :mdy
 end

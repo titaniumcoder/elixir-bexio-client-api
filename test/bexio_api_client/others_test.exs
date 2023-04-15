@@ -278,4 +278,85 @@ defmodule BexioApiClient.OthersTest do
       assert {:error, :not_found} = BexioApiClient.Others.fetch_country(client, 99)
     end
   end
+
+  describe "fetching a list of languages" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/language"
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "German",
+              "decimal_point" => ".",
+              "thousands_separator" => "'",
+              "date_format_id" => 1,
+              "date_format" => "d.m.Y",
+              "iso_639_1" => "de"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Others.fetch_languages(client)
+
+      assert result.id == 1
+      assert result.name == "German"
+      assert result.decimal_point == "."
+      assert result.thousands_separator == "'"
+      assert result.date_format_id == :dmy
+      assert result.date_format == "d.m.Y"
+      assert result.iso_639_1 == "de"
+    end
+  end
+
+  describe "searching languages" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/language/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "German",
+              "decimal_point" => ".",
+              "thousands_separator" => "'",
+              "date_format_id" => 1,
+              "date_format" => "d.m.Y",
+              "iso_639_1" => "de"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} =
+               BexioApiClient.Others.search_languages(client, [
+                 SearchCriteria.nil?(:name),
+                 SearchCriteria.part_of(:iso_639_1, ["fred", "queen"])
+               ])
+
+      assert result.id == 1
+      assert result.name == "German"
+      assert result.decimal_point == "."
+      assert result.thousands_separator == "'"
+      assert result.date_format_id == :dmy
+      assert result.date_format == "d.m.Y"
+      assert result.iso_639_1 == "de"
+    end
+  end
 end
