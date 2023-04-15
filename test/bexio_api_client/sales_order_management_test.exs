@@ -1037,7 +1037,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-
   describe "creating an order" do
     setup do
       mock(fn
@@ -1503,6 +1502,97 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
       assert {:error, :not_found} =
                BexioApiClient.SalesOrderManagement.fetch_subtotal_position(client, :invoice, 1, 3)
+    end
+  end
+
+  describe "creating a subtotal position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subtotal",
+          body: "{\"text\":\"text\"}"
+        } ->
+          json(%{
+            "id" => 1,
+            "text" => "Subtotal",
+            "value" => "17.800000",
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionSubtotal",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, position} =
+               BexioApiClient.SalesOrderManagement.create_subtotal_position(
+                 client,
+                 :invoice,
+                 1,
+                 "text"
+               )
+    end
+  end
+
+  describe "editing a subtotal position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subtotal/2",
+          body: "{\"text\":\"text\"}"
+        } ->
+          json(%{
+            "id" => 1,
+            "text" => "Subtotal",
+            "value" => "17.800000",
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionSubtotal",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, position} =
+               BexioApiClient.SalesOrderManagement.edit_subtotal_position(
+                 client,
+                 :invoice,
+                 1,
+                 2,
+                 "text"
+               )
+    end
+  end
+
+  describe "deleting a subtotal position" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subtotal/2"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.delete_subtotal_position(client, :invoice, 1, 2)
+
+        assert result == true
     end
   end
 

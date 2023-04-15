@@ -955,6 +955,67 @@ defmodule BexioApiClient.SalesOrderManagement do
     )
   end
 
+  @doc """
+  Create a subtotal position.
+  """
+  @spec create_subtotal_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          text :: String.t()
+        ) :: {:ok, PositionSubtotal.t()} | {:error, any()}
+  def create_subtotal_position(client, document_type, document_id, text) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal", %{
+          text: text
+        })
+      end,
+      &map_from_subtotal_position/2
+    )
+  end
+
+  @doc """
+  Edit a subtotal position.
+  """
+  @spec edit_subtotal_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position_id :: pos_integer(),
+          text :: String.t()
+        ) :: {:ok, PositionSubtotal.t()} | {:error, any()}
+  def edit_subtotal_position(client, document_type, document_id, position_id, text) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{position_id}",
+          %{text: text}
+        )
+      end,
+      &map_from_subtotal_position/2
+    )
+  end
+
+  @doc """
+  Delete a subtotal position.
+  """
+  @spec delete_subtotal_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_subtotal_position(client, document_type, document_id, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
   defp map_from_subtotal_positions(subtotal_positions, _env),
     do: Enum.map(subtotal_positions, &map_from_subtotal_position/1)
 
