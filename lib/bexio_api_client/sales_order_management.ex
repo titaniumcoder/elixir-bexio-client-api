@@ -97,43 +97,46 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   defp map_from_quotes(quotes, _env), do: Enum.map(quotes, &map_from_quote/1)
 
-  defp map_from_quote(%{
-         "id" => id,
-         "document_nr" => document_nr,
-         "title" => title,
-         "contact_id" => contact_id,
-         "contact_sub_id" => contact_sub_id,
-         "user_id" => user_id,
-         "project_id" => project_id,
-         "language_id" => language_id,
-         "bank_account_id" => bank_account_id,
-         "currency_id" => currency_id,
-         "payment_type_id" => payment_type_id,
-         "header" => header,
-         "footer" => footer,
-         "total_gross" => total_gross,
-         "total_net" => total_net,
-         "total_taxes" => total_taxes,
-         "total" => total,
-         "total_rounding_difference" => total_rounding_difference,
-         "mwst_type" => mwst_type_id,
-         "mwst_is_net" => mwst_is_net?,
-         "show_position_taxes" => show_position_taxes?,
-         "is_valid_from" => is_valid_from,
-         "is_valid_until" => is_valid_until,
-         "contact_address" => contact_address,
-         "delivery_address_type" => delivery_address_type,
-         "delivery_address" => delivery_address,
-         "kb_item_status_id" => kb_item_status_id,
-         "api_reference" => api_reference,
-         "viewed_by_client_at" => viewed_by_client_at,
-         "kb_terms_of_payment_template_id" => kb_terms_of_payment_template_id,
-         "show_total" => show_total?,
-         "updated_at" => updated_at,
-         "template_slug" => template_slug,
-         "taxs" => taxs,
-         "network_link" => network_link
-       }, _env \\ nil) do
+  defp map_from_quote(
+         %{
+           "id" => id,
+           "document_nr" => document_nr,
+           "title" => title,
+           "contact_id" => contact_id,
+           "contact_sub_id" => contact_sub_id,
+           "user_id" => user_id,
+           "project_id" => project_id,
+           "language_id" => language_id,
+           "bank_account_id" => bank_account_id,
+           "currency_id" => currency_id,
+           "payment_type_id" => payment_type_id,
+           "header" => header,
+           "footer" => footer,
+           "total_gross" => total_gross,
+           "total_net" => total_net,
+           "total_taxes" => total_taxes,
+           "total" => total,
+           "total_rounding_difference" => total_rounding_difference,
+           "mwst_type" => mwst_type_id,
+           "mwst_is_net" => mwst_is_net?,
+           "show_position_taxes" => show_position_taxes?,
+           "is_valid_from" => is_valid_from,
+           "is_valid_until" => is_valid_until,
+           "contact_address" => contact_address,
+           "delivery_address_type" => delivery_address_type,
+           "delivery_address" => delivery_address,
+           "kb_item_status_id" => kb_item_status_id,
+           "api_reference" => api_reference,
+           "viewed_by_client_at" => viewed_by_client_at,
+           "kb_terms_of_payment_template_id" => kb_terms_of_payment_template_id,
+           "show_total" => show_total?,
+           "updated_at" => updated_at,
+           "template_slug" => template_slug,
+           "taxs" => taxs,
+           "network_link" => network_link
+         },
+         _env \\ nil
+       ) do
     %Quote{
       id: id,
       document_nr: document_nr,
@@ -262,41 +265,44 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   defp map_from_orders(orders, _env), do: Enum.map(orders, &map_from_order/1)
 
-  defp map_from_order(%{
-         "id" => id,
-         "document_nr" => document_nr,
-         "title" => title,
-         "contact_id" => contact_id,
-         "contact_sub_id" => contact_sub_id,
-         "user_id" => user_id,
-         "project_id" => project_id,
-         "language_id" => language_id,
-         "bank_account_id" => bank_account_id,
-         "currency_id" => currency_id,
-         "payment_type_id" => payment_type_id,
-         "header" => header,
-         "footer" => footer,
-         "total_gross" => total_gross,
-         "total_net" => total_net,
-         "total_taxes" => total_taxes,
-         "total" => total,
-         "total_rounding_difference" => total_rounding_difference,
-         "mwst_type" => mwst_type_id,
-         "mwst_is_net" => mwst_is_net?,
-         "show_position_taxes" => show_position_taxes?,
-         "is_valid_from" => is_valid_from,
-         "contact_address" => contact_address,
-         "delivery_address_type" => delivery_address_type,
-         "delivery_address" => delivery_address,
-         "kb_item_status_id" => kb_item_status_id,
-         "is_recurring" => is_recurring?,
-         "api_reference" => api_reference,
-         "viewed_by_client_at" => viewed_by_client_at,
-         "updated_at" => updated_at,
-         "template_slug" => template_slug,
-         "taxs" => taxs,
-         "network_link" => network_link
-       }, _env \\ nil) do
+  defp map_from_order(
+         %{
+           "id" => id,
+           "document_nr" => document_nr,
+           "title" => title,
+           "contact_id" => contact_id,
+           "contact_sub_id" => contact_sub_id,
+           "user_id" => user_id,
+           "project_id" => project_id,
+           "language_id" => language_id,
+           "bank_account_id" => bank_account_id,
+           "currency_id" => currency_id,
+           "payment_type_id" => payment_type_id,
+           "header" => header,
+           "footer" => footer,
+           "total_gross" => total_gross,
+           "total_net" => total_net,
+           "total_taxes" => total_taxes,
+           "total" => total,
+           "total_rounding_difference" => total_rounding_difference,
+           "mwst_type" => mwst_type_id,
+           "mwst_is_net" => mwst_is_net?,
+           "show_position_taxes" => show_position_taxes?,
+           "is_valid_from" => is_valid_from,
+           "contact_address" => contact_address,
+           "delivery_address_type" => delivery_address_type,
+           "delivery_address" => delivery_address,
+           "kb_item_status_id" => kb_item_status_id,
+           "is_recurring" => is_recurring?,
+           "api_reference" => api_reference,
+           "viewed_by_client_at" => viewed_by_client_at,
+           "updated_at" => updated_at,
+           "template_slug" => template_slug,
+           "taxs" => taxs,
+           "network_link" => network_link
+         },
+         _env \\ nil
+       ) do
     %Order{
       id: id,
       document_nr: document_nr,
@@ -442,17 +448,20 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   defp map_from_comments(comments, _env), do: Enum.map(comments, &map_from_comment/1)
 
-  defp map_from_comment(%{
-         "id" => id,
-         "text" => text,
-         "user_id" => user_id,
-         "user_email" => user_email,
-         "user_name" => user_name,
-         "date" => date,
-         "is_public" => public?,
-         "image" => image,
-         "image_path" => image_path
-       }, _env \\ nil) do
+  defp map_from_comment(
+         %{
+           "id" => id,
+           "text" => text,
+           "user_id" => user_id,
+           "user_email" => user_email,
+           "user_name" => user_name,
+           "date" => date,
+           "is_public" => public?,
+           "image" => image,
+           "image_path" => image_path
+         },
+         _env \\ nil
+       ) do
     %Comment{
       id: id,
       text: text,
@@ -522,14 +531,17 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp map_from_subtotal_positions(subtotal_positions, _env),
     do: Enum.map(subtotal_positions, &map_from_subtotal_position/1)
 
-  defp map_from_subtotal_position(%{
-         "id" => id,
-         "text" => text,
-         "value" => value,
-         "internal_pos" => internal_pos,
-         "is_optional" => optional?,
-         "parent_id" => parent_id
-       }, _env \\ nil) do
+  defp map_from_subtotal_position(
+         %{
+           "id" => id,
+           "text" => text,
+           "value" => value,
+           "internal_pos" => internal_pos,
+           "is_optional" => optional?,
+           "parent_id" => parent_id
+         },
+         _env \\ nil
+       ) do
     %PositionSubtotal{
       id: id,
       text: text,
@@ -596,15 +608,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp map_from_text_positions(text_positions, _env),
     do: Enum.map(text_positions, &map_from_text_position/1)
 
-  defp map_from_text_position(%{
-         "id" => id,
-         "text" => text,
-         "show_pos_nr" => show_pos_nr,
-         "pos" => pos,
-         "internal_pos" => internal_pos,
-         "is_optional" => optional?,
-         "parent_id" => parent_id
-       }, _env \\ nil) do
+  defp map_from_text_position(
+         %{
+           "id" => id,
+           "text" => text,
+           "show_pos_nr" => show_pos_nr,
+           "pos" => pos,
+           "internal_pos" => internal_pos,
+           "is_optional" => optional?,
+           "parent_id" => parent_id
+         },
+         _env \\ nil
+       ) do
     %PositionText{
       id: id,
       text: text,
@@ -672,23 +687,26 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp map_from_default_positions(default_positions, _env),
     do: Enum.map(default_positions, &map_from_default_position/1)
 
-  defp map_from_default_position(%{
-         "id" => id,
-         "amount" => amount,
-         "unit_id" => unit_id,
-         "account_id" => account_id,
-         "unit_name" => unit_name,
-         "tax_id" => tax_id,
-         "tax_value" => tax_value,
-         "text" => text,
-         "unit_price" => unit_price,
-         "discount_in_percent" => discount_in_percent,
-         "position_total" => position_total,
-         "pos" => pos,
-         "internal_pos" => internal_pos,
-         "is_optional" => optional?,
-         "parent_id" => parent_id
-       }, _env \\ nil) do
+  defp map_from_default_position(
+         %{
+           "id" => id,
+           "amount" => amount,
+           "unit_id" => unit_id,
+           "account_id" => account_id,
+           "unit_name" => unit_name,
+           "tax_id" => tax_id,
+           "tax_value" => tax_value,
+           "text" => text,
+           "unit_price" => unit_price,
+           "discount_in_percent" => discount_in_percent,
+           "position_total" => position_total,
+           "pos" => pos,
+           "internal_pos" => internal_pos,
+           "is_optional" => optional?,
+           "parent_id" => parent_id
+         },
+         _env \\ nil
+       ) do
     %PositionDefault{
       id: id,
       amount: Decimal.new(amount),
@@ -764,24 +782,27 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp map_from_item_positions(item_positions, _env),
     do: Enum.map(item_positions, &map_from_item_position/1)
 
-  defp map_from_item_position(%{
-         "id" => id,
-         "amount" => amount,
-         "unit_id" => unit_id,
-         "account_id" => account_id,
-         "unit_name" => unit_name,
-         "tax_id" => tax_id,
-         "tax_value" => tax_value,
-         "text" => text,
-         "unit_price" => unit_price,
-         "discount_in_percent" => discount_in_percent,
-         "position_total" => position_total,
-         "pos" => pos,
-         "internal_pos" => internal_pos,
-         "is_optional" => optional?,
-         "article_id" => article_id,
-         "parent_id" => parent_id
-       }, _env \\ nil) do
+  defp map_from_item_position(
+         %{
+           "id" => id,
+           "amount" => amount,
+           "unit_id" => unit_id,
+           "account_id" => account_id,
+           "unit_name" => unit_name,
+           "tax_id" => tax_id,
+           "tax_value" => tax_value,
+           "text" => text,
+           "unit_price" => unit_price,
+           "discount_in_percent" => discount_in_percent,
+           "position_total" => position_total,
+           "pos" => pos,
+           "internal_pos" => internal_pos,
+           "is_optional" => optional?,
+           "article_id" => article_id,
+           "parent_id" => parent_id
+         },
+         _env \\ nil
+       ) do
     %PositionItem{
       id: id,
       amount: Decimal.new(amount),
@@ -858,13 +879,16 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp map_from_discount_positions(discount_positions, _env),
     do: Enum.map(discount_positions, &map_from_discount_position/1)
 
-  defp map_from_discount_position(%{
-         "id" => id,
-         "text" => text,
-         "value" => value,
-         "discount_total" => discount_total,
-         "is_percentual" => percentual?
-       }, _env \\ nil) do
+  defp map_from_discount_position(
+         %{
+           "id" => id,
+           "text" => text,
+           "value" => value,
+           "discount_total" => discount_total,
+           "is_percentual" => percentual?
+         },
+         _env \\ nil
+       ) do
     %PositionDiscount{
       id: id,
       text: text,
@@ -930,12 +954,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp map_from_pagebreak_positions(pagebreak_positions, _env),
     do: Enum.map(pagebreak_positions, &map_from_pagebreak_position/1)
 
-  defp map_from_pagebreak_position(%{
-         "id" => id,
-         "internal_pos" => internal_pos,
-         "is_optional" => optional?,
-         "parent_id" => parent_id
-       }, _env \\ nil) do
+  defp map_from_pagebreak_position(
+         %{
+           "id" => id,
+           "internal_pos" => internal_pos,
+           "is_optional" => optional?,
+           "parent_id" => parent_id
+         },
+         _env \\ nil
+       ) do
     %PositionPagebreak{
       id: id,
       internal_pos: internal_pos,
@@ -1002,17 +1029,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp map_from_subposition_positions(subposition_positions, _env),
     do: Enum.map(subposition_positions, &map_from_subposition_position/1)
 
-  defp map_from_subposition_position(%{
-         "id" => id,
-         "text" => text,
-         "pos" => pos,
-         "internal_pos" => internal_pos,
-         "show_pos_nr" => show_pos_nr?,
-         "is_optional" => optional?,
-         "total_sum" => total_sum,
-         "show_pos_prices" => show_pos_prices?,
-         "parent_id" => parent_id
-       }, _env \\ nil) do
+  defp map_from_subposition_position(
+         %{
+           "id" => id,
+           "text" => text,
+           "pos" => pos,
+           "internal_pos" => internal_pos,
+           "show_pos_nr" => show_pos_nr?,
+           "is_optional" => optional?,
+           "total_sum" => total_sum,
+           "show_pos_prices" => show_pos_prices?,
+           "parent_id" => parent_id
+         },
+         _env \\ nil
+       ) do
     %PositionSubposition{
       id: id,
       text: text,

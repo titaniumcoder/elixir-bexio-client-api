@@ -101,20 +101,23 @@ defmodule BexioApiClient.Files do
 
   defp map_from_files(files, _env), do: Enum.map(files, &map_from_file/1)
 
-  defp map_from_file(%{
-         "id" => id,
-         "uuid" => uuid,
-         "name" => name,
-         "size_in_bytes" => size_in_bytes,
-         "extension" => extension,
-         "mime_type" => mime_type,
-         "uploader_email" => uploader_email,
-         "user_id" => user_id,
-         "is_archived" => archived?,
-         "source_type" => source_type,
-         "is_referenced" => referenced?,
-         "created_at" => created_at
-       }, _env \\ nil) do
+  defp map_from_file(
+         %{
+           "id" => id,
+           "uuid" => uuid,
+           "name" => name,
+           "size_in_bytes" => size_in_bytes,
+           "extension" => extension,
+           "mime_type" => mime_type,
+           "uploader_email" => uploader_email,
+           "user_id" => user_id,
+           "is_archived" => archived?,
+           "source_type" => source_type,
+           "is_referenced" => referenced?,
+           "created_at" => created_at
+         },
+         _env \\ nil
+       ) do
     %File{
       id: id,
       uuid: uuid,

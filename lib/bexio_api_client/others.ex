@@ -422,4 +422,57 @@ defmodule BexioApiClient.Others do
       title_id: title_id
     }
   end
+
+  @doc """
+  Get access information of logged in user
+  """
+  @spec get_access_information(client :: Tesla.Client.t()) ::
+          {:ok, FictionalUser.t()} | {:error, any()}
+  def get_access_information(client) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/3.0/permissions")
+      end,
+      &map_from_permission_response/2
+    )
+  end
+
+  defp map_from_permission_response(
+         %{"components" => components, "permissions" => permissions},
+         _env
+       ) do
+    %Permission{
+      components: components,
+      permissions: permissions |> Enum.map(&map_permission/1) |> Enum.into(%{})
+    }
+  end
+
+  defp map_permission({k, properties}) do
+    map_part(String.to_atom(k), properties, %{})
+  end
+
+  defp map_part(k, %{"activation" => activation} = map, acc) do
+    map_part(k, Map.delete(map, "activation"), Map.put(acc, :activation, enabled(activation)))
+  end
+
+  defp map_part(k, %{"edit" => edit} = map, acc) do
+    map_part(k, Map.delete(map, "edit"), Map.put(acc, :edit, restriction(edit)))
+  end
+
+  defp map_part(k, %{"view" => view} = map, acc) do
+    map_part(k, Map.delete(map, "view"), Map.put(acc, :view, restriction(view)))
+  end
+
+  defp map_part(k, %{"show" => show} = map, acc) do
+    map_part(k, Map.delete(map, "show"), Map.put(acc, :show, restriction(show)))
+  end
+
+  defp map_part(k, %{}, acc), do: {k, acc}
+
+  def enabled("disabled"), do: :disabled
+  def enabled("enabled"), do: :enabled
+
+  def restriction("none"), do: :none
+  def restriction("all"), do: :all
+  def restriction("own"), do: :own
 end

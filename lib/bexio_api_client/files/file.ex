@@ -20,6 +20,30 @@ defmodule BexioApiClient.Files.File do
           referenced?: boolean(),
           created_at: DateTime.t()
         }
-  @enforce_keys [:id, :uuid, :name, :size_in_bytes, :extension, :mime_type, :user_id, :archived?, :referenced?, :created_at]
-  defstruct [:id, :uuid, :name, :size_in_bytes, :extension, :mime_type, :uploader_email, :user_id, :archived?, :source_type, :referenced?, :created_at]
+  @enforce_keys [
+    :id,
+    :uuid,
+    :name,
+    :size_in_bytes,
+    :extension,
+    :mime_type,
+    :user_id,
+    :archived?,
+    :referenced?,
+    :created_at
+  ]
+  defstruct [
+    :id,
+    :uuid,
+    :name,
+    :size_in_bytes,
+    :extension,
+    :mime_type,
+    :uploader_email,
+    :user_id,
+    :archived?,
+    :source_type,
+    :referenced?,
+    :created_at
+  ]
 end

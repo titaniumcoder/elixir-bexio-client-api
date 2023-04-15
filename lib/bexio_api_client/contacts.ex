@@ -107,36 +107,39 @@ defmodule BexioApiClient.Contacts do
 
   defp map_from_clients(clients, _env), do: Enum.map(clients, &map_from_client/1)
 
-  defp map_from_client(%{
-         "id" => id,
-         "nr" => nr,
-         "contact_type_id" => contact_type_id,
-         "name_1" => name_1,
-         "name_2" => name_2,
-         "salutation_id" => salutation_id,
-         "salutation_form" => salutation_form,
-         "title_id" => title_id,
-         "birthday" => birthday,
-         "address" => address,
-         "postcode" => postcode,
-         "city" => city,
-         "country_id" => country_id,
-         "mail" => mail,
-         "mail_second" => mail_second,
-         "phone_fixed" => phone_fixed,
-         "phone_fixed_second" => phone_fixed_second,
-         "phone_mobile" => phone_mobile,
-         "fax" => fax,
-         "url" => url,
-         "skype_name" => skype_name,
-         "remarks" => remarks,
-         "language_id" => language_id,
-         "contact_group_ids" => contact_group_ids,
-         "contact_branch_ids" => contact_branch_ids,
-         "user_id" => user_id,
-         "owner_id" => owner_id,
-         "updated_at" => updated_at
-       }, _env \\ nil) do
+  defp map_from_client(
+         %{
+           "id" => id,
+           "nr" => nr,
+           "contact_type_id" => contact_type_id,
+           "name_1" => name_1,
+           "name_2" => name_2,
+           "salutation_id" => salutation_id,
+           "salutation_form" => salutation_form,
+           "title_id" => title_id,
+           "birthday" => birthday,
+           "address" => address,
+           "postcode" => postcode,
+           "city" => city,
+           "country_id" => country_id,
+           "mail" => mail,
+           "mail_second" => mail_second,
+           "phone_fixed" => phone_fixed,
+           "phone_fixed_second" => phone_fixed_second,
+           "phone_mobile" => phone_mobile,
+           "fax" => fax,
+           "url" => url,
+           "skype_name" => skype_name,
+           "remarks" => remarks,
+           "language_id" => language_id,
+           "contact_group_ids" => contact_group_ids,
+           "contact_branch_ids" => contact_branch_ids,
+           "user_id" => user_id,
+           "owner_id" => owner_id,
+           "updated_at" => updated_at
+         },
+         _env \\ nil
+       ) do
     %Contact{
       id: id,
       nr: String.to_integer(nr),
@@ -243,13 +246,16 @@ defmodule BexioApiClient.Contacts do
   defp map_from_client_relations(client_relations, _env),
     do: Enum.map(client_relations, &map_from_client_relation/1)
 
-  defp map_from_client_relation(%{
-         "id" => id,
-         "contact_id" => contact_id,
-         "contact_sub_id" => contact_sub_id,
-         "description" => description,
-         "updated_at" => updated_at
-       }, _env \\ nil) do
+  defp map_from_client_relation(
+         %{
+           "id" => id,
+           "contact_id" => contact_id,
+           "contact_sub_id" => contact_sub_id,
+           "description" => description,
+           "updated_at" => updated_at
+         },
+         _env \\ nil
+       ) do
     %ContactRelation{
       id: id,
       contact_id: contact_id,
@@ -328,10 +334,13 @@ defmodule BexioApiClient.Contacts do
   defp map_from_contact_groups(contact_groups, _env),
     do: Enum.map(contact_groups, &map_from_contact_group/1)
 
-  defp map_from_contact_group(%{
-         "id" => id,
-         "name" => name
-       }, _env \\ nil) do
+  defp map_from_contact_group(
+         %{
+           "id" => id,
+           "name" => name
+         },
+         _env \\ nil
+       ) do
     %ContactGroup{
       id: id,
       name: name
@@ -485,16 +494,19 @@ defmodule BexioApiClient.Contacts do
   defp map_from_additional_addresses(addresses, _env),
     do: Enum.map(addresses, &map_from_additional_address/1)
 
-  defp map_from_additional_address(%{
-         "id" => id,
-         "name" => name,
-         "address" => address,
-         "postcode" => postcode,
-         "city" => city,
-         "country_id" => country_id,
-         "subject" => subject,
-         "description" => description
-       }, _env \\ nil) do
+  defp map_from_additional_address(
+         %{
+           "id" => id,
+           "name" => name,
+           "address" => address,
+           "postcode" => postcode,
+           "city" => city,
+           "country_id" => country_id,
+           "subject" => subject,
+           "description" => description
+         },
+         _env \\ nil
+       ) do
     %AdditionalAddress{
       id: id,
       name: name,
@@ -579,10 +591,13 @@ defmodule BexioApiClient.Contacts do
   defp map_from_salutations(salutations, _env),
     do: Enum.map(salutations, &map_from_salutation/1)
 
-  defp map_from_salutation(%{
-         "id" => id,
-         "name" => name
-       }, _env \\ nil) do
+  defp map_from_salutation(
+         %{
+           "id" => id,
+           "name" => name
+         },
+         _env \\ nil
+       ) do
     %Salutation{
       id: id,
       name: name
@@ -661,10 +676,13 @@ defmodule BexioApiClient.Contacts do
   defp map_from_titles(titles, _env),
     do: Enum.map(titles, &map_from_title/1)
 
-  defp map_from_title(%{
-         "id" => id,
-         "name" => name
-       }, _env \\ nil) do
+  defp map_from_title(
+         %{
+           "id" => id,
+           "name" => name
+         },
+         _env \\ nil
+       ) do
     %Title{
       id: id,
       name: name

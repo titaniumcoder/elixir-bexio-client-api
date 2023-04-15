@@ -15,6 +15,22 @@ defmodule BexioApiClient.Others.Language do
           date_format_id: :dmy | :mdy,
           iso_639_1: String.t()
         }
-  @enforce_keys [:id, :name, :decimal_point, :thousands_separator, :date_format, :date_format_id, :iso_639_1]
-  defstruct [:id, :name, :decimal_point, :thousands_separator, :date_format, :date_format_id, :iso_639_1]
+  @enforce_keys [
+    :id,
+    :name,
+    :decimal_point,
+    :thousands_separator,
+    :date_format,
+    :date_format_id,
+    :iso_639_1
+  ]
+  defstruct [
+    :id,
+    :name,
+    :decimal_point,
+    :thousands_separator,
+    :date_format,
+    :date_format_id,
+    :iso_639_1
+  ]
 end

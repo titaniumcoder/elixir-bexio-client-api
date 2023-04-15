@@ -622,4 +622,139 @@ defmodule BexioApiClient.OthersTest do
       assert result == true
     end
   end
+
+  describe "getting access information of logged in user" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/3.0/permissions"
+        } ->
+          json(%{
+            "components" => [
+              "api2_access",
+              "api3_access",
+              "analytics",
+              "file_upload",
+              "contact",
+              "todo",
+              "history",
+              "project",
+              "project_show_conditions",
+              "article",
+              "admin",
+              "user_administration",
+              "bill_administration",
+              "monitoring",
+              "stockmanagement",
+              "stockmanagement_changes",
+              "dashboard_widget_sales",
+              "banking",
+              "banking_sync",
+              "banking_direct",
+              "banking_sgkb",
+              "banking_sgkb_oauth2",
+              "banking_vabe",
+              "banking_vabe_2021H1",
+              "banking_tkb",
+              "banking_tkb_2021H1",
+              "banking_bcju",
+              "banking_bcju_2021H1",
+              "banking_raif_camt",
+              "banking_ubs_camt",
+              "banking_bcvl_oauth",
+              "accounting_reports",
+              "kb_offer",
+              "kb_order",
+              "kb_invoice",
+              "kb_credit_voucher",
+              "kb_delivery",
+              "kb_account_statement",
+              "expense",
+              "kb_bill",
+              "kb_article_order",
+              "kb_wizard_recurring_invoices",
+              "kb_wizard_payments",
+              "kb_wizard_reminder",
+              "kb_wizard_v11",
+              "network",
+              "document_designer",
+              "manual_entries",
+              "fm"
+            ],
+            "permissions" => %{
+              "mailchimp" => %{"activation" => "enabled"},
+              "document_designer" => %{"activation" => "enabled"},
+              "banking_sync" => %{"activation" => "enabled"},
+              "banking_direct" => %{"activation" => "enabled"},
+              "file_manager_share" => %{"activation" => "enabled"},
+              "boxnet" => %{"activation" => "enabled"},
+              "history" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "expense" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "file_upload" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "admin" => %{"activation" => "enabled"},
+              "kb_credit_voucher" => %{
+                "activation" => "enabled",
+                "edit" => "all",
+                "show" => "all"
+              },
+              "kb_wizard_payments" => %{"activation" => "enabled"},
+              "user_administration" => %{"activation" => "enabled"},
+              "monitoring" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "kb_bill" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "kb_order" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "lean_sync" => %{"activation" => "enabled"},
+              "project_show_conditions" => %{"activation" => "enabled"},
+              "kb_account_statement" => %{
+                "activation" => "enabled",
+                "edit" => "all",
+                "show" => "all"
+              },
+              "kb_wizard_reminder" => %{"activation" => "enabled"},
+              "kb_wizard_v11" => %{"activation" => "enabled"},
+              "pingen" => %{"activation" => "enabled"},
+              "kb_delivery" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "contact" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "stockmanagement" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "marketing" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "kb_article_order" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "payroll" => %{"activation" => "disabled"},
+              "analytics" => %{"activation" => "enabled", "download" => "all"},
+              "kb_invoice" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "file_manager" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "bill_administration" => %{"activation" => "enabled"},
+              "project" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "banking" => %{"activation" => "enabled", "edit" => "all"},
+              "accounting_reports" => %{"activation" => "enabled"},
+              "stockmanagement_changes" => %{"edit" => "all"},
+              "todo" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "dropbox" => %{"activation" => "enabled"},
+              "article" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "dashboard_widget_sales" => %{"activation" => "enabled"},
+              "gdrive" => %{"activation" => "enabled"},
+              "writer" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "fm" => %{"activation" => "enabled"},
+              "calendar" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "kb_offer" => %{"activation" => "enabled", "edit" => "all", "show" => "all"},
+              "kb_wizard_recurring_invoices" => %{"activation" => "enabled"}
+            }
+          })
+      end)
+
+      :ok
+    end
+
+    test "lists valid permissions" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.get_access_information(client)
+
+      assert length(result.components) == 49
+
+      assert result.permissions.writer.activation == :enabled
+      assert result.permissions.gdrive.activation == :enabled
+      assert result.permissions.kb_offer.edit == :all
+      assert result.permissions.kb_offer.show == :all
+    end
+  end
 end

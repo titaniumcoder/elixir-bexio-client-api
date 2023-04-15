@@ -99,15 +99,18 @@ defmodule BexioApiClient.Purchase do
     )
   end
 
-  defp map_from_paged_bills(%{
-         "data" => bills,
-         "paging" => %{
-           "page" => page,
-           "page_size" => page_size,
-           "page_count" => page_count,
-           "item_count" => item_count
-         }
-       }, _env) do
+  defp map_from_paged_bills(
+         %{
+           "data" => bills,
+           "paging" => %{
+             "page" => page,
+             "page_size" => page_size,
+             "page_count" => page_count,
+             "item_count" => item_count
+           }
+         },
+         _env
+       ) do
     {
       Enum.map(bills, &map_from_bill/1),
       %Paging{

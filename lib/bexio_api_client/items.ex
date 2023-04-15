@@ -82,44 +82,47 @@ defmodule BexioApiClient.Items do
 
   defp map_from_articles(articles, _env), do: Enum.map(articles, &map_from_article/1)
 
-  defp map_from_article(%{
-         "id" => id,
-         "user_id" => user_id,
-         "article_type_id" => article_type_id,
-         "contact_id" => contact_id,
-         "deliverer_code" => deliverer_code,
-         "deliverer_name" => deliverer_name,
-         "deliverer_description" => deliverer_description,
-         "intern_code" => intern_code,
-         "intern_name" => intern_name,
-         "intern_description" => intern_description,
-         "purchase_price" => purchase_price,
-         "sale_price" => sale_price,
-         "purchase_total" => purchase_total,
-         "sale_total" => sale_total,
-         "currency_id" => currency_id,
-         "tax_income_id" => tax_income_id,
-         "tax_id" => tax_id,
-         "tax_expense_id" => tax_expense_id,
-         "unit_id" => unit_id,
-         "is_stock" => stock?,
-         "stock_id" => stock_id,
-         "stock_place_id" => stock_place_id,
-         "stock_nr" => stock_nr,
-         "stock_min_nr" => stock_min_nr,
-         "stock_reserved_nr" => stock_reserved_nr,
-         "stock_available_nr" => stock_available_nr,
-         "stock_picked_nr" => stock_picked_nr,
-         "stock_disposed_nr" => stock_disposed_nr,
-         "stock_ordered_nr" => stock_ordered_nr,
-         "width" => width,
-         "height" => height,
-         "weight" => weight,
-         "volume" => volume,
-         "remarks" => remarks,
-         "delivery_price" => delivery_price,
-         "article_group_id" => article_group_id
-       }, _env \\ nil) do
+  defp map_from_article(
+         %{
+           "id" => id,
+           "user_id" => user_id,
+           "article_type_id" => article_type_id,
+           "contact_id" => contact_id,
+           "deliverer_code" => deliverer_code,
+           "deliverer_name" => deliverer_name,
+           "deliverer_description" => deliverer_description,
+           "intern_code" => intern_code,
+           "intern_name" => intern_name,
+           "intern_description" => intern_description,
+           "purchase_price" => purchase_price,
+           "sale_price" => sale_price,
+           "purchase_total" => purchase_total,
+           "sale_total" => sale_total,
+           "currency_id" => currency_id,
+           "tax_income_id" => tax_income_id,
+           "tax_id" => tax_id,
+           "tax_expense_id" => tax_expense_id,
+           "unit_id" => unit_id,
+           "is_stock" => stock?,
+           "stock_id" => stock_id,
+           "stock_place_id" => stock_place_id,
+           "stock_nr" => stock_nr,
+           "stock_min_nr" => stock_min_nr,
+           "stock_reserved_nr" => stock_reserved_nr,
+           "stock_available_nr" => stock_available_nr,
+           "stock_picked_nr" => stock_picked_nr,
+           "stock_disposed_nr" => stock_disposed_nr,
+           "stock_ordered_nr" => stock_ordered_nr,
+           "width" => width,
+           "height" => height,
+           "weight" => weight,
+           "volume" => volume,
+           "remarks" => remarks,
+           "delivery_price" => delivery_price,
+           "article_group_id" => article_group_id
+         },
+         _env \\ nil
+       ) do
     %Item{
       id: id,
       user_id: user_id,
@@ -211,10 +214,13 @@ defmodule BexioApiClient.Items do
   defp map_from_stock_locations(stock_locations, _env),
     do: Enum.map(stock_locations, &map_from_stock_location/1)
 
-  defp map_from_stock_location(%{
-         "id" => id,
-         "name" => name
-       }, _env \\ nil) do
+  defp map_from_stock_location(
+         %{
+           "id" => id,
+           "name" => name
+         },
+         _env \\ nil
+       ) do
     %StockLocation{
       id: id,
       name: name
@@ -269,10 +275,13 @@ defmodule BexioApiClient.Items do
 
   defp map_from_stock_areas(stock_areas, _env), do: Enum.map(stock_areas, &map_from_stock_area/1)
 
-  defp map_from_stock_area(%{
-         "id" => id,
-         "name" => name
-       }, _env \\ nil) do
+  defp map_from_stock_area(
+         %{
+           "id" => id,
+           "name" => name
+         },
+         _env \\ nil
+       ) do
     %StockArea{
       id: id,
       name: name

@@ -89,16 +89,19 @@ defmodule BexioApiClient.Accounting do
 
   defp map_from_accounts(accounts, _env), do: Enum.map(accounts, &map_from_account/1)
 
-  defp map_from_account(%{
-         "id" => id,
-         "account_no" => account_no,
-         "name" => name,
-         "account_group_id" => account_group_id,
-         "account_type" => account_type_id,
-         "tax_id" => tax_id,
-         "is_active" => active?,
-         "is_locked" => locked?
-       }, _env \\ nil) do
+  defp map_from_account(
+         %{
+           "id" => id,
+           "account_no" => account_no,
+           "name" => name,
+           "account_group_id" => account_group_id,
+           "account_type" => account_type_id,
+           "tax_id" => tax_id,
+           "is_active" => active?,
+           "is_locked" => locked?
+         },
+         _env \\ nil
+       ) do
     %Account{
       id: id,
       account_no: String.to_integer(account_no),
@@ -135,14 +138,17 @@ defmodule BexioApiClient.Accounting do
 
   defp map_from_account_groups(accounts, _env), do: Enum.map(accounts, &map_from_account_group/1)
 
-  defp map_from_account_group(%{
-         "id" => id,
-         "account_no" => account_no,
-         "name" => name,
-         "parent_fibu_account_group_id" => parent_fibu_account_group_id,
-         "is_active" => active?,
-         "is_locked" => locked?
-       }, _env \\ nil) do
+  defp map_from_account_group(
+         %{
+           "id" => id,
+           "account_no" => account_no,
+           "name" => name,
+           "parent_fibu_account_group_id" => parent_fibu_account_group_id,
+           "is_active" => active?,
+           "is_locked" => locked?
+         },
+         _env \\ nil
+       ) do
     %AccountGroup{
       id: id,
       account_no: String.to_integer(account_no),
