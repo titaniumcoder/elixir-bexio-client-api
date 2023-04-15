@@ -1,13 +1,14 @@
 defmodule BexioApiClient.Helpers do
   @moduledoc false
+  alias ElixirLS.LanguageServer.Server.InvalidParamError
 
   @doc """
   Convert the given string into an Elixir date.
-  
+
   Examples:
       iex> BexioApiClient.Helpers.to_date(nil)
       nil
-  
+
       iex> BexioApiClient.Helpers.to_date("2013-02-22")
       ~D[2013-02-22]
   """
@@ -20,11 +21,11 @@ defmodule BexioApiClient.Helpers do
 
   @doc """
   Convert the given string into an Elixir decimal.
-  
+
   Examples:
       iex> BexioApiClient.Helpers.to_decimal(nil)
       nil
-  
+
       iex> BexioApiClient.Helpers.to_decimal("2.331")
       #Decimal<2.331>
   """
@@ -35,11 +36,11 @@ defmodule BexioApiClient.Helpers do
   # The format from Bexio is 2022-09-13 09:14:21
   @doc """
   Convert the given string into an Elixir date.
-  
+
   Examples:
       iex> BexioApiClient.Helpers.to_datetime(nil)
       nil
-  
+
       iex> BexioApiClient.Helpers.to_datetime("2022-09-13 09:14:21")
       ~N[2022-09-13 09:14:21]
   """
@@ -51,6 +52,26 @@ defmodule BexioApiClient.Helpers do
     date = Date.from_iso8601!(zurich_date)
     time = Time.from_iso8601!(zurich_time)
     NaiveDateTime.new!(date, time)
+  end
+
+  # The format from Bexio 3.0 is 2022-09-13T09:14:21+00:00
+  @doc """
+  Convert the given string into an elixir date using offsets
+
+  Examples:
+      iex> BexioApiClient.Helpers.to_offset_datetime(nil)
+      nil
+
+      iex> BexioApiClient.Helpers.to_offset_datetime("2022-09-13T09:14:21+02:00")
+      ~U[2022-09-13 07:14:21Z]
+  """
+  def to_offset_datetime(nil), do: nil
+
+  def to_offset_datetime(datetime) do
+    case DateTime.from_iso8601(datetime) do
+      {:ok, datetime, _offset} -> datetime
+      {:error, error} -> raise ArgumentError, message: error
+    end
   end
 
   @spec string_to_array(String.t() | nil) :: [integer()]

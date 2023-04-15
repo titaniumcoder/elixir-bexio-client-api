@@ -5,7 +5,7 @@ defmodule BexioApiClient.Accounting do
 
   import BexioApiClient.Helpers
   alias BexioApiClient.SearchCriteria
-  alias BexioApiClient.Accounting.{Account, AccountGroup}
+  alias BexioApiClient.Accounting.{Account, AccountGroup, CalendarYear}
 
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
@@ -142,6 +142,47 @@ defmodule BexioApiClient.Accounting do
       parent_fibu_account_group_id: parent_fibu_account_group_id,
       active?: active?,
       locked?: locked?
+    }
+  end
+
+  @doc """
+  Fetch a list of calendar years.
+  """
+  @spec fetch_calendar_years(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [AccountGroup.t()]} | {:error, any()}
+  def fetch_calendar_years(client, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/3.0/calendar_years", query: opts_to_query(opts))
+      end,
+      &map_from_calendar_years/1
+    )
+  end
+
+  defp map_from_calendar_years(calendar_years),
+    do: Enum.map(calendar_years, &map_from_calendar_year/1)
+
+  defp map_from_calendar_year(%{
+         "id" => id,
+         "start" => start,
+         "end" => end_date,
+         "is_vat_subject" => vat_subject?,
+         "created_at" => created_at,
+         "updated_at" => updated_at,
+         "vat_accounting_method" => vat_accounting_method,
+         "vat_accounting_type" => vat_accounting_type
+       }) do
+    %CalendarYear{
+      id: id,
+      start: to_date(start),
+      end: to_date(end_date),
+      vat_subject?: vat_subject?,
+      created_at: to_offset_datetime(created_at),
+      updated_at: to_offset_datetime(updated_at),
+      vat_accounting_method: String.to_atom(vat_accounting_method),
+      vat_accounting_type: String.to_atom(vat_accounting_type)
     }
   end
 end

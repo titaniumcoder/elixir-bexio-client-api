@@ -141,7 +141,7 @@ defmodule BexioApiClient.AccountingTest do
               "parent_fibu_account_group_id" => 3,
               "is_active" => true,
               "is_locked" => false
-              }
+            }
           ])
       end)
 
@@ -162,4 +162,40 @@ defmodule BexioApiClient.AccountingTest do
     end
   end
 
+  describe "fetching a list of calendar years" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/3.0/calendar_years"} ->
+          json([
+            %{
+              "id" => 1,
+              "start" => "2018-01-01",
+              "end" => "2018-12-31",
+              "is_vat_subject" => true,
+              "created_at" => "2017-04-28T19:58:58+00:00",
+              "updated_at" => "2018-04-30T19:58:58+00:00",
+              "vat_accounting_method" => "effective",
+              "vat_accounting_type" => "agreed"
+              }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Accounting.fetch_calendar_years(client)
+
+      assert result.id == 1
+      assert result.start == ~D[2018-01-01]
+      assert result.end == ~D[2018-12-31]
+      assert result.vat_subject? == true
+      assert result.created_at == ~U[2017-04-28 19:58:58Z]
+      assert result.updated_at == ~U[2018-04-30 19:58:58Z]
+      assert result.vat_accounting_method == :effective
+      assert result.vat_accounting_type == :agreed
+    end
+  end
 end
