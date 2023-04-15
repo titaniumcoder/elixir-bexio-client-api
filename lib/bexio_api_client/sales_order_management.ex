@@ -1173,8 +1173,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   end
 
   @doc """
-  Create an order (id in order will be ignored). Be also aware: whether you need or must not send a document number depends on the settings in Bexio. It cannot be controlled by the API
-  and as such will just send if it exists.
+  Create a default position
   """
   @spec create_default_position(
           client :: Tesla.Client.t(),
@@ -1224,7 +1223,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
-         id :: non_neg_integer()
+          id :: non_neg_integer()
         ) :: {:ok, boolean()} | {:error, any()}
   def delete_default_position(client, document_type, document_id, id) do
     bexio_body_handling(
@@ -1348,6 +1347,90 @@ defmodule BexioApiClient.SalesOrderManagement do
       end,
       &map_from_item_position/2
     )
+  end
+
+  @doc """
+  Create an item position
+  """
+  @spec create_item_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position :: PositionItem.t()
+        ) :: {:ok, PositionItem.t()} | {:error, any()}
+  def create_item_position(client, document_type, document_id, position) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
+          remap_item_position(position)
+        )
+      end,
+      &map_from_item_position/2
+    )
+  end
+
+  @doc """
+  Edit an item.
+  """
+  @spec edit_item_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position :: PositionItem.t()
+        ) :: {:ok, PositionItem.t()} | {:error, any()}
+  def edit_item_position(client, document_type, document_id, position) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{position.id}",
+          remap_item_position(position)
+        )
+      end,
+      &map_from_default_position/2
+    )
+  end
+
+  @doc """
+  Delete a default position.
+  """
+  @spec delete_item_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_item_position(client, document_type, document_id, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  defp remap_item_position(%PositionItem{
+         amount: amount,
+         unit_id: unit_id,
+         account_id: account_id,
+         tax_id: tax_id,
+         text: text,
+         unit_price: unit_price,
+         discount_in_percent: discount_in_percent,
+         article_id: article_id
+       }) do
+    %{
+      amount: Decimal.to_string(amount, :normal),
+      unit_id: unit_id,
+      account_id: account_id,
+      tax_id: tax_id,
+      text: text,
+      unit_price: Decimal.to_string(unit_price, :normal),
+      discount_in_percent: Decimal.to_string(discount_in_percent, :normal),
+      article_id: article_id
+    }
   end
 
   defp map_from_item_positions(item_positions, _env),

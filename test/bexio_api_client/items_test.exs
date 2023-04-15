@@ -2,8 +2,6 @@ defmodule BexioApiClient.ItemsTest do
   use ExUnit.Case, async: true
   doctest BexioApiClient.Items
 
-  alias BexioApiClient.SearchCriteria
-
   alias BexioApiClient.Items.Item
 
   import Tesla.Mock
@@ -274,7 +272,7 @@ defmodule BexioApiClient.ItemsTest do
     test "creates a new record" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      {:ok, record} = BexioApiClient.Items.create_item(client, Item.new())
+      {:ok, _record} = BexioApiClient.Items.create_item(client, Item.new())
     end
   end
 
@@ -329,7 +327,7 @@ defmodule BexioApiClient.ItemsTest do
     test "edits a new record" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      {:ok, record} =
+      {:ok, _record} =
         BexioApiClient.Items.edit_item(
           client,
           Item.new(%{id: 4})

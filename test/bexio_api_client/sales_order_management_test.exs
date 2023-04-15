@@ -424,7 +424,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "creates a new record" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      {:ok, record} =
+      {:ok, _record} =
         BexioApiClient.SalesOrderManagement.create_quote(
           client,
           Quote.new(%{
@@ -527,7 +527,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "edits a new record" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      {:ok, record} =
+      {:ok, _record} =
         BexioApiClient.SalesOrderManagement.edit_quote(
           client,
           Quote.new(%{
@@ -1107,7 +1107,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "creates a new record" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      {:ok, record} =
+      {:ok, _record} =
         BexioApiClient.SalesOrderManagement.create_order(
           client,
           Order.new(%{
@@ -1206,7 +1206,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "edits a new record" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      {:ok, record} =
+      {:ok, _record} =
         BexioApiClient.SalesOrderManagement.edit_order(
           client,
           Order.new(%{
@@ -1530,7 +1530,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, position} =
+      assert {:ok, _position} =
                BexioApiClient.SalesOrderManagement.create_subtotal_position(
                  client,
                  :invoice,
@@ -1565,7 +1565,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, position} =
+      assert {:ok, _position} =
                BexioApiClient.SalesOrderManagement.edit_subtotal_position(
                  client,
                  :invoice,
@@ -1832,7 +1832,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, position} =
+      assert {:ok, _position} =
                BexioApiClient.SalesOrderManagement.create_default_position(
                  client,
                  :invoice,
@@ -1892,18 +1892,18 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "shows valid position" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, position} =
+      assert {:ok, _position} =
                BexioApiClient.SalesOrderManagement.edit_default_position(
                  client,
                  :invoice,
                  1,
                  PositionDefault.new(%{
-                  id: 2,
-                  tax_id: 4,
-                  text: "Apples",
-                  unit_id: 1,
-                  account_id: 1
-                })
+                   id: 2,
+                   tax_id: 4,
+                   text: "Apples",
+                   unit_id: 1,
+                   account_id: 1
+                 })
                )
     end
   end
@@ -2041,6 +2041,152 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
       assert {:error, :not_found} =
                BexioApiClient.SalesOrderManagement.fetch_item_position(client, :invoice, 1, 3)
+    end
+  end
+
+  describe "creating an item position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_article",
+          body: body
+        } ->
+          json_body = Jason.decode!(body)
+
+          assert json_body["amount"] != nil
+          assert json_body["article_id"] != nil
+          assert json_body["unit_id"] != nil
+          assert json_body["account_id"] != nil
+          assert json_body["tax_id"] != nil
+          assert json_body["text"] != nil
+          assert json_body["unit_price"] != nil
+          assert json_body["discount_in_percent"] != nil
+
+          json(%{
+            "id" => 1,
+            "amount" => "5.000000",
+            "unit_id" => 1,
+            "account_id" => 1,
+            "unit_name" => "kg",
+            "tax_id" => 4,
+            "tax_value" => "7.70",
+            "text" => "Apples",
+            "unit_price" => "3.560000",
+            "discount_in_percent" => "0.000000",
+            "position_total" => "17.800000",
+            "pos" => 1,
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionArticle",
+            "article_id" => 3,
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.create_item_position(
+                 client,
+                 :invoice,
+                 1,
+                 PositionItem.new(%{
+                   id: 2,
+                   tax_id: 4,
+                   article_id: 1,
+                   text: "Apples",
+                   unit_id: 1,
+                   account_id: 1
+                 })
+               )
+    end
+  end
+
+  describe "editing an item position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_article/2",
+          body: body
+        } ->
+          json_body = Jason.decode!(body)
+
+          assert json_body["amount"] != nil
+          assert json_body["article_id"] != nil
+          assert json_body["unit_id"] != nil
+          assert json_body["account_id"] != nil
+          assert json_body["tax_id"] != nil
+          assert json_body["text"] != nil
+          assert json_body["unit_price"] != nil
+          assert json_body["discount_in_percent"] != nil
+
+          json(%{
+            "id" => 1,
+            "amount" => "5.000000",
+            "unit_id" => 1,
+            "account_id" => 1,
+            "unit_name" => "kg",
+            "tax_id" => 4,
+            "tax_value" => "7.70",
+            "text" => "Apples",
+            "unit_price" => "3.560000",
+            "discount_in_percent" => "0.000000",
+            "position_total" => "17.800000",
+            "pos" => 1,
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionArticle",
+            "article_id" => 3,
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.edit_item_position(
+                 client,
+                 :invoice,
+                 1,
+                 PositionItem.new(%{
+                   id: 2,
+                   tax_id: 4,
+                   article_id: 1,
+                   text: "Apples",
+                   unit_id: 1,
+                   account_id: 1
+                 })
+               )
+    end
+  end
+
+  describe "deleting an item position" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_article/2"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.delete_item_position(client, :invoice, 1, 2)
+
+      assert result == true
     end
   end
 

@@ -2,8 +2,6 @@ defmodule BexioApiClient.FilesTest do
   use ExUnit.Case, async: true
   doctest BexioApiClient.Files
 
-  alias BexioApiClient.SearchCriteria
-
   import Tesla.Mock
 
   describe "fetching a list of files" do

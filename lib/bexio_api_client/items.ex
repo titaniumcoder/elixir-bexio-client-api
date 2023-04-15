@@ -273,7 +273,7 @@ defmodule BexioApiClient.Items do
       remarks: remarks,
       delivery_price: delivery_price,
       article_group_id: article_group_id
-}
+    }
   end
 
   defp article_type_id(:physical), do: 1
