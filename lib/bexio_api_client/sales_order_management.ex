@@ -575,7 +575,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   end
 
   @doc """
-  Create a quote (id in order will be ignored). Be also aware: whether you need or must not send a document number depends on the settings in Bexio. It cannot be controlled by the API
+  Create an order (id in order will be ignored). Be also aware: whether you need or must not send a document number depends on the settings in Bexio. It cannot be controlled by the API
   and as such will just send if it exists.
   """
   @spec create_order(
@@ -592,7 +592,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   end
 
   @doc """
-  Edit a quote.
+  Edit an order.
   """
   @spec edit_order(
           client :: Tesla.Client.t(),
@@ -608,7 +608,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   end
 
   @doc """
-  Delete a quote.
+  Delete an order.
   """
   @spec delete_order(
           client :: Tesla.Client.t(),

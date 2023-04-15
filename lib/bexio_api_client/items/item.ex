@@ -103,4 +103,29 @@ defmodule BexioApiClient.Items.Item do
     :delivery_price,
     :article_group_id
   ]
+
+  @doc """
+  Create a new article
+  """
+  @spec new(map()) :: __MODULE__.t()
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        user_id: nil,
+        article_type: :service,
+        intern_code: nil,
+        intern_name: nil,
+        stock?: false,
+        stock_nr: 0,
+        stock_min_nr: 0,
+        stock_reserved_nr: 0,
+        stock_available_nr: 0,
+        stock_picked_nr: 0,
+        stock_disposed_nr: 0,
+        stock_ordered_nr: 0
+      },
+      attrs
+    )
+  end
 end

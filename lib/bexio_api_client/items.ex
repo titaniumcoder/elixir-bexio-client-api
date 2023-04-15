@@ -80,6 +80,54 @@ defmodule BexioApiClient.Items do
     )
   end
 
+  @doc """
+  Create an item.
+  """
+  @spec create_item(
+          client :: Tesla.Client.t(),
+          item :: Item.t()
+        ) :: {:ok, Item.t()} | {:error, any()}
+  def create_item(client, item) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/article", remap_item(item))
+      end,
+      &map_from_article/2
+    )
+  end
+
+  @doc """
+  Edit an item.
+  """
+  @spec edit_item(
+          client :: Tesla.Client.t(),
+          item :: Item.t()
+        ) :: {:ok, Item.t()} | {:error, any()}
+  def edit_item(client, item) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/article/#{item.id}", remap_item(item))
+      end,
+      &map_from_article/2
+    )
+  end
+
+  @doc """
+  Delete an order.
+  """
+  @spec delete_item(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_item(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/article/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
   defp map_from_articles(articles, _env), do: Enum.map(articles, &map_from_article/1)
 
   defp map_from_article(
@@ -165,6 +213,71 @@ defmodule BexioApiClient.Items do
 
   defp article_type(1), do: :physical
   defp article_type(2), do: :service
+
+  defp remap_item(%Item{
+         article_type: article_type,
+         user_id: user_id,
+         contact_id: contact_id,
+         deliverer_code: deliverer_code,
+         deliverer_name: deliverer_name,
+         deliverer_description: deliverer_description,
+         intern_code: intern_code,
+         intern_name: intern_name,
+         intern_description: intern_description,
+         purchase_price: purchase_price,
+         sale_price: sale_price,
+         purchase_total: purchase_total,
+         sale_total: sale_total,
+         currency_id: currency_id,
+         tax_income_id: tax_income_id,
+         tax_expense_id: tax_expense_id,
+         unit_id: unit_id,
+         stock?: stock?,
+         stock_id: stock_id,
+         stock_place_id: stock_place_id,
+         stock_nr: stock_nr,
+         stock_min_nr: stock_min_nr,
+         width: width,
+         height: height,
+         volume: volume,
+         remarks: remarks,
+         delivery_price: delivery_price,
+         article_group_id: article_group_id
+       }) do
+    %{
+      article_type_id: article_type_id(article_type),
+      user_id: user_id,
+      contact_id: contact_id,
+      deliverer_code: deliverer_code,
+      deliverer_name: deliverer_name,
+      deliverer_description: deliverer_description,
+      intern_code: intern_code,
+      intern_name: intern_name,
+      intern_description: intern_description,
+      purchase_price: to_string(purchase_price),
+      sale_price: to_string(sale_price),
+      purchase_total: to_string(purchase_total),
+      sale_total: to_string(sale_total),
+      currency_id: currency_id,
+      tax_income_id: tax_income_id,
+      tax_expense_id: tax_expense_id,
+      unit_id: unit_id,
+      is_stock: stock?,
+      stock_id: stock_id,
+      stock_place_id: stock_place_id,
+      stock_nr: stock_nr,
+      stock_min_nr: stock_min_nr,
+      width: width,
+      height: height,
+      volume: volume,
+      remarks: remarks,
+      delivery_price: delivery_price,
+      article_group_id: article_group_id
+}
+  end
+
+  defp article_type_id(:physical), do: 1
+  defp article_type_id(:service), do: 2
 
   @doc """
   Fetch a list of stock locations.
