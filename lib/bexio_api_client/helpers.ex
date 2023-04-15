@@ -98,44 +98,24 @@ defmodule BexioApiClient.Helpers do
              | :api_not_available}
   def bexio_return_handling(call, callback) do
     case call.() do
-      {:ok, %Tesla.Env{status: 200, body: body}} ->
+      {:ok, %Tesla.Env{status: status, body: body}} when status in [200, 2091, 301] ->
         {:ok, callback.(body)}
 
-      {:ok, %Tesla.Env{status: 201, body: body}} ->
-        {:ok, callback.(body)}
-
-      {:ok, %Tesla.Env{status: 301, body: body}} ->
-        {:ok, callback.(body)}
-
-      {:ok, %Tesla.Env{status: 401}} ->
-        {:error, :invalid_access}
-
-      {:ok, %Tesla.Env{status: 403}} ->
-        {:error, :unauthorized}
-
-      {:ok, %Tesla.Env{status: 404}} ->
-        {:error, :not_found}
-
-      {:ok, %Tesla.Env{status: 411}} ->
-        {:error, :length_required}
-
-      {:ok, %Tesla.Env{status: 415}} ->
-        {:error, :invalid_data}
-
-      {:ok, %Tesla.Env{status: 422}} ->
-        {:error, :could_not_be_saved}
-
-      {:ok, %Tesla.Env{status: 429}} ->
-        {:error, :rate_limited}
-
-      {:ok, %Tesla.Env{status: 500}} ->
-        {:error, :unexpected_api_condition}
-
-      {:ok, %Tesla.Env{status: 503}} ->
-        {:error, :api_not_available}
+      {:ok, %Tesla.Env{status: status}} ->
+        {:error, error_code(status)}
 
       {:error, error} ->
         {:error, error}
     end
   end
+
+  defp error_code(401), do: :invalid_access
+  defp error_code(403), do: :unauthorized
+  defp error_code(404), do: :not_found
+  defp error_code(411), do: :length_required
+  defp error_code(415), do: :invalid_data
+  defp error_code(422), do: :could_not_be_saved
+  defp error_code(429), do: :rate_limited
+  defp error_code(500), do: :unexpected_api_condition
+  defp error_code(503), do: :api_not_available
 end
