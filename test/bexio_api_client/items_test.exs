@@ -220,4 +220,118 @@ defmodule BexioApiClient.ItemsTest do
       assert {:error, :not_found} = BexioApiClient.Items.fetch_item(client, 2)
     end
   end
+
+  describe "fetching a list of stock locations" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/stock"
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Stock Berlin"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Items.fetch_stock_locations(client)
+
+      assert result.id == 1
+      assert result.name == "Stock Berlin"
+    end
+  end
+
+  describe "searching stock locations" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/stock/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Stock Berlin"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Items.search_stock_locations(client, [])
+
+      assert result.id == 1
+      assert result.name == "Stock Berlin"
+    end
+  end
+
+  describe "fetching a list of stock areas" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/stock_place"
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Shelf A-06"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Items.fetch_stock_areas(client)
+
+      assert result.id == 1
+      assert result.name == "Shelf A-06"
+    end
+  end
+
+  describe "searching stock areas" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/stock_place/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Shelf A-06"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Items.search_stock_areas(client, [])
+
+      assert result.id == 1
+      assert result.name == "Shelf A-06"
+    end
+  end
 end

@@ -7,7 +7,9 @@ defmodule BexioApiClient.Items do
   alias BexioApiClient.SearchCriteria
 
   alias BexioApiClient.Items.{
-    Item
+    Item,
+    StockLocation,
+    StockArea
   }
 
   alias BexioApiClient.GlobalArguments
@@ -160,4 +162,120 @@ defmodule BexioApiClient.Items do
 
   defp article_type(1), do: :physical
   defp article_type(2), do: :service
+
+  @doc """
+  Fetch a list of stock locations.
+  """
+  @spec fetch_stock_locations(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Item.t()]} | {:error, any()}
+  def fetch_stock_locations(client, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/stock", query: opts_to_query(opts))
+      end,
+      &map_from_stock_locations/1
+    )
+  end
+
+  @doc """
+  Search sock locations via query.
+  The following search fields are supported:
+
+  * name
+  """
+  @spec search_stock_locations(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Item.t()]} | {:error, any()}
+  def search_stock_locations(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/stock/search",
+          criteria,
+          query: opts_to_query(opts)
+        )
+      end,
+      &map_from_stock_locations/1
+    )
+  end
+
+  defp map_from_stock_locations(stock_locations),
+    do: Enum.map(stock_locations, &map_from_stock_location/1)
+
+  defp map_from_stock_location(%{
+         "id" => id,
+         "name" => name
+       }) do
+    %StockLocation{
+      id: id,
+      name: name
+    }
+  end
+
+  @doc """
+  Fetch a list of stock areas.
+  """
+  @spec fetch_stock_areas(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Item.t()]} | {:error, any()}
+  def fetch_stock_areas(client, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/stock_place", query: opts_to_query(opts))
+      end,
+      &map_from_stock_areas/1
+    )
+  end
+
+  @doc """
+  Search sock areas via query.
+  The following search fields are supported:
+
+  * name
+  * stock_id
+  """
+  @spec search_stock_areas(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Item.t()]} | {:error, any()}
+  def search_stock_areas(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/stock_place/search",
+          criteria,
+          query: opts_to_query(opts)
+        )
+      end,
+      &map_from_stock_areas/1
+    )
+  end
+
+  defp map_from_stock_areas(stock_areas), do: Enum.map(stock_areas, &map_from_stock_area/1)
+
+  defp map_from_stock_area(%{
+         "id" => id,
+         "name" => name
+       }) do
+    %StockArea{
+      id: id,
+      name: name
+    }
+  end
 end
