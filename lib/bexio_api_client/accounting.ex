@@ -5,7 +5,15 @@ defmodule BexioApiClient.Accounting do
 
   import BexioApiClient.Helpers
   alias BexioApiClient.SearchCriteria
-  alias BexioApiClient.Accounting.{Account, AccountGroup, CalendarYear, Currency, ExchangeRate}
+
+  alias BexioApiClient.Accounting.{
+    Account,
+    AccountGroup,
+    CalendarYear,
+    Currency,
+    ExchangeRate,
+    Tax
+  }
 
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
@@ -244,6 +252,72 @@ defmodule BexioApiClient.Accounting do
     %ExchangeRate{
       factor: factor_nr,
       exchange_currency: map_from_currency(exchange_currency)
+    }
+  end
+
+  @doc """
+  Fetch a list of taxes.
+
+  Arguments:
+
+  * `date` - all taxes which are active at the date given
+  * `types` - filter the types of tax (:sales_tax or :pre_tax)
+  """
+  @spec fetch_taxes(
+          client :: Tesla.Client.t(),
+          date :: Date.t() | nil,
+          types :: :sales_tax | :pre_tax | nil,
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [Tax.t()]} | {:error, any()}
+  def fetch_taxes(client, date \\ nil, types \\ nil, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/3.0/taxes",
+          query: opts |> opts_to_query() |> opts_with_date(date) |> opts_with_type(types)
+        )
+      end,
+      &map_from_taxes/1
+    )
+  end
+
+  defp opts_with_date(opts, nil), do: opts
+  defp opts_with_date(opts, date), do: Keyword.put(opts, :date, Date.to_iso8601(date))
+  defp opts_with_type(opts, nil), do: opts
+  defp opts_with_type(type, opts), do: Keyword.put(opts, :types, type)
+
+  defp map_from_taxes(taxes), do: Enum.map(taxes, &map_from_tax/1)
+
+  defp map_from_tax(%{
+         "id" => id,
+         "uuid" => uuid,
+         "name" => name,
+         "code" => code,
+         "digit" => digit,
+         "type" => type,
+         "account_id" => account_id,
+         "tax_settlement_type" => tax_settlement_type,
+         "value" => value,
+         "net_tax_value" => net_tax_value,
+         "start_year" => start_year,
+         "end_year" => end_year,
+         "is_active" => active?,
+         "display_name" => display_name
+       }) do
+    %Tax{
+      id: id,
+      uuid: uuid,
+      name: name,
+      code: code,
+      digit: digit,
+      type: String.to_atom(type),
+      account_id: account_id,
+      tax_settlement_type: tax_settlement_type,
+      value: value,
+      net_tax_value: net_tax_value,
+      start_year: start_year,
+      end_year: end_year,
+      active?: active?,
+      display_name: display_name
     }
   end
 end

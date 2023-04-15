@@ -256,4 +256,53 @@ defmodule BexioApiClient.AccountingTest do
       assert result.exchange_currency.round_factor == 0.05
     end
   end
+
+  describe "fetch a list of taxes" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/3.0/taxes"} ->
+          json([
+            %{
+              "id" => 1,
+              "uuid" => "8078b1f3-f85b-4adf-aaa8-c3eeea964927",
+              "name" => "lib.model.tax.ch.sales_7_7.name",
+              "code" => "UN77",
+              "digit" => 302,
+              "type" => "sales_tax",
+              "account_id" => 98,
+              "tax_settlement_type" => "none",
+              "value" => 7.7,
+              "net_tax_value" => nil,
+              "start_year" => 2017,
+              "end_year" => 2018,
+              "is_active" => true,
+              "display_name" => "ZOLLM  - Import Mat/SV 100.00%"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Accounting.fetch_taxes(client)
+
+      assert result.id == 1
+      assert result.uuid == "8078b1f3-f85b-4adf-aaa8-c3eeea964927"
+      assert result.name == "lib.model.tax.ch.sales_7_7.name"
+      assert result.code == "UN77"
+      assert result.digit == 302
+      assert result.type == :sales_tax
+      assert result.account_id == 98
+      assert result.tax_settlement_type == "none"
+      assert result.value == 7.7
+      assert result.net_tax_value == nil
+      assert result.start_year == 2017
+      assert result.end_year == 2018
+      assert result.active? == true
+      assert result.display_name == "ZOLLM  - Import Mat/SV 100.00%"
+    end
+  end
 end
