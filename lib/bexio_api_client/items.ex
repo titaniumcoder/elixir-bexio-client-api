@@ -7,7 +7,7 @@ defmodule BexioApiClient.Items do
   alias BexioApiClient.SearchCriteria
 
   alias BexioApiClient.Items.{
-    Item,
+    Item
   }
 
   alias BexioApiClient.GlobalArguments
@@ -59,47 +59,65 @@ defmodule BexioApiClient.Items do
     )
   end
 
+  @doc """
+  Fetch single item.
+  """
+  @spec fetch_item(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, [Item.t()]} | {:error, any()}
+  def fetch_item(client, id) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(
+          client,
+          "/2.0/article/#{id}"
+        )
+      end,
+      &map_from_article/1
+    )
+  end
+
   defp map_from_articles(articles), do: Enum.map(articles, &map_from_article/1)
 
-  defp map_from_article(
-    %{
-      "id" => id,
-      "user_id" => user_id,
-      "article_type_id" => article_type_id,
-      "contact_id" => contact_id,      "deliverer_code" => deliverer_code,
-      "deliverer_name" => deliverer_name,
-      "deliverer_description" => deliverer_description,
-      "intern_code" => intern_code,
-      "intern_name" => intern_name,
-      "intern_description" => intern_description,
-      "purchase_price" => purchase_price,
-      "sale_price" => sale_price,
-      "purchase_total" => purchase_total,
-      "sale_total" => sale_total,
-      "currency_id" => currency_id,
-      "tax_income_id" => tax_income_id,
-      "tax_id" => tax_id,
-      "tax_expense_id" => tax_expense_id,
-      "unit_id" => unit_id,
-      "is_stock" => stock?,
-      "stock_id" => stock_id,
-      "stock_place_id" => stock_place_id,
-      "stock_nr" => stock_nr,
-      "stock_min_nr" => stock_min_nr,
-      "stock_reserved_nr" => stock_reserved_nr,
-      "stock_available_nr" => stock_available_nr,
-      "stock_picked_nr" => stock_picked_nr,
-      "stock_disposed_nr" => stock_disposed_nr,
-      "stock_ordered_nr" => stock_ordered_nr,
-      "width" => width,
-      "height" => height,
-      "weight" => weight,
-      "volume" => volume,
-      "remarks" => remarks,
-      "delivery_price" => delivery_price,
-      "article_group_id" => article_group_id
-    }
-  ) do
+  defp map_from_article(%{
+         "id" => id,
+         "user_id" => user_id,
+         "article_type_id" => article_type_id,
+         "contact_id" => contact_id,
+         "deliverer_code" => deliverer_code,
+         "deliverer_name" => deliverer_name,
+         "deliverer_description" => deliverer_description,
+         "intern_code" => intern_code,
+         "intern_name" => intern_name,
+         "intern_description" => intern_description,
+         "purchase_price" => purchase_price,
+         "sale_price" => sale_price,
+         "purchase_total" => purchase_total,
+         "sale_total" => sale_total,
+         "currency_id" => currency_id,
+         "tax_income_id" => tax_income_id,
+         "tax_id" => tax_id,
+         "tax_expense_id" => tax_expense_id,
+         "unit_id" => unit_id,
+         "is_stock" => stock?,
+         "stock_id" => stock_id,
+         "stock_place_id" => stock_place_id,
+         "stock_nr" => stock_nr,
+         "stock_min_nr" => stock_min_nr,
+         "stock_reserved_nr" => stock_reserved_nr,
+         "stock_available_nr" => stock_available_nr,
+         "stock_picked_nr" => stock_picked_nr,
+         "stock_disposed_nr" => stock_disposed_nr,
+         "stock_ordered_nr" => stock_ordered_nr,
+         "width" => width,
+         "height" => height,
+         "weight" => weight,
+         "volume" => volume,
+         "remarks" => remarks,
+         "delivery_price" => delivery_price,
+         "article_group_id" => article_group_id
+       }) do
     %Item{
       id: id,
       user_id: user_id,
