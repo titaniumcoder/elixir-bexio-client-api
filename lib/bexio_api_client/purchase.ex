@@ -79,7 +79,7 @@ defmodule BexioApiClient.Purchase do
         search_args \\ [],
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/4.0/purchase/bills",
           query:
@@ -95,7 +95,7 @@ defmodule BexioApiClient.Purchase do
             )
         )
       end,
-      &map_from_paged_bills/1
+      &map_from_paged_bills/2
     )
   end
 
@@ -107,7 +107,7 @@ defmodule BexioApiClient.Purchase do
            "page_count" => page_count,
            "item_count" => item_count
          }
-       }) do
+       }, _env) do
     {
       Enum.map(bills, &map_from_bill/1),
       %Paging{

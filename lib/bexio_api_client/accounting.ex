@@ -26,11 +26,11 @@ defmodule BexioApiClient.Accounting do
           opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) :: {:ok, [Account.t()]} | {:error, any()}
   def fetch_accounts(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/accounts", query: opts_to_query(opts))
       end,
-      &map_from_accounts/1
+      &map_from_accounts/2
     )
   end
 
@@ -53,7 +53,7 @@ defmodule BexioApiClient.Accounting do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(
           client,
@@ -62,7 +62,7 @@ defmodule BexioApiClient.Accounting do
           query: opts_to_query(opts)
         )
       end,
-      &map_from_accounts/1
+      &map_from_accounts/2
     )
   end
 
@@ -87,7 +87,7 @@ defmodule BexioApiClient.Accounting do
 
   defp update_account_type_in_search_criteria(search_criteria), do: search_criteria
 
-  defp map_from_accounts(accounts), do: Enum.map(accounts, &map_from_account/1)
+  defp map_from_accounts(accounts, _env), do: Enum.map(accounts, &map_from_account/1)
 
   defp map_from_account(%{
          "id" => id,
@@ -98,7 +98,7 @@ defmodule BexioApiClient.Accounting do
          "tax_id" => tax_id,
          "is_active" => active?,
          "is_locked" => locked?
-       }) do
+       }, _env \\ nil) do
     %Account{
       id: id,
       account_no: String.to_integer(account_no),
@@ -125,15 +125,15 @@ defmodule BexioApiClient.Accounting do
           opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) :: {:ok, [AccountGroup.t()]} | {:error, any()}
   def fetch_account_groups(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/account_groups", query: opts_to_query(opts))
       end,
-      &map_from_account_groups/1
+      &map_from_account_groups/2
     )
   end
 
-  defp map_from_account_groups(accounts), do: Enum.map(accounts, &map_from_account_group/1)
+  defp map_from_account_groups(accounts, _env), do: Enum.map(accounts, &map_from_account_group/1)
 
   defp map_from_account_group(%{
          "id" => id,
@@ -142,7 +142,7 @@ defmodule BexioApiClient.Accounting do
          "parent_fibu_account_group_id" => parent_fibu_account_group_id,
          "is_active" => active?,
          "is_locked" => locked?
-       }) do
+       }, _env \\ nil) do
     %AccountGroup{
       id: id,
       account_no: String.to_integer(account_no),
@@ -161,15 +161,15 @@ defmodule BexioApiClient.Accounting do
           opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) :: {:ok, [CalendarYear.t()]} | {:error, any()}
   def fetch_calendar_years(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/3.0/calendar_years", query: opts_to_query(opts))
       end,
-      &map_from_calendar_years/1
+      &map_from_calendar_years/2
     )
   end
 
-  defp map_from_calendar_years(calendar_years),
+  defp map_from_calendar_years(calendar_years, _env),
     do: Enum.map(calendar_years, &map_from_calendar_year/1)
 
   defp map_from_calendar_year(%{
@@ -202,15 +202,15 @@ defmodule BexioApiClient.Accounting do
           opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) :: {:ok, [Currency.t()]} | {:error, any()}
   def fetch_currencies(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/3.0/currencies", query: opts_to_query(opts))
       end,
-      &map_from_currencies/1
+      &map_from_currencies/2
     )
   end
 
-  defp map_from_currencies(currencies),
+  defp map_from_currencies(currencies, _env),
     do: Enum.map(currencies, &map_from_currency/1)
 
   defp map_from_currency(%{
@@ -234,15 +234,15 @@ defmodule BexioApiClient.Accounting do
           opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) :: {:ok, [Currency.t()]} | {:error, any()}
   def fetch_exchange_rates(client, id, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/3.0/currencies/#{id}/exchange_rates", query: opts_to_query(opts))
       end,
-      &map_from_exchange_rates/1
+      &map_from_exchange_rates/2
     )
   end
 
-  defp map_from_exchange_rates(exchange_rates),
+  defp map_from_exchange_rates(exchange_rates, _env),
     do: Enum.map(exchange_rates, &map_from_exchange_rate/1)
 
   defp map_from_exchange_rate(%{
@@ -270,13 +270,13 @@ defmodule BexioApiClient.Accounting do
           opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) :: {:ok, [Tax.t()]} | {:error, any()}
   def fetch_taxes(client, date \\ nil, types \\ nil, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/3.0/taxes",
           query: opts |> opts_to_query() |> opts_with_date(date) |> opts_with_type(types)
         )
       end,
-      &map_from_taxes/1
+      &map_from_taxes/2
     )
   end
 
@@ -285,7 +285,7 @@ defmodule BexioApiClient.Accounting do
   defp opts_with_type(opts, nil), do: opts
   defp opts_with_type(type, opts), do: Keyword.put(opts, :types, type)
 
-  defp map_from_taxes(taxes), do: Enum.map(taxes, &map_from_tax/1)
+  defp map_from_taxes(taxes, _env), do: Enum.map(taxes, &map_from_tax/1)
 
   defp map_from_tax(%{
          "id" => id,

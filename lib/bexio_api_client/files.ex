@@ -21,11 +21,11 @@ defmodule BexioApiClient.Files do
           opts :: [GlobalArguments.offset_arg()]
         ) :: {:ok, [File.t()]} | {:error, any()}
   def fetch_files(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/3.0/files", query: opts_to_query(opts))
       end,
-      &map_from_files/1
+      &map_from_files/2
     )
   end
 
@@ -54,7 +54,7 @@ defmodule BexioApiClient.Files do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(
           client,
@@ -63,7 +63,7 @@ defmodule BexioApiClient.Files do
           query: opts_to_query(opts)
         )
       end,
-      &map_from_files/1
+      &map_from_files/2
     )
   end
 
@@ -88,18 +88,18 @@ defmodule BexioApiClient.Files do
           id :: non_neg_integer()
         ) :: {:ok, [File.t()]} | {:error, any()}
   def fetch_file(client, id) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/3.0/files/#{id}"
         )
       end,
-      &map_from_file/1
+      &map_from_file/2
     )
   end
 
-  defp map_from_files(files), do: Enum.map(files, &map_from_file/1)
+  defp map_from_files(files, _env), do: Enum.map(files, &map_from_file/1)
 
   defp map_from_file(%{
          "id" => id,
@@ -114,7 +114,7 @@ defmodule BexioApiClient.Files do
          "source_type" => source_type,
          "is_referenced" => referenced?,
          "created_at" => created_at
-       }) do
+       }, _env \\ nil) do
     %File{
       id: id,
       uuid: uuid,
@@ -139,11 +139,11 @@ defmodule BexioApiClient.Files do
           id :: non_neg_integer()
         ) :: {:ok, {String.t(), any()}} | {:error, any()}
   def download_file(client, id) do
-    bexio_content_type_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/3.0/files/#{id}/download")
       end,
-      fn file, content_type -> {file, content_type} end
+      fn file, env -> {file, Tesla.get_header(env, "content-type")} end
     )
   end
 
@@ -155,11 +155,11 @@ defmodule BexioApiClient.Files do
           id :: non_neg_integer()
         ) :: {:ok, {String.t(), any()}} | {:error, any()}
   def preview_file(client, id) do
-    bexio_content_type_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/3.0/files/#{id}/preview")
       end,
-      fn file, content_type -> {file, content_type} end
+      fn file, env -> {file, Tesla.get_header(env, "content-type")} end
     )
   end
 end

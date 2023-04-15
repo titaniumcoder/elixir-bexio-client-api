@@ -23,11 +23,11 @@ defmodule BexioApiClient.Items do
           opts :: [GlobalArguments.offset_arg()]
         ) :: {:ok, [Item.t()]} | {:error, any()}
   def fetch_items(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/article", query: opts_to_query(opts))
       end,
-      &map_from_articles/1
+      &map_from_articles/2
     )
   end
 
@@ -48,7 +48,7 @@ defmodule BexioApiClient.Items do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(
           client,
@@ -57,7 +57,7 @@ defmodule BexioApiClient.Items do
           query: opts_to_query(opts)
         )
       end,
-      &map_from_articles/1
+      &map_from_articles/2
     )
   end
 
@@ -69,18 +69,18 @@ defmodule BexioApiClient.Items do
           id :: non_neg_integer()
         ) :: {:ok, [Item.t()]} | {:error, any()}
   def fetch_item(client, id) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/article/#{id}"
         )
       end,
-      &map_from_article/1
+      &map_from_article/2
     )
   end
 
-  defp map_from_articles(articles), do: Enum.map(articles, &map_from_article/1)
+  defp map_from_articles(articles, _env), do: Enum.map(articles, &map_from_article/1)
 
   defp map_from_article(%{
          "id" => id,
@@ -119,7 +119,7 @@ defmodule BexioApiClient.Items do
          "remarks" => remarks,
          "delivery_price" => delivery_price,
          "article_group_id" => article_group_id
-       }) do
+       }, _env \\ nil) do
     %Item{
       id: id,
       user_id: user_id,
@@ -171,11 +171,11 @@ defmodule BexioApiClient.Items do
           opts :: [GlobalArguments.offset_arg()]
         ) :: {:ok, [Item.t()]} | {:error, any()}
   def fetch_stock_locations(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/stock", query: opts_to_query(opts))
       end,
-      &map_from_stock_locations/1
+      &map_from_stock_locations/2
     )
   end
 
@@ -195,7 +195,7 @@ defmodule BexioApiClient.Items do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(
           client,
@@ -204,17 +204,17 @@ defmodule BexioApiClient.Items do
           query: opts_to_query(opts)
         )
       end,
-      &map_from_stock_locations/1
+      &map_from_stock_locations/2
     )
   end
 
-  defp map_from_stock_locations(stock_locations),
+  defp map_from_stock_locations(stock_locations, _env),
     do: Enum.map(stock_locations, &map_from_stock_location/1)
 
   defp map_from_stock_location(%{
          "id" => id,
          "name" => name
-       }) do
+       }, _env \\ nil) do
     %StockLocation{
       id: id,
       name: name
@@ -229,11 +229,11 @@ defmodule BexioApiClient.Items do
           opts :: [GlobalArguments.offset_arg()]
         ) :: {:ok, [Item.t()]} | {:error, any()}
   def fetch_stock_areas(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/stock_place", query: opts_to_query(opts))
       end,
-      &map_from_stock_areas/1
+      &map_from_stock_areas/2
     )
   end
 
@@ -254,7 +254,7 @@ defmodule BexioApiClient.Items do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(
           client,
@@ -263,16 +263,16 @@ defmodule BexioApiClient.Items do
           query: opts_to_query(opts)
         )
       end,
-      &map_from_stock_areas/1
+      &map_from_stock_areas/2
     )
   end
 
-  defp map_from_stock_areas(stock_areas), do: Enum.map(stock_areas, &map_from_stock_area/1)
+  defp map_from_stock_areas(stock_areas, _env), do: Enum.map(stock_areas, &map_from_stock_area/1)
 
   defp map_from_stock_area(%{
          "id" => id,
          "name" => name
-       }) do
+       }, _env \\ nil) do
     %StockArea{
       id: id,
       name: name

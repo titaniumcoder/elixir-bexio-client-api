@@ -33,11 +33,11 @@ defmodule BexioApiClient.Contacts do
           opts :: [GlobalArguments.offset_arg()]
         ) :: {:ok, [Contact.t()]} | {:error, any()}
   def fetch_contacts(client, show_archived \\ false, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/contact", query: contact_opts_to_query(show_archived, opts))
       end,
-      &map_from_clients/1
+      &map_from_clients/2
     )
   end
 
@@ -74,13 +74,13 @@ defmodule BexioApiClient.Contacts do
         show_archived \\ false,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/contact/search", criteria,
           query: contact_opts_to_query(show_archived, opts)
         )
       end,
-      &map_from_clients/1
+      &map_from_clients/2
     )
   end
 
@@ -97,15 +97,15 @@ defmodule BexioApiClient.Contacts do
         contact_id,
         show_archived \\ nil
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/contact/#{contact_id}", query: [show_archived: show_archived])
       end,
-      &map_from_client/1
+      &map_from_client/2
     )
   end
 
-  defp map_from_clients(clients), do: Enum.map(clients, &map_from_client/1)
+  defp map_from_clients(clients, _env), do: Enum.map(clients, &map_from_client/1)
 
   defp map_from_client(%{
          "id" => id,
@@ -136,7 +136,7 @@ defmodule BexioApiClient.Contacts do
          "user_id" => user_id,
          "owner_id" => owner_id,
          "updated_at" => updated_at
-       }) do
+       }, _env \\ nil) do
     %Contact{
       id: id,
       nr: String.to_integer(nr),
@@ -187,11 +187,11 @@ defmodule BexioApiClient.Contacts do
         client,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/contact_relation", query: opts_to_query(opts))
       end,
-      &map_from_client_relations/1
+      &map_from_client_relations/2
     )
   end
 
@@ -213,11 +213,11 @@ defmodule BexioApiClient.Contacts do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/contact_relation/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_client_relations/1
+      &map_from_client_relations/2
     )
   end
 
@@ -232,15 +232,15 @@ defmodule BexioApiClient.Contacts do
         client,
         contact_relation_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/contact_relation/#{contact_relation_id}")
       end,
-      &map_from_client_relation/1
+      &map_from_client_relation/2
     )
   end
 
-  defp map_from_client_relations(client_relations),
+  defp map_from_client_relations(client_relations, _env),
     do: Enum.map(client_relations, &map_from_client_relation/1)
 
   defp map_from_client_relation(%{
@@ -249,7 +249,7 @@ defmodule BexioApiClient.Contacts do
          "contact_sub_id" => contact_sub_id,
          "description" => description,
          "updated_at" => updated_at
-       }) do
+       }, _env \\ nil) do
     %ContactRelation{
       id: id,
       contact_id: contact_id,
@@ -274,11 +274,11 @@ defmodule BexioApiClient.Contacts do
         client,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/contact_group", query: opts_to_query(opts))
       end,
-      &map_from_contact_groups/1
+      &map_from_contact_groups/2
     )
   end
 
@@ -298,11 +298,11 @@ defmodule BexioApiClient.Contacts do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/contact_group/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_contact_groups/1
+      &map_from_contact_groups/2
     )
   end
 
@@ -317,21 +317,21 @@ defmodule BexioApiClient.Contacts do
         client,
         contact_group_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/contact_group/#{contact_group_id}")
       end,
-      &map_from_contact_group/1
+      &map_from_contact_group/2
     )
   end
 
-  defp map_from_contact_groups(contact_groups),
+  defp map_from_contact_groups(contact_groups, _env),
     do: Enum.map(contact_groups, &map_from_contact_group/1)
 
   defp map_from_contact_group(%{
          "id" => id,
          "name" => name
-       }) do
+       }, _env \\ nil) do
     %ContactGroup{
       id: id,
       name: name
@@ -353,11 +353,11 @@ defmodule BexioApiClient.Contacts do
         client,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/contact_branch", query: opts_to_query(opts))
       end,
-      &map_from_contact_sectors/1
+      &map_from_contact_sectors/2
     )
   end
 
@@ -377,15 +377,15 @@ defmodule BexioApiClient.Contacts do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/contact_branch/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_contact_sectors/1
+      &map_from_contact_sectors/2
     )
   end
 
-  defp map_from_contact_sectors(contact_sectors),
+  defp map_from_contact_sectors(contact_sectors, _env),
     do: Enum.map(contact_sectors, &map_from_contact_sector/1)
 
   defp map_from_contact_sector(%{
@@ -415,13 +415,13 @@ defmodule BexioApiClient.Contacts do
         contact_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/contact/#{contact_id}/additional_address",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_additional_addresses/1
+      &map_from_additional_addresses/2
     )
   end
 
@@ -448,13 +448,13 @@ defmodule BexioApiClient.Contacts do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/contact/#{contact_id}/additional_address/search", criteria,
           query: opts_to_query(opts)
         )
       end,
-      &map_from_additional_addresses/1
+      &map_from_additional_addresses/2
     )
   end
 
@@ -471,18 +471,18 @@ defmodule BexioApiClient.Contacts do
         contact_id,
         additional_address_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/contact/#{contact_id}/additional_address/#{additional_address_id}"
         )
       end,
-      &map_from_additional_address/1
+      &map_from_additional_address/2
     )
   end
 
-  defp map_from_additional_addresses(addresses),
+  defp map_from_additional_addresses(addresses, _env),
     do: Enum.map(addresses, &map_from_additional_address/1)
 
   defp map_from_additional_address(%{
@@ -494,7 +494,7 @@ defmodule BexioApiClient.Contacts do
          "country_id" => country_id,
          "subject" => subject,
          "description" => description
-       }) do
+       }, _env \\ nil) do
     %AdditionalAddress{
       id: id,
       name: name,
@@ -522,11 +522,11 @@ defmodule BexioApiClient.Contacts do
         client,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/salutation", query: opts_to_query(opts))
       end,
-      &map_from_salutations/1
+      &map_from_salutations/2
     )
   end
 
@@ -546,11 +546,11 @@ defmodule BexioApiClient.Contacts do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/salutation/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_salutations/1
+      &map_from_salutations/2
     )
   end
 
@@ -565,24 +565,24 @@ defmodule BexioApiClient.Contacts do
         client,
         salutation_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/salutation/#{salutation_id}"
         )
       end,
-      &map_from_salutation/1
+      &map_from_salutation/2
     )
   end
 
-  defp map_from_salutations(salutations),
+  defp map_from_salutations(salutations, _env),
     do: Enum.map(salutations, &map_from_salutation/1)
 
   defp map_from_salutation(%{
          "id" => id,
          "name" => name
-       }) do
+       }, _env \\ nil) do
     %Salutation{
       id: id,
       name: name
@@ -604,11 +604,11 @@ defmodule BexioApiClient.Contacts do
         client,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/title", query: opts_to_query(opts))
       end,
-      &map_from_titles/1
+      &map_from_titles/2
     )
   end
 
@@ -628,11 +628,11 @@ defmodule BexioApiClient.Contacts do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/title/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_titles/1
+      &map_from_titles/2
     )
   end
 
@@ -647,24 +647,24 @@ defmodule BexioApiClient.Contacts do
         client,
         title_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/title/#{title_id}"
         )
       end,
-      &map_from_title/1
+      &map_from_title/2
     )
   end
 
-  defp map_from_titles(titles),
+  defp map_from_titles(titles, _env),
     do: Enum.map(titles, &map_from_title/1)
 
   defp map_from_title(%{
          "id" => id,
          "name" => name
-       }) do
+       }, _env \\ nil) do
     %Title{
       id: id,
       name: name

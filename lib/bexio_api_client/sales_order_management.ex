@@ -33,11 +33,11 @@ defmodule BexioApiClient.SalesOrderManagement do
           opts :: [GlobalArguments.offset_arg()]
         ) :: {:ok, [Quote.t()]} | {:error, any()}
   def fetch_quotes(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_offer", query: opts_to_query(opts))
       end,
-      &map_from_quotes/1
+      &map_from_quotes/2
     )
   end
 
@@ -71,11 +71,11 @@ defmodule BexioApiClient.SalesOrderManagement do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/kb_offer/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_quotes/1
+      &map_from_quotes/2
     )
   end
 
@@ -87,15 +87,15 @@ defmodule BexioApiClient.SalesOrderManagement do
           quote_id :: pos_integer()
         ) :: {:ok, [Quote.t()]} | {:error, any()}
   def fetch_quote(client, quote_id) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_offer/#{quote_id}")
       end,
-      &map_from_quote/1
+      &map_from_quote/2
     )
   end
 
-  defp map_from_quotes(quotes), do: Enum.map(quotes, &map_from_quote/1)
+  defp map_from_quotes(quotes, _env), do: Enum.map(quotes, &map_from_quote/1)
 
   defp map_from_quote(%{
          "id" => id,
@@ -133,7 +133,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "template_slug" => template_slug,
          "taxs" => taxs,
          "network_link" => network_link
-       }) do
+       }, _env \\ nil) do
     %Quote{
       id: id,
       document_nr: document_nr,
@@ -200,11 +200,11 @@ defmodule BexioApiClient.SalesOrderManagement do
           opts :: [GlobalArguments.offset_arg()]
         ) :: {:ok, [Order.t()]} | {:error, any()}
   def fetch_orders(client, opts \\ []) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_order", query: opts_to_query(opts))
       end,
-      &map_from_orders/1
+      &map_from_orders/2
     )
   end
 
@@ -236,11 +236,11 @@ defmodule BexioApiClient.SalesOrderManagement do
         criteria,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/kb_order/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_orders/1
+      &map_from_orders/2
     )
   end
 
@@ -252,15 +252,15 @@ defmodule BexioApiClient.SalesOrderManagement do
           order_id :: pos_integer()
         ) :: {:ok, [Order.t()]} | {:error, any()}
   def fetch_order(client, order_id) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_order/#{order_id}")
       end,
-      &map_from_order/1
+      &map_from_order/2
     )
   end
 
-  defp map_from_orders(orders), do: Enum.map(orders, &map_from_order/1)
+  defp map_from_orders(orders, _env), do: Enum.map(orders, &map_from_order/1)
 
   defp map_from_order(%{
          "id" => id,
@@ -296,7 +296,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "template_slug" => template_slug,
          "taxs" => taxs,
          "network_link" => network_link
-       }) do
+       }, _env \\ nil) do
     %Order{
       id: id,
       document_nr: document_nr,
@@ -361,13 +361,13 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/comment",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_comments/1
+      &map_from_comments/2
     )
   end
 
@@ -386,14 +386,14 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         comment_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/kb_#{document_type}/#{document_id}/comment/#{comment_id}"
         )
       end,
-      &map_from_comment/1
+      &map_from_comment/2
     )
   end
 
@@ -412,7 +412,7 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         comment
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.post(
           client,
@@ -420,7 +420,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           mapped_comment(comment)
         )
       end,
-      &map_from_comment/1
+      &map_from_comment/2
     )
   end
 
@@ -440,7 +440,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     }
   end
 
-  defp map_from_comments(comments), do: Enum.map(comments, &map_from_comment/1)
+  defp map_from_comments(comments, _env), do: Enum.map(comments, &map_from_comment/1)
 
   defp map_from_comment(%{
          "id" => id,
@@ -452,7 +452,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "is_public" => public?,
          "image" => image,
          "image_path" => image_path
-       }) do
+       }, _env \\ nil) do
     %Comment{
       id: id,
       text: text,
@@ -483,13 +483,13 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_subtotal_positions/1
+      &map_from_subtotal_positions/2
     )
   end
 
@@ -508,18 +508,18 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         position_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{position_id}"
         )
       end,
-      &map_from_subtotal_position/1
+      &map_from_subtotal_position/2
     )
   end
 
-  defp map_from_subtotal_positions(subtotal_positions),
+  defp map_from_subtotal_positions(subtotal_positions, _env),
     do: Enum.map(subtotal_positions, &map_from_subtotal_position/1)
 
   defp map_from_subtotal_position(%{
@@ -529,7 +529,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "internal_pos" => internal_pos,
          "is_optional" => optional?,
          "parent_id" => parent_id
-       }) do
+       }, _env \\ nil) do
     %PositionSubtotal{
       id: id,
       text: text,
@@ -557,13 +557,13 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_text_positions/1
+      &map_from_text_positions/2
     )
   end
 
@@ -582,18 +582,18 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         position_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{position_id}"
         )
       end,
-      &map_from_text_position/1
+      &map_from_text_position/2
     )
   end
 
-  defp map_from_text_positions(text_positions),
+  defp map_from_text_positions(text_positions, _env),
     do: Enum.map(text_positions, &map_from_text_position/1)
 
   defp map_from_text_position(%{
@@ -604,7 +604,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "internal_pos" => internal_pos,
          "is_optional" => optional?,
          "parent_id" => parent_id
-       }) do
+       }, _env \\ nil) do
     %PositionText{
       id: id,
       text: text,
@@ -633,13 +633,13 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_default_positions/1
+      &map_from_default_positions/2
     )
   end
 
@@ -658,18 +658,18 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         position_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom/#{position_id}"
         )
       end,
-      &map_from_default_position/1
+      &map_from_default_position/2
     )
   end
 
-  defp map_from_default_positions(default_positions),
+  defp map_from_default_positions(default_positions, _env),
     do: Enum.map(default_positions, &map_from_default_position/1)
 
   defp map_from_default_position(%{
@@ -688,7 +688,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "internal_pos" => internal_pos,
          "is_optional" => optional?,
          "parent_id" => parent_id
-       }) do
+       }, _env \\ nil) do
     %PositionDefault{
       id: id,
       amount: Decimal.new(amount),
@@ -725,13 +725,13 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_item_positions/1
+      &map_from_item_positions/2
     )
   end
 
@@ -750,18 +750,18 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         position_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{position_id}"
         )
       end,
-      &map_from_item_position/1
+      &map_from_item_position/2
     )
   end
 
-  defp map_from_item_positions(item_positions),
+  defp map_from_item_positions(item_positions, _env),
     do: Enum.map(item_positions, &map_from_item_position/1)
 
   defp map_from_item_position(%{
@@ -781,7 +781,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "is_optional" => optional?,
          "article_id" => article_id,
          "parent_id" => parent_id
-       }) do
+       }, _env \\ nil) do
     %PositionItem{
       id: id,
       amount: Decimal.new(amount),
@@ -819,13 +819,13 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_discount_positions/1
+      &map_from_discount_positions/2
     )
   end
 
@@ -844,18 +844,18 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         position_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{position_id}"
         )
       end,
-      &map_from_discount_position/1
+      &map_from_discount_position/2
     )
   end
 
-  defp map_from_discount_positions(discount_positions),
+  defp map_from_discount_positions(discount_positions, _env),
     do: Enum.map(discount_positions, &map_from_discount_position/1)
 
   defp map_from_discount_position(%{
@@ -864,7 +864,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "value" => value,
          "discount_total" => discount_total,
          "is_percentual" => percentual?
-       }) do
+       }, _env \\ nil) do
     %PositionDiscount{
       id: id,
       text: text,
@@ -891,13 +891,13 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_pagebreak_positions/1
+      &map_from_pagebreak_positions/2
     )
   end
 
@@ -916,18 +916,18 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         position_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{position_id}"
         )
       end,
-      &map_from_pagebreak_position/1
+      &map_from_pagebreak_position/2
     )
   end
 
-  defp map_from_pagebreak_positions(pagebreak_positions),
+  defp map_from_pagebreak_positions(pagebreak_positions, _env),
     do: Enum.map(pagebreak_positions, &map_from_pagebreak_position/1)
 
   defp map_from_pagebreak_position(%{
@@ -935,7 +935,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "internal_pos" => internal_pos,
          "is_optional" => optional?,
          "parent_id" => parent_id
-       }) do
+       }, _env \\ nil) do
     %PositionPagebreak{
       id: id,
       internal_pos: internal_pos,
@@ -962,13 +962,13 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         opts \\ []
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
           query: opts_to_query(opts)
         )
       end,
-      &map_from_subposition_positions/1
+      &map_from_subposition_positions/2
     )
   end
 
@@ -988,18 +988,18 @@ defmodule BexioApiClient.SalesOrderManagement do
         document_id,
         position_id
       ) do
-    bexio_return_handling(
+    bexio_body_handling(
       fn ->
         Tesla.get(
           client,
           "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{position_id}"
         )
       end,
-      &map_from_subposition_position/1
+      &map_from_subposition_position/2
     )
   end
 
-  defp map_from_subposition_positions(subposition_positions),
+  defp map_from_subposition_positions(subposition_positions, _env),
     do: Enum.map(subposition_positions, &map_from_subposition_position/1)
 
   defp map_from_subposition_position(%{
@@ -1012,7 +1012,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          "total_sum" => total_sum,
          "show_pos_prices" => show_pos_prices?,
          "parent_id" => parent_id
-       }) do
+       }, _env \\ nil) do
     %PositionSubposition{
       id: id,
       text: text,
