@@ -3,6 +3,7 @@ defmodule BexioApiClient.OthersTest do
 
   doctest BexioApiClient.Others
 
+  alias BexioApiClient.Others.FictionalUser
   alias BexioApiClient.SearchCriteria
 
   import Tesla.Mock
@@ -357,6 +358,268 @@ defmodule BexioApiClient.OthersTest do
       assert result.date_format_id == :dmy
       assert result.date_format == "d.m.Y"
       assert result.iso_639_1 == "de"
+    end
+  end
+
+  describe "fetching a list of users" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/3.0/users"
+        } ->
+          json([
+            %{
+              "id" => 4,
+              "salutation_type" => "male",
+              "firstname" => "Rudolph",
+              "lastname" => "Smith",
+              "email" => "rudolph.smith@example.com",
+              "is_superadmin" => true,
+              "is_accountant" => false
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Others.fetch_users(client)
+
+      assert result.id == 4
+      assert result.salutation_type == :male
+      assert result.firstname == "Rudolph"
+      assert result.lastname == "Smith"
+      assert result.email == "rudolph.smith@example.com"
+      assert result.superadmin? == true
+      assert result.accountant? == false
+    end
+  end
+
+  describe "fetching a user" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/3.0/users/4"
+        } ->
+          json(%{
+            "id" => 4,
+            "salutation_type" => "male",
+            "firstname" => "Rudolph",
+            "lastname" => "Smith",
+            "email" => "rudolph.smith@example.com",
+            "is_superadmin" => true,
+            "is_accountant" => false
+          })
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_user(client, 4)
+
+      assert result.id == 4
+      assert result.salutation_type == :male
+      assert result.firstname == "Rudolph"
+      assert result.lastname == "Smith"
+      assert result.email == "rudolph.smith@example.com"
+      assert result.superadmin? == true
+      assert result.accountant? == false
+    end
+  end
+
+  describe "fetching a list of fictional users" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/3.0/fictional_users"
+        } ->
+          json([
+            %{
+              "id" => 4,
+              "salutation_type" => "male",
+              "firstname" => "Rudolph",
+              "lastname" => "Smith",
+              "email" => "rudolph.smith@example.com",
+              "title_id" => nil
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Others.fetch_fictional_users(client)
+
+      assert result.id == 4
+      assert result.salutation_type == :male
+      assert result.firstname == "Rudolph"
+      assert result.lastname == "Smith"
+      assert result.email == "rudolph.smith@example.com"
+      assert result.title_id == nil
+    end
+  end
+
+  describe "fetching a fictional user" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/3.0/fictional_users/4"
+        } ->
+          json(%{
+            "id" => 4,
+            "salutation_type" => "male",
+            "firstname" => "Rudolph",
+            "lastname" => "Smith",
+            "email" => "rudolph.smith@example.com",
+            "title_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_fictional_user(client, 4)
+
+      assert result.id == 4
+      assert result.salutation_type == :male
+      assert result.firstname == "Rudolph"
+      assert result.lastname == "Smith"
+      assert result.email == "rudolph.smith@example.com"
+      assert result.title_id == nil
+    end
+  end
+
+  describe "creating a fictional user" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/3.0/fictional_users",
+          body: body
+        } ->
+          body_json = Jason.decode!(body)
+          assert body_json["email"] == "rudolph.smith@bexio.com"
+          assert body_json["salutation_type"] == "male"
+          assert body_json["firstname"] == "Rudolph"
+          assert body_json["lastname"] == "Smith"
+
+          json(%{
+            "id" => 4,
+            "salutation_type" => "male",
+            "firstname" => "Rudolph",
+            "lastname" => "Smith",
+            "email" => "rudolph.smith@example.com",
+            "title_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "creates the new user" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} =
+               BexioApiClient.Others.create_fictional_user(client, %FictionalUser{
+                 id: -1,
+                 salutation_type: :male,
+                 firstname: "Rudolph",
+                 lastname: "Smith",
+                 email: "rudolph.smith@bexio.com"
+               })
+
+      assert result.id == 4
+      assert result.salutation_type == :male
+      assert result.firstname == "Rudolph"
+      assert result.lastname == "Smith"
+      assert result.email == "rudolph.smith@example.com"
+      assert result.title_id == nil
+    end
+  end
+
+  describe "updating a fictional user" do
+    setup do
+      mock(fn
+        %{
+          method: :patch,
+          url: "https://api.bexio.com/3.0/fictional_users/4",
+          body: body
+        } ->
+          body_json = Jason.decode!(body)
+          assert body_json["email"] == "rudolph.smith@bexio.com"
+          assert body_json["salutation_type"] == "male"
+          assert body_json["firstname"] == "Rudolph"
+          assert body_json["lastname"] == "Smith"
+
+          json(%{
+            "id" => 4,
+            "salutation_type" => "male",
+            "firstname" => "Rudolph",
+            "lastname" => "Smith",
+            "email" => "rudolph.smith@example.com",
+            "title_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "creates the new user" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} =
+               BexioApiClient.Others.update_fictional_user(client, %FictionalUser{
+                 id: 4,
+                 salutation_type: :male,
+                 firstname: "Rudolph",
+                 lastname: "Smith",
+                 email: "rudolph.smith@bexio.com"
+               })
+
+      assert result.id == 4
+      assert result.salutation_type == :male
+      assert result.firstname == "Rudolph"
+      assert result.lastname == "Smith"
+      assert result.email == "rudolph.smith@example.com"
+      assert result.title_id == nil
+    end
+  end
+
+  describe "delete a fictional user" do
+    setup do
+      mock(fn
+        %{
+          method: :delete,
+          url: "https://api.bexio.com/3.0/fictional_users/4"
+        } ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "success" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.delete_fictional_user(client, 4)
+
+      assert result == true
     end
   end
 end

@@ -53,40 +53,43 @@ defmodule BexioApiClient.Others do
   defp map_from_company_profiles(company_profiles, _env),
     do: Enum.map(company_profiles, &map_from_company_profile/1)
 
-  defp map_from_company_profile(%{
-         "id" => id,
-         "name" => name,
-         "address" => address,
-         "address_nr" => address_nr,
-         "postcode" => postcode,
-         "city" => city,
-         "country_id" => country_id,
-         "legal_form" => legal_form,
-         "country_name" => country_name,
-         "mail" => mail,
-         "phone_fixed" => phone_fixed,
-         "phone_mobile" => phone_mobile,
-         "fax" => fax,
-         "url" => url,
-         "skype_name" => skype_name,
-         "facebook_name" => facebook_name,
-         "twitter_name" => twitter_name,
-         "description" => description,
-         "ust_id_nr" => ust_id_nr,
-         "mwst_nr" => mwst_nr,
-         "trade_register_nr" => trade_register_nr,
-         "has_own_logo" => own_logo?,
-         "is_public_profile" => public_profile?,
-         "is_logo_public" => logo_public?,
-         "is_address_public" => address_public?,
-         "is_phone_public" => phone_public?,
-         "is_mobile_public" => mobile_public?,
-         "is_fax_public" => fax_public?,
-         "is_mail_public" => mail_public?,
-         "is_url_public" => url_public?,
-         "is_skype_public" => skype_public?,
-         "logo_base64" => logo_base64
-       }, _env \\ nil) do
+  defp map_from_company_profile(
+         %{
+           "id" => id,
+           "name" => name,
+           "address" => address,
+           "address_nr" => address_nr,
+           "postcode" => postcode,
+           "city" => city,
+           "country_id" => country_id,
+           "legal_form" => legal_form,
+           "country_name" => country_name,
+           "mail" => mail,
+           "phone_fixed" => phone_fixed,
+           "phone_mobile" => phone_mobile,
+           "fax" => fax,
+           "url" => url,
+           "skype_name" => skype_name,
+           "facebook_name" => facebook_name,
+           "twitter_name" => twitter_name,
+           "description" => description,
+           "ust_id_nr" => ust_id_nr,
+           "mwst_nr" => mwst_nr,
+           "trade_register_nr" => trade_register_nr,
+           "has_own_logo" => own_logo?,
+           "is_public_profile" => public_profile?,
+           "is_logo_public" => logo_public?,
+           "is_address_public" => address_public?,
+           "is_phone_public" => phone_public?,
+           "is_mobile_public" => mobile_public?,
+           "is_fax_public" => fax_public?,
+           "is_mail_public" => mail_public?,
+           "is_url_public" => url_public?,
+           "is_skype_public" => skype_public?,
+           "logo_base64" => logo_base64
+         },
+         _env \\ nil
+       ) do
     %CompanyProfile{
       id: id,
       name: name,
@@ -178,12 +181,15 @@ defmodule BexioApiClient.Others do
 
   defp map_from_countries(countries, _env), do: Enum.map(countries, &map_from_country/1)
 
-  defp map_from_country(%{
-         "id" => id,
-         "name" => name,
-         "name_short" => name_short,
-         "iso3166_alpha2" => iso3166_alpha2
-       }, _env \\ nil) do
+  defp map_from_country(
+         %{
+           "id" => id,
+           "name" => name,
+           "name_short" => name_short,
+           "iso3166_alpha2" => iso3166_alpha2
+         },
+         _env \\ nil
+       ) do
     %Country{
       id: id,
       name: name,
@@ -233,15 +239,18 @@ defmodule BexioApiClient.Others do
 
   defp map_from_languages(languages, _env), do: Enum.map(languages, &map_from_language/1)
 
-  defp map_from_language(%{
-         "id" => id,
-         "name" => name,
-         "decimal_point" => decimal_point,
-         "thousands_separator" => thousands_separator,
-         "date_format_id" => date_format_id_bexio,
-         "date_format" => date_format,
-         "iso_639_1" => iso_639_1
-       }, _env \\ nil) do
+  defp map_from_language(
+         %{
+           "id" => id,
+           "name" => name,
+           "decimal_point" => decimal_point,
+           "thousands_separator" => thousands_separator,
+           "date_format_id" => date_format_id_bexio,
+           "date_format" => date_format,
+           "iso_639_1" => iso_639_1
+         },
+         _env \\ nil
+       ) do
     %Language{
       id: id,
       name: name,
@@ -288,7 +297,7 @@ defmodule BexioApiClient.Others do
   Fetch a list of finctional users.
   """
   @spec fetch_fictional_users(client :: Tesla.Client.t()) ::
-          {:ok, [User.t()]} | {:error, any()}
+          {:ok, [FictionalUser.t()]} | {:error, any()}
   def fetch_fictional_users(client) do
     bexio_body_handling(
       fn ->
@@ -299,34 +308,50 @@ defmodule BexioApiClient.Others do
   end
 
   @doc """
-  Create a fictional user
+  Fetch a finctional user.
   """
-  @spec create_fictional_user(client :: Tesla.Client.t(), map()) ::
-          {:ok, [User.t()]} | {:error, any()}
-  def create_fictional_user(
-        client,
-        %{
-          salutation_type: _salutation_type,
-          firstname: _firstname,
-          lastname: _lastname,
-          email: _email
-        } = map
-      ),
-      do: create_fictional_user(client, Map.put(map, :title_id, nil))
-
-  def create_fictional_user(
-        client,
-        %{
-          salutation_type: _salutation_type,
-          firstname: _firstname,
-          lastname: _lastname,
-          email: _email,
-          title_id: _title_id
-        } = map
-      ) do
+  @spec fetch_fictional_user(client :: Tesla.Client.t(), id :: integer()) ::
+          {:ok, FictionalUser.t()} | {:error, any()}
+  def fetch_fictional_user(client, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/3.0/fictional_users", map)
+        Tesla.get(client, "/3.0/fictional_users/#{id}")
+      end,
+      &map_from_fictional_user/2
+    )
+  end
+
+  @doc """
+  Create a fictional user, the id of the fictional user will be ignored!
+  """
+  @spec create_fictional_user(client :: Tesla.Client.t(), finctional_user :: FictionalUser.t()) ::
+          {:ok, FictionalUser.t()} | {:error, any()}
+  def create_fictional_user(client, fictional_user) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/3.0/fictional_users",
+          Map.take(fictional_user, [:salutation_type, :firstname, :lastname, :email, :title_id])
+        )
+      end,
+      &map_from_fictional_user/2
+    )
+  end
+
+  @doc """
+  Create a fictional user
+  """
+  @spec update_fictional_user(client :: Tesla.Client.t(), fictional_user :: FictionalUser.t()) ::
+          {:ok, FictionalUser.t()} | {:error, any()}
+  def update_fictional_user(client, fictional_user) do
+    bexio_body_handling(
+      fn ->
+        Tesla.patch(
+          client,
+          "/3.0/fictional_users/#{fictional_user.id}",
+          Map.take(fictional_user, [:salutation_type, :firstname, :lastname, :email, :title_id])
+        )
       end,
       &map_from_fictional_user/2
     )
@@ -351,15 +376,18 @@ defmodule BexioApiClient.Others do
 
   defp map_from_users(users, _env), do: Enum.map(users, &map_from_user/1)
 
-  defp map_from_user(%{
-         "id" => id,
-         "salutation_type" => salutation_type,
-         "firstname" => firstname,
-         "lastname" => lastname,
-         "email" => email,
-         "is_superadmin" => superadmin?,
-         "is_accountant" => accountant?
-       }, _env \\ nil) do
+  defp map_from_user(
+         %{
+           "id" => id,
+           "salutation_type" => salutation_type,
+           "firstname" => firstname,
+           "lastname" => lastname,
+           "email" => email,
+           "is_superadmin" => superadmin?,
+           "is_accountant" => accountant?
+         },
+         _env \\ nil
+       ) do
     %User{
       id: id,
       salutation_type: String.to_atom(salutation_type),
@@ -374,14 +402,17 @@ defmodule BexioApiClient.Others do
   defp map_from_fictional_users(fictional_users, _env),
     do: Enum.map(fictional_users, &map_from_fictional_user/1)
 
-  defp map_from_fictional_user(%{
-         "id" => id,
-         "salutation_type" => salutation_type,
-         "firstname" => firstname,
-         "lastname" => lastname,
-         "email" => email,
-         "title_id" => title_id
-       }, _env \\ nil) do
+  defp map_from_fictional_user(
+         %{
+           "id" => id,
+           "salutation_type" => salutation_type,
+           "firstname" => firstname,
+           "lastname" => lastname,
+           "email" => email,
+           "title_id" => title_id
+         },
+         _env \\ nil
+       ) do
     %FictionalUser{
       id: id,
       salutation_type: String.to_atom(salutation_type),
