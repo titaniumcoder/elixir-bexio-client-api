@@ -475,4 +475,210 @@ defmodule BexioApiClient.Others do
   def restriction("none"), do: :none
   def restriction("all"), do: :all
   def restriction("own"), do: :own
+
+  @doc """
+  Fetch a list of tasks.
+  """
+  @spec fetch_tasks(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, [Task.t()]} | {:error, any()}
+  def fetch_tasks(client, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/task", query: opts_to_query(opts))
+      end,
+      &map_from_tasks/2
+    )
+  end
+
+  @doc """
+  Search a task
+
+  Following fields are supported:
+
+  * `subject`
+  * `updated_at`
+  * `user_id`
+  * `contact_id`
+  * `todo_status_id`
+  * `module_id`
+  * `entry_id`
+  """
+  @spec search_tasks(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Task.t()]} | {:error, any()}
+  def search_tasks(client, criteria, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/task/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_tasks/2
+    )
+  end
+
+  @doc """
+  Fetch a  task.
+  """
+  @spec fetch_task(client :: Tesla.Client.t(), id :: integer()) ::
+          {:ok, Task.t()} | {:error, any()}
+  def fetch_task(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/task/#{id}")
+      end,
+      &map_from_task/2
+    )
+  end
+
+  @doc """
+  Create a  task.
+  """
+  @spec create_task(client :: Tesla.Client.t(), task :: Task.t()) ::
+          {:ok, Task.t()} | {:error, any()}
+  def create_task(client, task) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/task", remap_task(task))
+      end,
+      &map_from_task/2
+    )
+  end
+
+  @doc """
+  Edut a  task.
+  """
+  @spec edit_task(client :: Tesla.Client.t(), task :: Task.t()) ::
+          {:ok, Task.t()} | {:error, any()}
+  def edit_task(client, task) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/task/#{task.id}", remap_task(task))
+      end,
+      &map_from_task/2
+    )
+  end
+
+  @doc """
+  Delete a  task.
+  """
+  @spec delete_task(client :: Tesla.Client.t(), id :: integer()) ::
+          {:ok, Task.t()} | {:error, any()}
+  def delete_task(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/task/#{id}")
+      end,
+      fn
+        %{"success" => true}, _ -> true
+        _, _ -> false
+      end
+    )
+  end
+
+  defp remap_task(task) do
+    task
+    |> Map.take([
+      :user_id,
+      :subject,
+      :info,
+      :contact_id,
+      :sub_contact_id,
+      :entry_id,
+      :module_id,
+      :todo_status_id,
+      :todo_priority_id,
+      :remember_type_id,
+      :remember_time_id,
+      :communication_kind_id
+    ])
+    |> Map.put(:finish_date, to_iso8601(Map.get(task, :finish_date)))
+    |> Map.put(:have_remember, Map.get(task, :reminder?))
+    |> Map.put(:pr_project_id, Map.get(task, :project_id))
+  end
+
+  defp map_from_tasks(tasks, _env), do: Enum.map(tasks, &map_from_task/1)
+
+  defp map_from_task(
+         %{
+           "id" => id,
+           "user_id" => user_id,
+           "finish_date" => finish_date,
+           "subject" => subject,
+           "place" => place,
+           "info" => info,
+           "contact_id" => contact_id,
+           "sub_contact_id" => sub_contact_id,
+           "project_id" => project_id,
+           "entry_id" => entry_id,
+           "module_id" => module_id,
+           "todo_status_id" => todo_status_id,
+           "todo_priority_id" => todo_priority_id,
+           "has_reminder" => reminder?,
+           "remember_type_id" => remember_type_id,
+           "remember_time_id" => remember_time_id,
+           "communication_kind_id" => communication_kind_id
+         },
+         _env \\ nil
+       ) do
+    %Task{
+      id: id,
+      user_id: user_id,
+      finish_date: to_datetime(finish_date),
+      subject: subject,
+      place: place,
+      info: info,
+      contact_id: contact_id,
+      sub_contact_id: sub_contact_id,
+      project_id: project_id,
+      entry_id: entry_id,
+      module_id: module_id,
+      todo_status_id: todo_status_id,
+      todo_priority_id: todo_priority_id,
+      reminder?: to_boolean(reminder?),
+      remember_time_id: remember_time_id,
+      remember_type_id: remember_type_id,
+      communication_kind_id: communication_kind_id
+    }
+  end
+
+  defp to_boolean(b) when is_boolean(b), do: b
+  defp to_boolean("true"), do: true
+  defp to_boolean("false"), do: false
+
+  @doc """
+  Fetch a list of task priorities.
+  """
+  @spec fetch_task_priorities(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, map()} | {:error, any()}
+  def fetch_task_priorities(client, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/todo_priority", query: opts_to_query(opts))
+      end,
+      fn body, _env ->
+        body
+        |> Enum.map(fn %{"id" => id, "name" => name} -> {id, name} end)
+        |> Enum.into(%{})
+      end
+    )
+  end
+
+  @doc """
+  Fetch a list of task status.
+  """
+  @spec fetch_task_status(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, map()} | {:error, any()}
+  def fetch_task_status(client, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/todo_status", query: opts_to_query(opts))
+      end,
+      fn body, _env ->
+        body
+        |> Enum.map(fn %{"id" => id, "name" => name} -> {id, name} end)
+        |> Enum.into(%{})
+      end
+    )
+  end
 end

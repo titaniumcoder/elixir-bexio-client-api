@@ -3,7 +3,7 @@ defmodule BexioApiClient.OthersTest do
 
   doctest BexioApiClient.Others
 
-  alias BexioApiClient.Others.FictionalUser
+  alias BexioApiClient.Others.{FictionalUser, Task}
   alias BexioApiClient.SearchCriteria
 
   import Tesla.Mock
@@ -755,6 +755,400 @@ defmodule BexioApiClient.OthersTest do
       assert result.permissions.gdrive.activation == :enabled
       assert result.permissions.kb_offer.edit == :all
       assert result.permissions.kb_offer.show == :all
+    end
+  end
+
+  describe "fetching a list of tasks" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/task"
+        } ->
+          json([
+            %{
+              "communication_kind_id" => nil,
+              "contact_id" => nil,
+              "entry_id" => nil,
+              "finish_date" => "2023-03-13 08:00:00",
+              "has_reminder" => "true",
+              "id" => 2,
+              "info" => "Mahnlauf<br /><br />",
+              "module_id" => nil,
+              "place" => nil,
+              "project_id" => nil,
+              "remember_time_id" => 3,
+              "remember_type_id" => 1,
+              "sub_contact_id" => nil,
+              "subject" => "Mahnlauf",
+              "todo_priority_id" => 4,
+              "todo_status_id" => 1,
+              "user_id" => 29
+            },
+            %{
+              "communication_kind_id" => nil,
+              "contact_id" => nil,
+              "entry_id" => nil,
+              "finish_date" => "2022-10-17 10:00:00",
+              "has_reminder" => "false",
+              "id" => 4,
+              "info" => "Dessert Testlauf&nbsp;",
+              "module_id" => nil,
+              "place" => nil,
+              "project_id" => nil,
+              "remember_time_id" => nil,
+              "remember_type_id" => nil,
+              "sub_contact_id" => nil,
+              "subject" => "Test",
+              "todo_priority_id" => 5,
+              "todo_status_id" => 5,
+              "user_id" => 11
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result1, result2]} = BexioApiClient.Others.fetch_tasks(client)
+
+      assert result1.finish_date == ~N[2023-03-13 08:00:00]
+      assert result1.reminder? == true
+      assert result1.id == 2
+      assert result1.info == "Mahnlauf<br /><br />"
+      assert result1.subject == "Mahnlauf"
+      assert result1.user_id == 29
+
+      assert result2.finish_date == ~N[2022-10-17 10:00:00]
+      assert result2.reminder? == false
+      assert result2.id == 4
+      assert result2.info == "Dessert Testlauf&nbsp;"
+      assert result2.subject == "Test"
+      assert result2.user_id == 11
+    end
+  end
+
+  describe "searching tasks" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/task/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "communication_kind_id" => nil,
+              "contact_id" => nil,
+              "entry_id" => nil,
+              "finish_date" => "2023-03-13 08:00:00",
+              "has_reminder" => "true",
+              "id" => 2,
+              "info" => "Mahnlauf<br /><br />",
+              "module_id" => nil,
+              "place" => nil,
+              "project_id" => nil,
+              "remember_time_id" => 3,
+              "remember_type_id" => 1,
+              "sub_contact_id" => nil,
+              "subject" => "Mahnlauf",
+              "todo_priority_id" => 4,
+              "todo_status_id" => 1,
+              "user_id" => 29
+            },
+            %{
+              "communication_kind_id" => nil,
+              "contact_id" => nil,
+              "entry_id" => nil,
+              "finish_date" => "2022-10-17 10:00:00",
+              "has_reminder" => "false",
+              "id" => 4,
+              "info" => "Dessert Testlauf&nbsp;",
+              "module_id" => nil,
+              "place" => nil,
+              "project_id" => nil,
+              "remember_time_id" => nil,
+              "remember_type_id" => nil,
+              "sub_contact_id" => nil,
+              "subject" => "Test",
+              "todo_priority_id" => 5,
+              "todo_status_id" => 5,
+              "user_id" => 11
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result1, result2]} =
+               BexioApiClient.Others.search_tasks(client, [
+                 SearchCriteria.nil?(:subject),
+                 SearchCriteria.less_than(:reminder, NaiveDateTime.local_now())
+               ])
+
+      assert result1.finish_date == ~N[2023-03-13 08:00:00]
+      assert result1.reminder? == true
+      assert result1.id == 2
+      assert result1.info == "Mahnlauf<br /><br />"
+      assert result1.subject == "Mahnlauf"
+      assert result1.user_id == 29
+
+      assert result2.finish_date == ~N[2022-10-17 10:00:00]
+      assert result2.reminder? == false
+      assert result2.id == 4
+      assert result2.info == "Dessert Testlauf&nbsp;"
+      assert result2.subject == "Test"
+      assert result2.user_id == 11
+    end
+  end
+
+  describe "fetching a task" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/task/2"
+        } ->
+          json(%{
+            "communication_kind_id" => nil,
+            "contact_id" => nil,
+            "entry_id" => nil,
+            "finish_date" => "2023-03-13 08:00:00",
+            "has_reminder" => "true",
+            "id" => 2,
+            "info" => "Mahnlauf<br /><br />",
+            "module_id" => nil,
+            "place" => nil,
+            "project_id" => nil,
+            "remember_time_id" => 3,
+            "remember_type_id" => 1,
+            "sub_contact_id" => nil,
+            "subject" => "Mahnlauf",
+            "todo_priority_id" => 4,
+            "todo_status_id" => 1,
+            "user_id" => 29
+          })
+      end)
+
+      :ok
+    end
+
+    test "lists found result" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_task(client, 2)
+
+      assert result.finish_date == ~N[2023-03-13 08:00:00]
+      assert result.reminder? == true
+      assert result.id == 2
+      assert result.info == "Mahnlauf<br /><br />"
+      assert result.subject == "Mahnlauf"
+      assert result.user_id == 29
+    end
+  end
+
+  describe "creating a task" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/task",
+          body: body
+        } ->
+          body_json = Jason.decode!(body)
+
+          assert body_json["finish_date"] == "2023-03-13T08:00:00"
+          assert body_json["subject"] == "Unterlagen versenden"
+          assert body_json["have_remember"] == false
+
+          json(%{
+            "communication_kind_id" => nil,
+            "contact_id" => nil,
+            "entry_id" => nil,
+            "finish_date" => "2023-03-13 08:00:00",
+            "has_reminder" => "true",
+            "id" => 2,
+            "info" => "Mahnlauf<br /><br />",
+            "module_id" => nil,
+            "place" => nil,
+            "project_id" => nil,
+            "remember_time_id" => 3,
+            "remember_type_id" => 1,
+            "sub_contact_id" => nil,
+            "subject" => "Mahnlauf",
+            "todo_priority_id" => 4,
+            "todo_status_id" => 1,
+            "user_id" => 29
+          })
+      end)
+
+      :ok
+    end
+
+    test "creates a task" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} =
+               BexioApiClient.Others.create_task(client, %Task{
+                 id: -1,
+                 reminder?: false,
+                 finish_date: ~N[2023-03-13 08:00:00],
+                 subject: "Unterlagen versenden",
+                 user_id: 1,
+                 info: "so schnell wie möglich.",
+                 todo_status_id: 1
+               })
+
+      assert result.finish_date == ~N[2023-03-13 08:00:00]
+      assert result.reminder? == true
+      assert result.id == 2
+      assert result.info == "Mahnlauf<br /><br />"
+      assert result.subject == "Mahnlauf"
+      assert result.user_id == 29
+    end
+  end
+
+  describe "updating a task" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/task/2",
+          body: body
+        } ->
+          body_json = Jason.decode!(body)
+
+          assert body_json["finish_date"] == "2023-03-13T08:00:00"
+          assert body_json["subject"] == "Unterlagen versenden"
+          assert body_json["have_remember"] == false
+
+          json(%{
+            "communication_kind_id" => nil,
+            "contact_id" => nil,
+            "entry_id" => nil,
+            "finish_date" => "2023-03-13 08:00:00",
+            "has_reminder" => "true",
+            "id" => 2,
+            "info" => "Mahnlauf<br /><br />",
+            "module_id" => nil,
+            "place" => nil,
+            "project_id" => nil,
+            "remember_time_id" => 3,
+            "remember_type_id" => 1,
+            "sub_contact_id" => nil,
+            "subject" => "Mahnlauf",
+            "todo_priority_id" => 4,
+            "todo_status_id" => 1,
+            "user_id" => 29
+          })
+      end)
+
+      :ok
+    end
+
+    test "updates a task" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} =
+               BexioApiClient.Others.edit_task(client, %Task{
+                 id: 2,
+                 reminder?: false,
+                 finish_date: ~N[2023-03-13 08:00:00],
+                 subject: "Unterlagen versenden",
+                 user_id: 1,
+                 info: "so schnell wie möglich.",
+                 todo_status_id: 1
+               })
+
+      assert result.finish_date == ~N[2023-03-13 08:00:00]
+      assert result.reminder? == true
+      assert result.id == 2
+      assert result.info == "Mahnlauf<br /><br />"
+      assert result.subject == "Mahnlauf"
+      assert result.user_id == 29
+    end
+  end
+
+  describe "deleting a task" do
+    setup do
+      mock(fn
+        %{
+          method: :delete,
+          url: "https://api.bexio.com/2.0/task/2"
+        } ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "deletes a task" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.delete_task(client, 2)
+
+      assert result == true
+    end
+  end
+
+  describe "fetching a list of task priorities" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/todo_priority"
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "High"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_task_priorities(client)
+
+      assert result[1] == "High"
+    end
+  end
+
+  describe "fetching a list of task status" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/todo_status"
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Open"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_task_status(client)
+
+      assert result[1] == "Open"
     end
   end
 end

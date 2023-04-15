@@ -53,6 +53,10 @@ defmodule BexioApiClient.Helpers do
     NaiveDateTime.new!(date, time)
   end
 
+  def to_iso8601(nil), do: nil
+  def to_iso8601(%NaiveDateTime{} = n), do: NaiveDateTime.to_iso8601(n)
+  def to_iso8601(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
+
   # The format from Bexio 3.0 is 2022-09-13T09:14:21+00:00
   @doc """
   Convert the given string into an elixir date using offsets
