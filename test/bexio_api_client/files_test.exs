@@ -55,7 +55,7 @@ defmodule BexioApiClient.FilesTest do
     end
   end
 
-  describe "searching items" do
+  describe "searching files" do
     setup do
       mock(fn
         %{
@@ -105,7 +105,7 @@ defmodule BexioApiClient.FilesTest do
     end
   end
 
-  describe "fetching a single item" do
+  describe "fetching a single file" do
     setup do
       mock(fn
         %{method: :get, url: "https://api.bexio.com/3.0/files/1"} ->
@@ -152,6 +152,52 @@ defmodule BexioApiClient.FilesTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.Files.fetch_file(client, 2)
+    end
+  end
+
+  describe "downloading a single file" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/3.0/files/1/download"} ->
+          %Tesla.Env{
+            status: 200,
+            headers: [{"content-type", "application/pdf"}],
+            body: "string"
+          }
+      end)
+
+      :ok
+    end
+
+    test "shows valid result" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, {body, content_type}} = BexioApiClient.Files.download_file(client, 1)
+
+      assert body == "string"
+      assert content_type == "application/pdf"
+    end
+  end
+
+  describe "preview a single file" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/3.0/files/1/preview"} ->
+          %Tesla.Env{
+            status: 200,
+            headers: [{"content-type", "image/png"}],
+            body: "string"
+          }
+      end)
+
+      :ok
+    end
+
+    test "shows valid result" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, {body, content_type}} = BexioApiClient.Files.preview_file(client, 1)
+
+      assert body == "string"
+      assert content_type == "image/png"
     end
   end
 

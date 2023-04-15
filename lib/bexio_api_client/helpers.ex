@@ -98,8 +98,33 @@ defmodule BexioApiClient.Helpers do
              | :api_not_available}
   def bexio_return_handling(call, callback) do
     case call.() do
-      {:ok, %Tesla.Env{status: status, body: body}} when status in [200, 2091, 301] ->
+      {:ok, %Tesla.Env{status: status, body: body}} when status in [200, 201, 301] ->
         {:ok, callback.(body)}
+
+      {:ok, %Tesla.Env{status: status}} ->
+        {:error, error_code(status)}
+
+      {:error, error} ->
+        {:error, error}
+    end
+  end
+
+  @spec bexio_content_type_return_handling(call :: (() -> any()), callback :: (any(), String.t() | nil -> any())) ::
+          {:ok, any()}
+          | {:error,
+             :invalid_access
+             | :unauthorized
+             | :not_found
+             | :length_required
+             | :invalid_data
+             | :could_not_be_saved
+             | :rate_limited
+             | :unexpected_api_condition
+             | :api_not_available}
+  def bexio_content_type_return_handling(call, callback) do
+    case call.() do
+      {:ok, %Tesla.Env{status: status, body: body} = env} when status in [200, 201, 301] ->
+        {:ok, callback.(body, Tesla.get_header(env, "content-type"))}
 
       {:ok, %Tesla.Env{status: status}} ->
         {:error, error_code(status)}

@@ -130,4 +130,36 @@ defmodule BexioApiClient.Files do
       created_at: to_offset_datetime(created_at)
     }
   end
+
+  @doc """
+  Download file (original content).
+  """
+  @spec download_file(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, {String.t(), any()}} | {:error, any()}
+  def download_file(client, id) do
+    bexio_content_type_return_handling(
+      fn ->
+        Tesla.get(client, "/3.0/files/#{id}/download")
+      end,
+      fn file, content_type -> {file, content_type} end
+    )
+  end
+
+  @doc """
+  Download file (original content).
+  """
+  @spec preview_file(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, {String.t(), any()}} | {:error, any()}
+  def preview_file(client, id) do
+    bexio_content_type_return_handling(
+      fn ->
+        Tesla.get(client, "/3.0/files/#{id}/preview")
+      end,
+      fn file, content_type -> {file, content_type} end
+    )
+  end
 end
