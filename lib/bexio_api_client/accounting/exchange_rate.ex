@@ -5,9 +5,9 @@ defmodule BexioApiClient.Accounting.ExchangeRate do
 
   @typedoc """
   Bexio Currency Exchange Rate
-  
+
   ## Fields:
-  
+
     * `:factor` - the exchange rate of the currency in comparison with the currency listed in the field `:exchange_currency`
     * `:exchange_currency` - the reference currency for the exchange rate
       * `:id` - id of the currency
@@ -16,7 +16,7 @@ defmodule BexioApiClient.Accounting.ExchangeRate do
   """
   @type t :: %__MODULE__{
           factor: float(),
-          exchange_currency: BeyioApiClient.Accounting.Currency.t()
+          exchange_currency: BexioApiClient.Accounting.Currency.t()
         }
   @enforce_keys [:factor, :exchange_currency]
   defstruct [:factor, :exchange_currency]
