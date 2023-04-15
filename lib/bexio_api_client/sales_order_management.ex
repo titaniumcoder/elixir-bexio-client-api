@@ -6,6 +6,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   import BexioApiClient.Helpers
 
   alias BexioApiClient.GlobalArguments
+  alias BexioApiClient.SearchCriteria
 
   alias BexioApiClient.SalesOrderManagement.{
     Comment,
