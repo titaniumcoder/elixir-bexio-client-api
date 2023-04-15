@@ -1676,6 +1676,101 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
+
+  describe "creating a text position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_text"
+        } ->
+          json(%{
+            "id" => 1,
+            "text" => "Text Sample",
+            "internal_pos" => 1,
+            "show_pos_nr" => true,
+            "pos" => nil,
+            "is_optional" => false,
+            "type" => "KbPositionText",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.create_text_position(
+                 client,
+                 :invoice,
+                 1,
+                 "Container",
+                 true
+               )
+    end
+  end
+
+  describe "editing a text position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_text/2",
+          body: _body
+        } ->
+          json(%{
+            "id" => 1,
+            "text" => "Text Sample",
+            "internal_pos" => 1,
+            "show_pos_nr" => true,
+            "pos" => nil,
+            "is_optional" => false,
+            "type" => "KbPositionText",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.edit_text_position(
+                 client,
+                 :invoice,
+                 1,
+                 2,
+                 "Container",
+                 true
+               )
+    end
+  end
+
+  describe "deleting a text position" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_text/2"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.delete_text_position(client, :invoice, 1, 2)
+
+      assert result == true
+    end
+  end
+
   describe "fetching a list of default positions" do
     setup do
       mock(fn
@@ -2264,6 +2359,102 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
+  describe "creating a discount position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_discount"
+        } ->
+          json(%{
+            "id" => 1,
+            "text" => "Partner discount",
+            "is_percentual" => true,
+            "value" => "10.000000",
+            "discount_total" => "1.780000",
+            "type" => "KbPositionDiscount"
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.create_discount_position(
+                 client,
+                 :invoice,
+                 1,
+                 PositionDiscount.new(%{
+                  text: "Partner discount",
+                  value: Decimal.new(10),
+                  percentual?: true
+                 })
+               )
+    end
+  end
+
+  describe "editing a discount position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_discount/2",
+          body: _body
+        } ->
+          json(%{
+            "id" => 1,
+            "text" => "Partner discount",
+            "is_percentual" => true,
+            "value" => "10.000000",
+            "discount_total" => "1.780000",
+            "type" => "KbPositionDiscount"
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.edit_discount_position(
+                 client,
+                 :invoice,
+                 1,
+                 PositionDiscount.new(%{
+                  id: 2,
+                  text: "Partner discount",
+                  value: Decimal.new(10),
+                  percentual?: true
+                 })
+               )
+    end
+  end
+
+  describe "deleting a discount position" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_discount/2"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.delete_discount_position(client, :invoice, 1, 2)
+
+      assert result == true
+    end
+  end
+
   describe "fetching a list of pagebreak positions" do
     setup do
       mock(fn
@@ -2341,6 +2532,91 @@ defmodule BexioApiClient.SalesOrderManagementTest do
                  1,
                  3
                )
+    end
+  end
+
+  describe "creating a pagebreak position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak"
+        } ->
+          json(%{
+            "id" => 1,
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionPagebreak",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.create_pagebreak_position(
+                 client,
+                 :invoice,
+                 1
+               )
+    end
+  end
+
+  describe "editing a pagebreak position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak/2",
+          body: _body
+        } ->
+          json(%{
+            "id" => 1,
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionPagebreak",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.edit_pagebreak_position(
+                 client,
+                 :invoice,
+                 1,
+                 2,
+                 true
+               )
+    end
+  end
+
+  describe "deleting a pagebreak position" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak/2"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.delete_pagebreak_position(client, :invoice, 1, 2)
+
+      assert result == true
     end
   end
 
@@ -2445,4 +2721,103 @@ defmodule BexioApiClient.SalesOrderManagementTest do
                )
     end
   end
+
+  describe "creating a subposition position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition"
+        } ->
+          json(%{
+            "id" => 1,
+            "text" => "This is a container to group other position types",
+            "pos" => 1,
+            "internal_pos" => 1,
+            "show_pos_nr" => true,
+            "is_optional" => false,
+            "total_sum" => "17.800000",
+            "show_pos_prices" => true,
+            "type" => "KbPositionSubposition",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.create_subposition_position(
+                 client,
+                 :invoice,
+                 1,
+                 "Container",
+                 true
+               )
+    end
+  end
+
+  describe "editing a subposition position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition/2",
+          body: _body
+        } ->
+          json(%{
+            "id" => 1,
+            "text" => "This is a container to group other position types",
+            "pos" => 1,
+            "internal_pos" => 1,
+            "show_pos_nr" => true,
+            "is_optional" => false,
+            "total_sum" => "17.800000",
+            "show_pos_prices" => true,
+            "type" => "KbPositionSubposition",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, _position} =
+               BexioApiClient.SalesOrderManagement.edit_subposition_position(
+                 client,
+                 :invoice,
+                 1,
+                 2,
+                 "Container",
+                 true
+               )
+    end
+  end
+
+  describe "deleting a subposition position" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition/2"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.delete_subposition_position(client, :invoice, 1, 2)
+
+      assert result == true
+    end
+  end
+
 end

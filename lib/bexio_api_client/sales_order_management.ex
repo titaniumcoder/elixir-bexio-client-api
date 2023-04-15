@@ -1075,7 +1075,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [BexioApiClient.SalesOrderManagement.PositionText.t()]} | {:error, any()}
+        ) :: {:ok, PositionText.t()} | {:error, any()}
   def fetch_text_position(
         client,
         document_type,
@@ -1090,6 +1090,71 @@ defmodule BexioApiClient.SalesOrderManagement do
         )
       end,
       &map_from_text_position/2
+    )
+  end
+
+    @doc """
+  Create a text position
+  """
+  @spec create_text_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          text :: String.t(),
+          show_pos_nr? :: boolean()
+        ) :: {:ok, PositionText.t()} | {:error, any()}
+  def create_text_position(client, document_type, document_id, text, show_pos_nr?) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
+          %{text: text, show_pos_nr: show_pos_nr?}
+        )
+      end,
+      &map_from_text_position/2
+    )
+  end
+
+  @doc """
+  Edit a text position.
+  """
+  @spec edit_text_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position_id :: pos_integer(),
+          text :: String.t(),
+          show_pos_nr? :: boolean()
+        ) :: {:ok, PositionDefault.t()} | {:error, any()}
+  def edit_text_position(client, document_type, document_id, position_id, text, show_pos_nr?) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{position_id}",
+          %{text: text, show_pos_nr: show_pos_nr?}
+        )
+      end,
+      &map_from_text_position/2
+    )
+  end
+
+  @doc """
+  Delete a text position.
+  """
+  @spec delete_text_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_text_position(client, document_type, document_id, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{id}")
+      end,
+      &success_response/2
     )
   end
 
@@ -1512,7 +1577,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [PositionDiscount.t()]} | {:error, any()}
+        ) :: {:ok, PositionDiscount.t()} | {:error, any()}
   def fetch_discount_position(
         client,
         document_type,
@@ -1529,6 +1594,81 @@ defmodule BexioApiClient.SalesOrderManagement do
       &map_from_discount_position/2
     )
   end
+
+  @doc """
+  Create a discount position
+  """
+  @spec create_discount_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position :: PositionDiscount.t()
+        ) :: {:ok, PositionDiscount.t()} | {:error, any()}
+  def create_discount_position(client, document_type, document_id, position) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
+          remap_discount_position(position)
+        )
+      end,
+      &map_from_discount_position/2
+    )
+  end
+
+  @doc """
+  Edit a discount position.
+  """
+  @spec edit_discount_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position :: PositionDiscount.t()
+        ) :: {:ok, PositionDiscount.t()} | {:error, any()}
+  def edit_discount_position(client, document_type, document_id, position) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{position.id}",
+          remap_discount_position(position)
+        )
+      end,
+      &map_from_discount_position/2
+    )
+  end
+
+  @doc """
+  Delete a discount position.
+  """
+  @spec delete_discount_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_discount_position(client, document_type, document_id, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  defp remap_discount_position(%PositionDiscount{
+    text: text,
+    percentual?: percentual?,
+    value: value
+       }) do
+    %{
+      text: text,
+      is_percentual: percentual?,
+      value: Decimal.to_string(value, :normal)
+    }
+  end
+
 
   defp map_from_discount_positions(discount_positions, _env),
     do: Enum.map(discount_positions, &map_from_discount_position/1)
@@ -1587,7 +1727,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [PositionPagebreak.t()]} | {:error, any()}
+        ) :: {:ok, PositionPagebreak.t()} | {:error, any()}
   def fetch_pagebreak_position(
         client,
         document_type,
@@ -1602,6 +1742,68 @@ defmodule BexioApiClient.SalesOrderManagement do
         )
       end,
       &map_from_pagebreak_position/2
+    )
+  end
+
+  @doc """
+  Create a pagebreak position
+  """
+  @spec create_pagebreak_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer()
+        ) :: {:ok, PositionPagebreak.t()} | {:error, any()}
+  def create_pagebreak_position(client, document_type, document_id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
+          %{}
+        )
+      end,
+      &map_from_pagebreak_position/2
+    )
+  end
+
+  @doc """
+  Edit a pagebreak position.
+  """
+  @spec edit_pagebreak_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position_id :: pos_integer(),
+          pagebreak :: boolean()
+        ) :: {:ok, PositionPagebreak.t()} | {:error, any()}
+  def edit_pagebreak_position(client, document_type, document_id, position_id, pagebreak) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{position_id}",
+          %{papebreak: pagebreak}
+        )
+      end,
+      &map_from_pagebreak_position/2
+    )
+  end
+
+  @doc """
+  Delete a pagebreak position.
+  """
+  @spec delete_pagebreak_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_pagebreak_position(client, document_type, document_id, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{id}")
+      end,
+      &success_response/2
     )
   end
 
@@ -1677,6 +1879,71 @@ defmodule BexioApiClient.SalesOrderManagement do
         )
       end,
       &map_from_subposition_position/2
+    )
+  end
+
+  @doc """
+  Create a subposition position
+  """
+  @spec create_subposition_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          text :: String.t(),
+          show_pos_nr? :: boolean()
+        ) :: {:ok, PositionSubposition.t()} | {:error, any()}
+  def create_subposition_position(client, document_type, document_id, text, show_pos_nr?) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
+          %{text: text, show_pos_nr: show_pos_nr?}
+        )
+      end,
+      &map_from_subposition_position/2
+    )
+  end
+
+  @doc """
+  Edit a subposition position.
+  """
+  @spec edit_subposition_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          position_id :: pos_integer(),
+          text :: String.t(),
+          show_pos_nr? :: boolean()
+        ) :: {:ok, PositionSubposition.t()} | {:error, any()}
+  def edit_subposition_position(client, document_type, document_id, position_id, text, show_pos_nr?) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{position_id}",
+          %{text: text, show_pos_nr: show_pos_nr?}
+        )
+      end,
+      &map_from_subposition_position/2
+    )
+  end
+
+  @doc """
+  Delete a subposition position.
+  """
+  @spec delete_subposition_position(
+          client :: Tesla.Client.t(),
+          document_type :: :offer | :order | :invoice,
+          document_id :: pos_integer(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_subposition_position(client, document_type, document_id, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{id}")
+      end,
+      &success_response/2
     )
   end
 
