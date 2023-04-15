@@ -225,4 +225,35 @@ defmodule BexioApiClient.AccountingTest do
       assert result.round_factor == 0.05
     end
   end
+
+  describe "fetch exchange rates for currencies" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/3.0/currencies/1/exchange_rates"} ->
+          json([
+            %{
+              "factor_nr" => 1.2,
+              "exchange_currency" => %{
+                "id" => 1,
+                "name" => "CHF",
+                "round_factor" => 0.05
+              }
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Accounting.fetch_exchange_rates(client, 1)
+
+      assert result.factor == 1.2
+      assert result.exchange_currency.id == 1
+      assert result.exchange_currency.name == "CHF"
+      assert result.exchange_currency.round_factor == 0.05
+    end
+  end
 end

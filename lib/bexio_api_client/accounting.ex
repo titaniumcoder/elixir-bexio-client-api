@@ -5,7 +5,7 @@ defmodule BexioApiClient.Accounting do
 
   import BexioApiClient.Helpers
   alias BexioApiClient.SearchCriteria
-  alias BexioApiClient.Accounting.{Account, AccountGroup, CalendarYear, Currency}
+  alias BexioApiClient.Accounting.{Account, AccountGroup, CalendarYear, Currency, ExchangeRate}
 
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
@@ -214,6 +214,36 @@ defmodule BexioApiClient.Accounting do
       id: id,
       name: name,
       round_factor: round_factor
+    }
+  end
+
+  @doc """
+  Fetch a list of currency exchange rates.
+  """
+  @spec fetch_exchange_rates(
+          client :: Tesla.Client.t(),
+          id :: integer(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [Currency.t()]} | {:error, any()}
+  def fetch_exchange_rates(client, id, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/3.0/currencies/#{id}/exchange_rates", query: opts_to_query(opts))
+      end,
+      &map_from_exchange_rates/1
+    )
+  end
+
+  defp map_from_exchange_rates(exchange_rates),
+    do: Enum.map(exchange_rates, &map_from_exchange_rate/1)
+
+  defp map_from_exchange_rate(%{
+         "factor_nr" => factor_nr,
+         "exchange_currency" => exchange_currency
+       }) do
+    %ExchangeRate{
+      factor: factor_nr,
+      exchange_currency: map_from_currency(exchange_currency)
     }
   end
 end
