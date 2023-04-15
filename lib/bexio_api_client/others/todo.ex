@@ -1,6 +1,6 @@
-defmodule BexioApiClient.Others.Task do
+defmodule BexioApiClient.Others.Todo do
   @moduledoc """
-  Bexio Task Module.
+  Bexio Task Module, renamed to Todo in Elixir.
   """
 
   @typedoc """

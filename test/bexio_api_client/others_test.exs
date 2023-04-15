@@ -3,7 +3,7 @@ defmodule BexioApiClient.OthersTest do
 
   doctest BexioApiClient.Others
 
-  alias BexioApiClient.Others.{FictionalUser, Task}
+  alias BexioApiClient.Others.{FictionalUser, Todo}
   alias BexioApiClient.SearchCriteria
 
   import Tesla.Mock
@@ -996,7 +996,7 @@ defmodule BexioApiClient.OthersTest do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, result} =
-               BexioApiClient.Others.create_task(client, %Task{
+               BexioApiClient.Others.create_task(client, %Todo{
                  id: -1,
                  reminder?: false,
                  finish_date: ~N[2023-03-13 08:00:00],
@@ -1057,7 +1057,7 @@ defmodule BexioApiClient.OthersTest do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
       assert {:ok, result} =
-               BexioApiClient.Others.edit_task(client, %Task{
+               BexioApiClient.Others.edit_task(client, %Todo{
                  id: 2,
                  reminder?: false,
                  finish_date: ~N[2023-03-13 08:00:00],

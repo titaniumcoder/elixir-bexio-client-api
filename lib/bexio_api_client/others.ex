@@ -13,7 +13,7 @@ defmodule BexioApiClient.Others do
     Note,
     PaymentType,
     Permission,
-    Task,
+    Todo,
     Unit,
     User,
     FictionalUser
@@ -621,7 +621,7 @@ defmodule BexioApiClient.Others do
          },
          _env \\ nil
        ) do
-    %Task{
+    %Todo{
       id: id,
       user_id: user_id,
       finish_date: to_datetime(finish_date),
