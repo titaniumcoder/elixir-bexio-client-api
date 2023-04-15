@@ -1592,7 +1592,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       {:ok, result} =
         BexioApiClient.SalesOrderManagement.delete_subtotal_position(client, :invoice, 1, 2)
 
-        assert result == true
+      assert result == true
     end
   end
 
@@ -1785,6 +1785,146 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
       assert {:error, :not_found} =
                BexioApiClient.SalesOrderManagement.fetch_default_position(client, :invoice, 1, 3)
+    end
+  end
+
+  describe "creating a default position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_custom",
+          body: body
+        } ->
+          json_body = Jason.decode!(body)
+
+          assert json_body["amount"] != nil
+          assert json_body["unit_id"] != nil
+          assert json_body["account_id"] != nil
+          assert json_body["tax_id"] != nil
+          assert json_body["text"] != nil
+          assert json_body["unit_price"] != nil
+          assert json_body["discount_in_percent"] != nil
+
+          json(%{
+            "id" => 1,
+            "amount" => "5.000000",
+            "unit_id" => 1,
+            "account_id" => 1,
+            "unit_name" => "kg",
+            "tax_id" => 4,
+            "tax_value" => "7.70",
+            "text" => "Apples",
+            "unit_price" => "3.560000",
+            "discount_in_percent" => "0.000000",
+            "position_total" => "17.800000",
+            "pos" => 1,
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionCustom",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, position} =
+               BexioApiClient.SalesOrderManagement.create_default_position(
+                 client,
+                 :invoice,
+                 1,
+                 PositionDefault.new(%{
+                   id: 2,
+                   tax_id: 4,
+                   text: "Apples",
+                   unit_id: 1,
+                   account_id: 1
+                 })
+               )
+    end
+  end
+
+  describe "editing a default position" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_custom/2",
+          body: body
+        } ->
+          json_body = Jason.decode!(body)
+
+          assert json_body["amount"] != nil
+          assert json_body["unit_id"] != nil
+          assert json_body["account_id"] != nil
+          assert json_body["tax_id"] != nil
+          assert json_body["text"] != nil
+          assert json_body["unit_price"] != nil
+          assert json_body["discount_in_percent"] != nil
+
+          json(%{
+            "id" => 1,
+            "amount" => "5.000000",
+            "unit_id" => 1,
+            "account_id" => 1,
+            "unit_name" => "kg",
+            "tax_id" => 4,
+            "tax_value" => "7.70",
+            "text" => "Apples",
+            "unit_price" => "3.560000",
+            "discount_in_percent" => "0.000000",
+            "position_total" => "17.800000",
+            "pos" => 1,
+            "internal_pos" => 1,
+            "is_optional" => false,
+            "type" => "KbPositionCustom",
+            "parent_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, position} =
+               BexioApiClient.SalesOrderManagement.edit_default_position(
+                 client,
+                 :invoice,
+                 1,
+                 PositionDefault.new(%{
+                  id: 2,
+                  tax_id: 4,
+                  text: "Apples",
+                  unit_id: 1,
+                  account_id: 1
+                })
+               )
+    end
+  end
+
+  describe "deleting a default position" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_custom/2"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.delete_default_position(client, :invoice, 1, 2)
+
+      assert result == true
     end
   end
 
