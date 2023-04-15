@@ -140,4 +140,32 @@ defmodule BexioApiClient.Helpers do
   defp error_code(429), do: :rate_limited
   defp error_code(500), do: :unexpected_api_condition
   defp error_code(503), do: :api_not_available
+
+  @doc """
+  converts a list of maps ("id" => id, "name" => name) into a single map with all values converted to %{id: name}
+
+  Examples:
+
+    iex> BexioApiClient.Helpers.body_to_map([%{"id" => 1, "name" => "hello"}, %{"id" => 2, "name" => "world"}], nil)
+    %{1 => "hello", 2 => "world"}
+
+  """
+  @spec body_to_map(list(%{String.t() => any()}), Tesla.Env.t()) :: %{integer() => String.t()}
+  def body_to_map(body, _env) do
+    body
+    |> Enum.map(fn %{"id" => id, "name" => name} -> {id, name} end)
+    |> Enum.into(%{})
+  end
+
+  @doc """
+  Converts the pattern %{"id" => id, "name" => name} into %{id: id, name: name}
+
+  Examples:
+
+    iex> BexioApiClient.Helpers.id_name(%{"id" => 1, "name" => "hello"}, nil)
+    %{id: 1, name: "hello"}
+
+  """
+  @spec id_name(%{String.t() => any()}, Tesla.Env.t()) :: %{id: integer(), name: String.t()}
+  def id_name(%{"id" => id, "name" => name}, _env), do: %{id: id, name: name}
 end

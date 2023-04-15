@@ -1151,4 +1151,172 @@ defmodule BexioApiClient.OthersTest do
       assert result[1] == "Open"
     end
   end
+
+  describe "fetching a list of units" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/unit"
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "h"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_units(client)
+
+      assert result[1] == "h"
+    end
+  end
+
+  describe "searching units" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/unit/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "h"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} =
+               BexioApiClient.Others.search_units(client, [
+                 SearchCriteria.not_nil?(:name)
+               ])
+
+      assert result[1] == "h"
+    end
+  end
+
+  describe "fetching a unit" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/unit/1"
+        } ->
+          json(%{
+            "id" => 1,
+            "name" => "h"
+          })
+      end)
+
+      :ok
+    end
+
+    test "lists found result" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_unit(client, 1)
+
+      assert result.id == 1
+      assert result.name == "h"
+    end
+  end
+
+  describe "creating a unit" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/unit",
+          body: body
+        } ->
+          body_json = Jason.decode!(body)
+
+          assert body_json["name"] == "minute"
+
+          json(%{
+            "id" => 2,
+            "name" => "minute"
+          })
+      end)
+
+      :ok
+    end
+
+    test "creates a unit" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.create_unit(client, "minute")
+
+      assert result.id == 2
+      assert result.name == "minute"
+    end
+  end
+
+  describe "updating a unit" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/unit/1",
+          body: body
+        } ->
+          body_json = Jason.decode!(body)
+
+          assert body_json["name"] == "minute"
+
+          json(%{
+            "id" => 1,
+            "name" => "minute"
+          })
+      end)
+
+      :ok
+    end
+
+    test "updates a unit" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.edit_unit(client, 1, "minute")
+
+      assert result.id == 1
+      assert result.name == "minute"
+    end
+  end
+
+  describe "deleting a unit" do
+    setup do
+      mock(fn
+        %{
+          method: :delete,
+          url: "https://api.bexio.com/2.0/unit/2"
+        } ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "deletes a unit" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, result} = BexioApiClient.Others.delete_unit(client, 2)
+
+      assert result == true
+    end
+  end
 end

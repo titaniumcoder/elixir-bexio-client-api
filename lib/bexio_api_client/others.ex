@@ -14,7 +14,6 @@ defmodule BexioApiClient.Others do
     PaymentType,
     Permission,
     Todo,
-    Unit,
     User,
     FictionalUser
   }
@@ -656,11 +655,7 @@ defmodule BexioApiClient.Others do
       fn ->
         Tesla.get(client, "/2.0/todo_priority", query: opts_to_query(opts))
       end,
-      fn body, _env ->
-        body
-        |> Enum.map(fn %{"id" => id, "name" => name} -> {id, name} end)
-        |> Enum.into(%{})
-      end
+      &body_to_map/2
     )
   end
 
@@ -674,10 +669,101 @@ defmodule BexioApiClient.Others do
       fn ->
         Tesla.get(client, "/2.0/todo_status", query: opts_to_query(opts))
       end,
-      fn body, _env ->
-        body
-        |> Enum.map(fn %{"id" => id, "name" => name} -> {id, name} end)
-        |> Enum.into(%{})
+      &body_to_map/2
+    )
+  end
+
+
+@doc """
+  Fetch a list of units.
+  """
+  @spec fetch_units(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_without_order_by_arg()]) ::
+          {:ok, map()} | {:error, any()}
+  def fetch_units(client, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/unit", query: opts_to_query(opts))
+      end,
+      &body_to_map/2
+    )
+  end
+
+  @doc """
+  Search a unit
+
+  Following fields are supported:
+
+  * `name`
+  """
+  @spec search_units(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Task.t()]} | {:error, any()}
+  def search_units(client, criteria, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/unit/search", criteria, query: opts_to_query(opts))
+      end,
+      &body_to_map/2
+    )
+  end
+
+  @doc """
+  Fetch a unit.
+  """
+  @spec fetch_unit(client :: Tesla.Client.t(), id :: integer()) ::
+          {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+  def fetch_unit(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/unit/#{id}")
+      end,
+      &id_name/2
+    )
+  end
+
+  @doc """
+  Create a unit.
+  """
+  @spec create_unit(client :: Tesla.Client.t(), name :: String.t()) ::
+  {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+  def create_unit(client, name) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/unit", %{name: name})
+      end,
+      &id_name/2
+    )
+  end
+
+  @doc """
+  Edit a unit.
+  """
+  @spec edit_unit(client :: Tesla.Client.t(), id :: integer(), name :: String.t()) ::
+  {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+  def edit_unit(client, id, name) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/unit/#{id}", %{name: name})
+      end,
+      &id_name/2
+    )
+  end
+
+  @doc """
+  Delete a unit.
+  """
+  @spec delete_unit(client :: Tesla.Client.t(), id :: integer()) ::
+          {:ok, Task.t()} | {:error, any()}
+  def delete_unit(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/unit/#{id}")
+      end,
+      fn
+        %{"success" => true}, _ -> true
+        _, _ -> false
       end
     )
   end
