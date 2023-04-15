@@ -134,7 +134,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec delete_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, boolean()} | {:error, any()}
   def delete_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -150,7 +150,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec issue_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, boolean()} | {:error, any()}
   def issue_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -166,7 +166,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec revert_issue_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, boolean()} | {:error, any()}
   def revert_issue_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -182,7 +182,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec accept_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, boolean()} | {:error, any()}
   def accept_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -198,7 +198,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec decline_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, boolean()} | {:error, any()}
   def decline_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -214,7 +214,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec reissue_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, boolean()} | {:error, any()}
   def reissue_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -230,7 +230,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec mark_quote_as_sent(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, boolean()} | {:error, any()}
   def mark_quote_as_sent(client, id) do
     bexio_body_handling(
       fn ->
@@ -246,7 +246,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec quote_pdf(
           client :: Tesla.Client.t(),
           quote_id :: pos_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, map()} | {:error, any()}
   def quote_pdf(client, quote_id) do
     bexio_body_handling(
       fn ->
@@ -572,6 +572,127 @@ defmodule BexioApiClient.SalesOrderManagement do
       end,
       &map_from_order/2
     )
+  end
+
+  @doc """
+  Create a quote (id in order will be ignored). Be also aware: whether you need or must not send a document number depends on the settings in Bexio. It cannot be controlled by the API
+  and as such will just send if it exists.
+  """
+  @spec create_order(
+          client :: Tesla.Client.t(),
+          order :: Order.t()
+        ) :: {:ok, Order.t()} | {:error, any()}
+  def create_order(client, order) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_order", remap_order(order))
+      end,
+      &map_from_order/2
+    )
+  end
+
+  @doc """
+  Edit a quote.
+  """
+  @spec edit_order(
+          client :: Tesla.Client.t(),
+          order :: Order.t()
+        ) :: {:ok, Order.t()} | {:error, any()}
+  def edit_order(client, order) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_order/#{order.id}", remap_edit_order(order))
+      end,
+      &map_from_order/2
+    )
+  end
+
+  @doc """
+  Delete a quote.
+  """
+  @spec delete_order(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_order(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_order/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  This action returns a pdf document of the order
+  """
+  @spec order_pdf(
+          client :: Tesla.Client.t(),
+          order_id :: pos_integer()
+        ) :: {:ok, map()} | {:error, any()}
+  def order_pdf(client, order_id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_order/#{order_id}/pdf")
+      end,
+      &map_from_pdf/2
+    )
+  end
+
+  defp remap_order(
+         %Order{
+           positions: positions
+         } = order
+       ) do
+    order
+    |> remap_edit_order()
+    |> Map.put(:positions, Enum.map(positions, &map_to_post_position/1))
+  end
+
+  defp remap_edit_order(%Order{
+         title: title,
+         document_nr: document_nr,
+         contact_id: contact_id,
+         contact_sub_id: contact_sub_id,
+         user_id: user_id,
+         project_id: project_id,
+         language_id: language_id,
+         bank_account_id: bank_account_id,
+         currency_id: curency_id,
+         payment_type_id: payment_type_id,
+         header: header,
+         footer: footer,
+         mwst_type: mwst_type,
+         mwst_is_net?: mwst_is_net?,
+         show_position_taxes?: show_position_taxes?,
+         is_valid_from: is_valid_from,
+         delivery_address_type: delivery_address_type,
+         api_reference: api_reference,
+         viewed_by_client_at: viewed_by_client_at,
+         template_slug: template_slug
+       }) do
+    %{
+      title: title,
+      document_nr: document_nr,
+      contact_id: contact_id,
+      contact_sub_id: contact_sub_id,
+      user_id: user_id,
+      pr_project_id: project_id,
+      language_id: language_id,
+      bank_account_id: bank_account_id,
+      currency_id: curency_id,
+      payment_type_id: payment_type_id,
+      header: header,
+      footer: footer,
+      mwst_type: mwst_type_id(mwst_type),
+      mwst_is_net: mwst_is_net?,
+      show_position_taxes: show_position_taxes?,
+      is_valid_from: Date.to_iso8601(is_valid_from),
+      delivery_address_type: delivery_address_type,
+      api_reference: api_reference,
+      viewed_by_client_at: to_naive_string(viewed_by_client_at),
+      template_slug: template_slug
+    }
   end
 
   defp map_from_orders(orders, _env), do: Enum.map(orders, &map_from_order/1)

@@ -1037,6 +1037,256 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
+
+  describe "creating an order" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_order", body: body} ->
+          json_body = Jason.decode!(body)
+
+          assert json_body["contact_id"] == 14
+          assert json_body["pr_project_id"] == 3
+          assert json_body["mwst_is_net"] == true
+          assert json_body["show_position_taxes"] == false
+          assert json_body["is_valid_from"] == "2019-06-24"
+          assert json_body["mwst_type"] == 0
+          assert Enum.at(json_body["positions"], 0)["type"] == "KbPositionCustom"
+          assert Enum.at(json_body["positions"], 1)["type"] == "KbPositionArticle"
+          assert Enum.at(json_body["positions"], 2)["type"] == "KbPositionText"
+          assert Enum.at(json_body["positions"], 3)["type"] == "KbPositionPagebreak"
+          assert Enum.at(json_body["positions"], 4)["type"] == "KbPositionSubtotal"
+          assert Enum.at(json_body["positions"], 5)["type"] == "KbPositionDiscount"
+
+          json(%{
+            "id" => 4,
+            "document_nr" => "O-00001",
+            "title" => nil,
+            "contact_id" => 14,
+            "contact_sub_id" => nil,
+            "user_id" => 1,
+            "project_id" => nil,
+            "logopaper_id" => 1,
+            "language_id" => 1,
+            "bank_account_id" => 1,
+            "currency_id" => 1,
+            "payment_type_id" => 1,
+            "header" =>
+              "Thank you very much for your inquiry. We would be pleased to make you the following offer:",
+            "footer" =>
+              "We hope that our offer meets your expectations and will be happy to answer your questions.",
+            "total_gross" => "17.800000",
+            "total_net" => "17.800000",
+            "total_taxes" => "1.3706",
+            "total" => "19.150000",
+            "total_rounding_difference" => -0.02,
+            "mwst_type" => 0,
+            "mwst_is_net" => true,
+            "show_position_taxes" => false,
+            "is_valid_from" => "2019-06-24",
+            "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "delivery_address_type" => 0,
+            "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "kb_item_status_id" => 6,
+            "api_reference" => nil,
+            "viewed_by_client_at" => nil,
+            "is_recurring" => false,
+            "updated_at" => "2019-04-08 13:17:32",
+            "template_slug" => "581a8010821e01426b8b456b",
+            "taxs" => [
+              %{
+                "percentage" => "7.70",
+                "value" => "1.3706"
+              }
+            ],
+            "network_link" => ""
+          })
+      end)
+
+      :ok
+    end
+
+    test "creates a new record" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, record} =
+        BexioApiClient.SalesOrderManagement.create_order(
+          client,
+          Order.new(%{
+            document_nr: "AN-00004",
+            contact_id: 14,
+            is_valid_from: ~D[2019-06-24],
+            project_id: 3,
+            mwst_type: :including,
+            user_id: 1,
+            language_id: 1,
+            bank_account_id: 1,
+            currency_id: 1,
+            payment_type_id: 1,
+            header: "Header",
+            footer: "Footer",
+            mwst_is_net?: true,
+            show_position_taxes?: false,
+            contact_address: "",
+            delivery_address_type: 0,
+            delivery_address: "",
+            show_total?: true,
+            positions: [
+              PositionDefault.new(),
+              PositionItem.new(),
+              PositionText.new(),
+              PositionPagebreak.new(),
+              PositionSubtotal.new(),
+              PositionDiscount.new()
+            ]
+          })
+        )
+    end
+  end
+
+  describe "editing an order" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_order/4", body: body} ->
+          json_body = Jason.decode!(body)
+
+          assert json_body["contact_id"] == 14
+          assert json_body["pr_project_id"] == 3
+          assert json_body["mwst_is_net"] == true
+          assert json_body["show_position_taxes"] == false
+          assert json_body["is_valid_from"] == "2019-06-24"
+          assert json_body["mwst_type"] == 0
+
+          json(%{
+            "id" => 4,
+            "document_nr" => "O-00001",
+            "title" => nil,
+            "contact_id" => 14,
+            "contact_sub_id" => nil,
+            "user_id" => 1,
+            "project_id" => nil,
+            "logopaper_id" => 1,
+            "language_id" => 1,
+            "bank_account_id" => 1,
+            "currency_id" => 1,
+            "payment_type_id" => 1,
+            "header" =>
+              "Thank you very much for your inquiry. We would be pleased to make you the following offer:",
+            "footer" =>
+              "We hope that our offer meets your expectations and will be happy to answer your questions.",
+            "total_gross" => "17.800000",
+            "total_net" => "17.800000",
+            "total_taxes" => "1.3706",
+            "total" => "19.150000",
+            "total_rounding_difference" => -0.02,
+            "mwst_type" => 0,
+            "mwst_is_net" => true,
+            "show_position_taxes" => false,
+            "is_valid_from" => "2019-06-24",
+            "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "delivery_address_type" => 0,
+            "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "kb_item_status_id" => 6,
+            "api_reference" => nil,
+            "viewed_by_client_at" => nil,
+            "is_recurring" => false,
+            "updated_at" => "2019-04-08 13:17:32",
+            "template_slug" => "581a8010821e01426b8b456b",
+            "taxs" => [
+              %{
+                "percentage" => "7.70",
+                "value" => "1.3706"
+              }
+            ],
+            "network_link" => ""
+          })
+      end)
+
+      :ok
+    end
+
+    test "edits a new record" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, record} =
+        BexioApiClient.SalesOrderManagement.edit_order(
+          client,
+          Order.new(%{
+            id: 4,
+            document_nr: "AN-00004",
+            contact_id: 14,
+            is_valid_from: ~D[2019-06-24],
+            project_id: 3,
+            mwst_type: :including,
+            user_id: 1,
+            language_id: 1,
+            bank_account_id: 1,
+            currency_id: 1,
+            payment_type_id: 1,
+            header: "Header",
+            footer: "Footer",
+            mwst_is_net?: true,
+            show_position_taxes?: false,
+            contact_address: "",
+            delivery_address_type: 0,
+            delivery_address: "",
+            show_total?: true,
+            positions: [
+              PositionDefault.new(),
+              PositionItem.new(),
+              PositionText.new(),
+              PositionPagebreak.new(),
+              PositionSubtotal.new(),
+              PositionDiscount.new()
+            ]
+          })
+        )
+    end
+  end
+
+  describe "deleting an order" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_order/4"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "deletes the record" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.delete_order(client, 4)
+      assert result == true
+    end
+  end
+
+  describe "showing order pdf" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_order/4/pdf"} ->
+          json(%{
+            "name" => "document-00005.pdf",
+            "size" => 9768,
+            "mime" => "application/pdf",
+            "content" => "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+          })
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.order_pdf(client, 4)
+      assert result.name == "document-00005.pdf"
+      assert result.size == 9768
+      assert result.mime == "application/pdf"
+      assert result.content == "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+    end
+  end
+
   describe "fetching a list of comments" do
     setup do
       mock(fn
