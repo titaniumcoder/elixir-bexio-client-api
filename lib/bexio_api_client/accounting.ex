@@ -5,7 +5,7 @@ defmodule BexioApiClient.Accounting do
 
   import BexioApiClient.Helpers
   alias BexioApiClient.SearchCriteria
-  alias BexioApiClient.Accounting.{Account, AccountGroup, CalendarYear}
+  alias BexioApiClient.Accounting.{Account, AccountGroup, CalendarYear, Currency}
 
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
@@ -151,7 +151,7 @@ defmodule BexioApiClient.Accounting do
   @spec fetch_calendar_years(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [AccountGroup.t()]} | {:error, any()}
+        ) :: {:ok, [CalendarYear.t()]} | {:error, any()}
   def fetch_calendar_years(client, opts \\ []) do
     bexio_return_handling(
       fn ->
@@ -183,6 +183,37 @@ defmodule BexioApiClient.Accounting do
       updated_at: to_offset_datetime(updated_at),
       vat_accounting_method: String.to_atom(vat_accounting_method),
       vat_accounting_type: String.to_atom(vat_accounting_type)
+    }
+  end
+
+  @doc """
+  Fetch a list of currencies.
+  """
+  @spec fetch_currencies(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [Currency.t()]} | {:error, any()}
+  def fetch_currencies(client, opts \\ []) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/3.0/currencies", query: opts_to_query(opts))
+      end,
+      &map_from_currencies/1
+    )
+  end
+
+  defp map_from_currencies(currencies),
+    do: Enum.map(currencies, &map_from_currency/1)
+
+  defp map_from_currency(%{
+         "id" => id,
+         "name" => name,
+         "round_factor" => round_factor
+       }) do
+    %Currency{
+      id: id,
+      name: name,
+      round_factor: round_factor
     }
   end
 end

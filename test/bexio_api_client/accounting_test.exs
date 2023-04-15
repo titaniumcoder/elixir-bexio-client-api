@@ -176,7 +176,7 @@ defmodule BexioApiClient.AccountingTest do
               "updated_at" => "2018-04-30T19:58:58+00:00",
               "vat_accounting_method" => "effective",
               "vat_accounting_type" => "agreed"
-              }
+            }
           ])
       end)
 
@@ -196,6 +196,33 @@ defmodule BexioApiClient.AccountingTest do
       assert result.updated_at == ~U[2018-04-30 19:58:58Z]
       assert result.vat_accounting_method == :effective
       assert result.vat_accounting_type == :agreed
+    end
+  end
+
+  describe "fetching a list of currencies" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/3.0/currencies"} ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "CHF",
+              "round_factor" => 0.05
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Accounting.fetch_currencies(client)
+
+      assert result.id == 1
+      assert result.name == "CHF"
+      assert result.round_factor == 0.05
     end
   end
 end

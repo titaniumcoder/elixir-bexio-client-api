@@ -1,13 +1,13 @@
 defmodule BexioApiClient.Accounting.CalendarYear do
   @moduledoc """
-  Bexio Account Module.
+  Bexio Calendar Year Module.
   """
 
   @typedoc """
-  Bexio Account
-  
+  Bexio Calendar Year
+
   ## Fields:
-  
+
     * `:id` - automatic id given by bexio
     * `:start` - Start date of the calendar year
     * `:end` - End date of the calendar year

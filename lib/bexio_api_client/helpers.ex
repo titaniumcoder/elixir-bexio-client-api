@@ -1,6 +1,5 @@
 defmodule BexioApiClient.Helpers do
   @moduledoc false
-  alias ElixirLS.LanguageServer.Server.InvalidParamError
 
   @doc """
   Convert the given string into an Elixir date.
