@@ -35,4 +35,20 @@ defmodule BexioApiClient.SalesOrderManagement.PositionDiscount do
     :value,
     :discount_total
   ]
+
+  @doc """
+  Create a new record.
+  """
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        text: "",
+        percentual?: true,
+        value: Decimal.new(0),
+        discount_total: Decimal.new(0)
+      },
+      attrs
+    )
+  end
 end

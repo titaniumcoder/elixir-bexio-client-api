@@ -10,8 +10,6 @@ defmodule BexioApiClient.Others do
     CompanyProfile,
     Country,
     Language,
-    Note,
-    PaymentType,
     Permission,
     Todo,
     User,
@@ -366,10 +364,7 @@ defmodule BexioApiClient.Others do
       fn ->
         Tesla.delete(client, "/3.0/fictional_users/#{id}")
       end,
-      fn
-        %{"success" => true}, _env -> true
-        _, _ -> false
-      end
+      &success_response/2
     )
   end
 
@@ -568,10 +563,7 @@ defmodule BexioApiClient.Others do
       fn ->
         Tesla.delete(client, "/2.0/task/#{id}")
       end,
-      fn
-        %{"success" => true}, _ -> true
-        _, _ -> false
-      end
+      &success_response/2
     )
   end
 
@@ -673,11 +665,13 @@ defmodule BexioApiClient.Others do
     )
   end
 
-
-@doc """
+  @doc """
   Fetch a list of units.
   """
-  @spec fetch_units(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_without_order_by_arg()]) ::
+  @spec fetch_units(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) ::
           {:ok, map()} | {:error, any()}
   def fetch_units(client, opts \\ []) do
     bexio_body_handling(
@@ -727,7 +721,7 @@ defmodule BexioApiClient.Others do
   Create a unit.
   """
   @spec create_unit(client :: Tesla.Client.t(), name :: String.t()) ::
-  {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+          {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
   def create_unit(client, name) do
     bexio_body_handling(
       fn ->
@@ -741,7 +735,7 @@ defmodule BexioApiClient.Others do
   Edit a unit.
   """
   @spec edit_unit(client :: Tesla.Client.t(), id :: integer(), name :: String.t()) ::
-  {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+          {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
   def edit_unit(client, id, name) do
     bexio_body_handling(
       fn ->
@@ -761,10 +755,7 @@ defmodule BexioApiClient.Others do
       fn ->
         Tesla.delete(client, "/2.0/unit/#{id}")
       end,
-      fn
-        %{"success" => true}, _ -> true
-        _, _ -> false
-      end
+      &success_response/2
     )
   end
 end

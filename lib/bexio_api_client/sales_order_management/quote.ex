@@ -2,6 +2,13 @@ defmodule BexioApiClient.SalesOrderManagement.Quote do
   @moduledoc """
   Quote
   """
+  alias BexioApiClient.SalesOrderManagement.PositionText
+  alias BexioApiClient.SalesOrderManagement.PositionSubtotal
+  alias BexioApiClient.SalesOrderManagement.PositionSubposition
+  alias BexioApiClient.SalesOrderManagement.PositionPagebreak
+  alias BexioApiClient.SalesOrderManagement.PositionItem
+  alias BexioApiClient.SalesOrderManagement.PositionDiscount
+  alias BexioApiClient.SalesOrderManagement.PositionDefault
 
   @typedoc """
   Quote
@@ -58,7 +65,18 @@ defmodule BexioApiClient.SalesOrderManagement.Quote do
           updated_at: NaiveDateTime.t(),
           template_slug: String.t() | nil,
           taxs: list(%{percentage: Decimal.t(), value: Decimal.t()}),
-          network_link: String.t() | nil
+          network_link: String.t() | nil,
+          positions:
+            list(
+              PositionDefault.t()
+              | PositionDiscount.t()
+              | PositionItem.t()
+              | PositionPagebreak.t()
+              | PositionSubposition.t()
+              | PositionSubtotal.t()
+              | PositionText.t()
+            )
+            | nil
         }
   @enforce_keys [
     :id,
@@ -123,6 +141,48 @@ defmodule BexioApiClient.SalesOrderManagement.Quote do
     :updated_at,
     :template_slug,
     :taxs,
-    :network_link
+    :network_link,
+    :positions
   ]
+
+  @doc """
+  Create a new quote
+  """
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        document_nr: nil,
+        contact_id: nil,
+        contact_sub_id: nil,
+        user_id: nil,
+        project_id: nil,
+        language_id: nil,
+        bank_account_id: nil,
+        currency_id: nil,
+        payment_type_id: nil,
+        header: "",
+        footer: "",
+        total_gross: Decimal.new(0),
+        total_net: Decimal.new(0),
+        total_taxes: Decimal.new(0),
+        total: Decimal.new(0),
+        total_rounding_difference: 0.0,
+        mwst_type: :including,
+        mwst_is_net?: true,
+        show_position_taxes?: false,
+        is_valid_from: Date.utc_today(),
+        is_valid_until: Date.utc_today(),
+        contact_address: "",
+        delivery_address_type: 0,
+        delivery_address: "",
+        kb_item_status: :draft,
+        show_total?: true,
+        updated_at: NaiveDateTime.local_now(),
+        taxs: [],
+        positions: []
+      },
+      attrs
+    )
+  end
 end

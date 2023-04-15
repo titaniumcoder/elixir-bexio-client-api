@@ -47,4 +47,19 @@ defmodule BexioApiClient.SalesOrderManagement.Comment do
     :image,
     :image_path
   ]
+
+  @doc """
+  Create a new record.
+  """
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        text: "",
+        date: Date.utc_today(),
+        public?: false
+      },
+      attrs
+    )
+  end
 end

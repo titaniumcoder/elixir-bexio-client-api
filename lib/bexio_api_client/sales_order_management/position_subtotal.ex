@@ -26,4 +26,21 @@ defmodule BexioApiClient.SalesOrderManagement.PositionSubtotal do
         }
   @enforce_keys [:id, :text, :value, :internal_pos, :optional?]
   defstruct [:id, :text, :value, :internal_pos, :optional?, :parent_id]
+
+  @doc """
+  Create a new record.
+  """
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        text: "",
+        internal_pos: 0,
+        value: Decimal.new(0),
+        optional?: false,
+        parent_id: nil
+      },
+      attrs
+    )
+  end
 end

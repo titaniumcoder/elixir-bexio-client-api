@@ -2,6 +2,17 @@ defmodule BexioApiClient.SalesOrderManagementTest do
   use ExUnit.Case, async: true
   doctest BexioApiClient.Contacts
 
+  alias BexioApiClient.SalesOrderManagement.{
+    PositionDiscount,
+    PositionItem,
+    PositionSubtotal,
+    PositionPagebreak,
+    PositionText,
+    PositionDefault,
+    Quote,
+    Order
+  }
+
   alias BexioApiClient.SearchCriteria
 
   import Tesla.Mock
@@ -65,7 +76,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "shows valid records" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [record]} = BexioApiClient.SalesOrderManagement.fetch_quotes(client)
+      {:ok, [record]} = BexioApiClient.SalesOrderManagement.fetch_quotes(client)
 
       assert record.id == 4
       assert record.document_nr == "AN-00001"
@@ -175,16 +186,16 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "lists found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [record]} =
-               BexioApiClient.SalesOrderManagement.search_quotes(
-                 client,
-                 [
-                   SearchCriteria.equal(:id, 4)
-                 ],
-                 limit: 100,
-                 offset: 50,
-                 order_by: :id
-               )
+      {:ok, [record]} =
+        BexioApiClient.SalesOrderManagement.search_quotes(
+          client,
+          [
+            SearchCriteria.equal(:id, 4)
+          ],
+          limit: 100,
+          offset: 50,
+          order_by: :id
+        )
 
       assert record.id == 4
       assert record.document_nr == "AN-00001"
@@ -289,7 +300,8 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
     test "shows valid result" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:ok, record} = BexioApiClient.SalesOrderManagement.fetch_quote(client, 1)
+      {:ok, record} = BexioApiClient.SalesOrderManagement.fetch_quote(client, 1)
+
       assert record.id == 4
       assert record.document_nr == "AN-00001"
       assert record.title == nil
@@ -336,6 +348,371 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
       assert {:error, :not_found} = BexioApiClient.SalesOrderManagement.fetch_quote(client, 99)
+    end
+  end
+
+  describe "creating a quote" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_offer", body: body} ->
+          json_body = Jason.decode!(body)
+
+          assert json_body["contact_id"] == 14
+          assert json_body["pr_project_id"] == 3
+          assert json_body["mwst_is_net"] == true
+          assert json_body["show_position_taxes"] == false
+          assert json_body["is_valid_from"] == "2019-06-24"
+          assert json_body["is_valid_until"] == "2019-07-24"
+          assert json_body["mwst_type"] == 0
+          assert Enum.at(json_body["positions"], 0)["type"] == "KbPositionCustom"
+          assert Enum.at(json_body["positions"], 1)["type"] == "KbPositionArticle"
+          assert Enum.at(json_body["positions"], 2)["type"] == "KbPositionText"
+          assert Enum.at(json_body["positions"], 3)["type"] == "KbPositionPagebreak"
+          assert Enum.at(json_body["positions"], 4)["type"] == "KbPositionSubtotal"
+          assert Enum.at(json_body["positions"], 5)["type"] == "KbPositionDiscount"
+
+          json(%{
+            "id" => 4,
+            "document_nr" => "AN-00001",
+            "title" => nil,
+            "contact_id" => 14,
+            "contact_sub_id" => nil,
+            "user_id" => 1,
+            "project_id" => nil,
+            "logopaper_id" => 1,
+            "language_id" => 1,
+            "bank_account_id" => 1,
+            "currency_id" => 1,
+            "payment_type_id" => 1,
+            "header" =>
+              "Thank you very much for your inquiry. We would be pleased to make you the following offer:",
+            "footer" =>
+              "We hope that our offer meets your expectations and will be happy to answer your questions.",
+            "total_gross" => "17.800000",
+            "total_net" => "17.800000",
+            "total_taxes" => "1.3706",
+            "total" => "19.150000",
+            "total_rounding_difference" => -0.02,
+            "mwst_type" => 0,
+            "mwst_is_net" => true,
+            "show_position_taxes" => false,
+            "is_valid_from" => "2019-06-24",
+            "is_valid_until" => "2019-07-24",
+            "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "delivery_address_type" => 0,
+            "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "kb_item_status_id" => 3,
+            "api_reference" => nil,
+            "viewed_by_client_at" => nil,
+            "kb_terms_of_payment_template_id" => nil,
+            "show_total" => true,
+            "updated_at" => "2019-04-08 13:17:32",
+            "template_slug" => "581a8010821e01426b8b456b",
+            "taxs" => [
+              %{
+                "percentage" => "7.70",
+                "value" => "1.3706"
+              }
+            ],
+            "network_link" => ""
+          })
+      end)
+
+      :ok
+    end
+
+    test "creates a new record" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, record} =
+        BexioApiClient.SalesOrderManagement.create_quote(
+          client,
+          Quote.new(%{
+            document_nr: "AN-00004",
+            contact_id: 14,
+            is_valid_from: ~D[2019-06-24],
+            is_valid_until: ~D[2019-07-24],
+            project_id: 3,
+            mwst_type: :including,
+            user_id: 1,
+            language_id: 1,
+            bank_account_id: 1,
+            currency_id: 1,
+            payment_type_id: 1,
+            header: "Header",
+            footer: "Footer",
+            mwst_is_net?: true,
+            show_position_taxes?: false,
+            contact_address: "",
+            delivery_address_type: 0,
+            delivery_address: "",
+            show_total?: true,
+            positions: [
+              PositionDefault.new(),
+              PositionItem.new(),
+              PositionText.new(),
+              PositionPagebreak.new(),
+              PositionSubtotal.new(),
+              PositionDiscount.new()
+            ]
+          })
+        )
+    end
+  end
+
+  describe "editing a quote" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_offer/4", body: body} ->
+          json_body = Jason.decode!(body)
+
+          assert json_body["contact_id"] == 14
+          assert json_body["pr_project_id"] == 3
+          assert json_body["mwst_is_net"] == true
+          assert json_body["show_position_taxes"] == false
+          assert json_body["is_valid_from"] == "2019-06-24"
+          assert json_body["is_valid_until"] == "2019-07-24"
+          assert json_body["mwst_type"] == 0
+
+          json(%{
+            "id" => 4,
+            "document_nr" => "AN-00001",
+            "title" => nil,
+            "contact_id" => 14,
+            "contact_sub_id" => nil,
+            "user_id" => 1,
+            "project_id" => nil,
+            "logopaper_id" => 1,
+            "language_id" => 1,
+            "bank_account_id" => 1,
+            "currency_id" => 1,
+            "payment_type_id" => 1,
+            "header" =>
+              "Thank you very much for your inquiry. We would be pleased to make you the following offer:",
+            "footer" =>
+              "We hope that our offer meets your expectations and will be happy to answer your questions.",
+            "total_gross" => "17.800000",
+            "total_net" => "17.800000",
+            "total_taxes" => "1.3706",
+            "total" => "19.150000",
+            "total_rounding_difference" => -0.02,
+            "mwst_type" => 0,
+            "mwst_is_net" => true,
+            "show_position_taxes" => false,
+            "is_valid_from" => "2019-06-24",
+            "is_valid_until" => "2019-07-24",
+            "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "delivery_address_type" => 0,
+            "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+            "kb_item_status_id" => 3,
+            "api_reference" => nil,
+            "viewed_by_client_at" => nil,
+            "kb_terms_of_payment_template_id" => nil,
+            "show_total" => true,
+            "updated_at" => "2019-04-08 13:17:32",
+            "template_slug" => "581a8010821e01426b8b456b",
+            "taxs" => [
+              %{
+                "percentage" => "7.70",
+                "value" => "1.3706"
+              }
+            ],
+            "network_link" => ""
+          })
+      end)
+
+      :ok
+    end
+
+    test "edits a new record" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, record} =
+        BexioApiClient.SalesOrderManagement.edit_quote(
+          client,
+          Quote.new(%{
+            id: 4,
+            document_nr: "AN-00004",
+            contact_id: 14,
+            is_valid_from: ~D[2019-06-24],
+            is_valid_until: ~D[2019-07-24],
+            project_id: 3,
+            mwst_type: :including,
+            user_id: 1,
+            language_id: 1,
+            bank_account_id: 1,
+            currency_id: 1,
+            payment_type_id: 1,
+            header: "Header",
+            footer: "Footer",
+            mwst_is_net?: true,
+            show_position_taxes?: false,
+            contact_address: "",
+            delivery_address_type: 0,
+            delivery_address: "",
+            show_total?: true,
+            positions: [
+              PositionDefault.new(),
+              PositionItem.new(),
+              PositionText.new(),
+              PositionPagebreak.new(),
+              PositionSubtotal.new(),
+              PositionDiscount.new()
+            ]
+          })
+        )
+    end
+  end
+
+  describe "deleting a quote" do
+    setup do
+      mock(fn
+        %{method: :delete, url: "https://api.bexio.com/2.0/kb_offer/4"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "deletes the record" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.delete_quote(client, 4)
+      assert result == true
+    end
+  end
+
+  describe "issueing a quote" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_offer/4/issue"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.issue_quote(client, 4)
+      assert result == true
+    end
+  end
+
+  describe "revert issueing a quote" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_offer/4/revertIssue"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.revert_issue_quote(client, 4)
+      assert result == true
+    end
+  end
+
+  describe "accepting a quote" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_offer/4/accept"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.accept_quote(client, 4)
+      assert result == true
+    end
+  end
+
+  describe "declining a quote" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_offer/4/reject"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.decline_quote(client, 4)
+      assert result == true
+    end
+  end
+
+  describe "reissuing a quote" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_offer/4/reissue"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.reissue_quote(client, 4)
+      assert result == true
+    end
+  end
+
+  describe "marking quote as sent" do
+    setup do
+      mock(fn
+        %{method: :post, url: "https://api.bexio.com/2.0/kb_offer/4/mark_as_sent"} ->
+          json(%{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.mark_quote_as_sent(client, 4)
+      assert result == true
+    end
+  end
+
+  describe "showing pdf" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/kb_offer/4/pdf"} ->
+          json(%{
+            "name" => "document-00005.pdf",
+            "size" => 9768,
+            "mime" => "application/pdf",
+            "content" => "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+          })
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.quote_pdf(client, 4)
+      assert result.name == "document-00005.pdf"
+      assert result.size == 9768
+      assert result.mime == "application/pdf"
+      assert result.content == "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
     end
   end
 
@@ -908,7 +1285,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
       assert position.id == 1
       assert position.text == "Text Sample"
-      assert position.show_pos_nr == true
+      assert position.show_pos_nr? == true
       assert position.internal_pos == 1
       assert position.optional? == false
       assert position.parent_id == nil
@@ -945,7 +1322,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
       assert position.id == 1
       assert position.text == "Text Sample"
-      assert position.show_pos_nr == true
+      assert position.show_pos_nr? == true
       assert position.internal_pos == 1
       assert position.optional? == false
       assert position.parent_id == nil

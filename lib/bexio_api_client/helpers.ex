@@ -57,6 +57,9 @@ defmodule BexioApiClient.Helpers do
   def to_iso8601(%NaiveDateTime{} = n), do: NaiveDateTime.to_iso8601(n)
   def to_iso8601(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
 
+  def to_naive_string(nil), do: nil
+  def to_naive_string(n), do: NaiveDateTime.to_string(n)
+
   # The format from Bexio 3.0 is 2022-09-13T09:14:21+00:00
   @doc """
   Convert the given string into an elixir date using offsets
@@ -168,4 +171,20 @@ defmodule BexioApiClient.Helpers do
   """
   @spec id_name(%{String.t() => any()}, Tesla.Env.t()) :: %{id: integer(), name: String.t()}
   def id_name(%{"id" => id, "name" => name}, _env), do: %{id: id, name: name}
+
+  @doc """
+  Just interprets the delete result into either true or false depending on the success key in the map
+
+  Example:
+
+    iex> BexioApiClient.Helpers.success_response(%{"success" => true}, %Tesla.Env{})
+    true
+
+    iex> BexioApiClient.Helpers.success_response(%{"failure" => true}, %Tesla.Env{})
+    false
+
+  """
+  @spec success_response(map(), Tesla.Env.t()) :: boolean()
+  def success_response(%{"success" => true}, _env), do: true
+  def success_response(_result, _env), do: false
 end

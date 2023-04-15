@@ -79,4 +79,31 @@ defmodule BexioApiClient.SalesOrderManagement.PositionItem do
     :article_id,
     :parent_id
   ]
+
+  @doc """
+  Create a new record.
+  """
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        amount: Decimal.new(0),
+        unit_id: nil,
+        account_id: nil,
+        unit_name: "",
+        tax_id: nil,
+        tax_value: Decimal.new(0),
+        text: "",
+        unit_price: Decimal.new(0),
+        discount_in_percent: Decimal.new(0),
+        position_total: Decimal.new(0),
+        pos: 0,
+        internal_pos: 0,
+        optional?: false,
+        parent_id: nil,
+        article_id: nil
+      },
+      attrs
+    )
+  end
 end

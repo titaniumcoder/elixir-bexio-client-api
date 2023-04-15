@@ -85,7 +85,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec fetch_quote(
           client :: Tesla.Client.t(),
           quote_id :: pos_integer()
-        ) :: {:ok, [Quote.t()]} | {:error, any()}
+        ) :: {:ok, Quote.t()} | {:error, any()}
   def fetch_quote(client, quote_id) do
     bexio_body_handling(
       fn ->
@@ -94,6 +94,318 @@ defmodule BexioApiClient.SalesOrderManagement do
       &map_from_quote/2
     )
   end
+
+  @doc """
+  Create a quote (id in order will be ignored). Be also aware: whether you need or must not send a document number depends on the settings in Bexio. It cannot be controlled by the API
+  and as such will just send if it exists.
+  """
+  @spec create_quote(
+          client :: Tesla.Client.t(),
+          offer :: Quote.t()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def create_quote(client, offer) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer", remap_quote(offer))
+      end,
+      &map_from_quote/2
+    )
+  end
+
+  @doc """
+  Edit a quote.
+  """
+  @spec edit_quote(
+          client :: Tesla.Client.t(),
+          offer :: Quote.t()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def edit_quote(client, offer) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer/#{offer.id}", remap_edit_quote(offer))
+      end,
+      &map_from_quote/2
+    )
+  end
+
+  @doc """
+  Delete a quote.
+  """
+  @spec delete_quote(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def delete_quote(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_offer/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Issue a quote.
+  """
+  @spec issue_quote(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def issue_quote(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer/#{id}/issue", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Revert Issue a quote.
+  """
+  @spec revert_issue_quote(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def revert_issue_quote(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer/#{id}/revertIssue", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Accept a quote.
+  """
+  @spec accept_quote(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def accept_quote(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer/#{id}/accept", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Decline a quote.
+  """
+  @spec decline_quote(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def decline_quote(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer/#{id}/reject", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Reissue a quote.
+  """
+  @spec reissue_quote(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def reissue_quote(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer/#{id}/reissue", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Mark a quote as sent.
+  """
+  @spec mark_quote_as_sent(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def mark_quote_as_sent(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_offer/#{id}/mark_as_sent", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  This action returns a pdf document of the quote
+  """
+  @spec quote_pdf(
+          client :: Tesla.Client.t(),
+          quote_id :: pos_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def quote_pdf(client, quote_id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_offer/#{quote_id}/pdf")
+      end,
+      &map_from_pdf/2
+    )
+  end
+
+  defp remap_quote(
+         %Quote{
+           positions: positions
+         } = offer
+       ) do
+    offer
+    |> remap_edit_quote()
+    |> Map.put(:positions, Enum.map(positions, &map_to_post_position/1))
+  end
+
+  defp map_from_pdf(%{"name" => name, "size" => size, "mime" => mime, "content" => content}, _env) do
+    %{
+      name: name,
+      size: size,
+      mime: mime,
+      content: content
+    }
+  end
+
+  defp remap_edit_quote(%Quote{
+         title: title,
+         document_nr: document_nr,
+         contact_id: contact_id,
+         contact_sub_id: contact_sub_id,
+         user_id: user_id,
+         project_id: project_id,
+         language_id: language_id,
+         bank_account_id: bank_account_id,
+         currency_id: curency_id,
+         payment_type_id: payment_type_id,
+         header: header,
+         footer: footer,
+         mwst_type: mwst_type,
+         mwst_is_net?: mwst_is_net?,
+         show_position_taxes?: show_position_taxes?,
+         is_valid_from: is_valid_from,
+         is_valid_until: is_valid_until,
+         delivery_address_type: delivery_address_type,
+         api_reference: api_reference,
+         viewed_by_client_at: viewed_by_client_at,
+         kb_terms_of_payment_template_id: kb_terms_of_payment_template_id,
+         template_slug: template_slug
+       }) do
+    %{
+      title: title,
+      document_nr: document_nr,
+      contact_id: contact_id,
+      contact_sub_id: contact_sub_id,
+      user_id: user_id,
+      pr_project_id: project_id,
+      language_id: language_id,
+      bank_account_id: bank_account_id,
+      currency_id: curency_id,
+      payment_type_id: payment_type_id,
+      header: header,
+      footer: footer,
+      mwst_type: mwst_type_id(mwst_type),
+      mwst_is_net: mwst_is_net?,
+      show_position_taxes: show_position_taxes?,
+      is_valid_from: Date.to_iso8601(is_valid_from),
+      is_valid_until: Date.to_iso8601(is_valid_until),
+      delivery_address_type: delivery_address_type,
+      api_reference: api_reference,
+      viewed_by_client_at: to_naive_string(viewed_by_client_at),
+      kb_terms_of_payment_template_id: kb_terms_of_payment_template_id,
+      template_slug: template_slug
+    }
+  end
+
+  defp map_to_post_position(%PositionDefault{
+         amount: amount,
+         unit_id: unit_id,
+         account_id: account_id,
+         tax_id: tax_id,
+         text: text,
+         unit_price: unit_price,
+         discount_in_percent: discount_in_percent,
+         parent_id: parent_id
+       }),
+       do: %{
+         type: "KbPositionCustom",
+         amount: Decimal.to_string(amount, :normal),
+         unit_id: unit_id,
+         account_id: account_id,
+         tax_id: tax_id,
+         unit_price: Decimal.to_string(unit_price, :normal),
+         discount_in_percent: Decimal.to_string(discount_in_percent, :normal),
+         parent_id: parent_id,
+         text: text
+       }
+
+  defp map_to_post_position(%PositionItem{
+         amount: amount,
+         unit_id: unit_id,
+         account_id: account_id,
+         tax_id: tax_id,
+         text: text,
+         unit_price: unit_price,
+         discount_in_percent: discount_in_percent,
+         parent_id: parent_id,
+         article_id: article_id
+       }),
+       do: %{
+         type: "KbPositionArticle",
+         amount: Decimal.to_string(amount, :normal),
+         unit_id: unit_id,
+         account_id: account_id,
+         tax_id: tax_id,
+         unit_price: Decimal.to_string(unit_price, :normal),
+         discount_in_percent: Decimal.to_string(discount_in_percent, :normal),
+         parent_id: parent_id,
+         text: text,
+         article_id: article_id
+       }
+
+  defp map_to_post_position(%PositionText{
+         text: text,
+         show_pos_nr?: show_pos_nr?,
+         parent_id: parent_id
+       }),
+       do: %{
+         type: "KbPositionText",
+         text: text,
+         show_pos_nr: show_pos_nr?,
+         parent_id: parent_id
+       }
+
+  defp map_to_post_position(%PositionSubtotal{text: text}),
+    do: %{
+      type: "KbPositionSubtotal",
+      text: text
+    }
+
+  defp map_to_post_position(%PositionPagebreak{}),
+    do: %{
+      type: "KbPositionPagebreak",
+      pagebreak: true
+    }
+
+  defp map_to_post_position(%PositionDiscount{
+         text: text,
+         percentual?: percentual?,
+         value: value
+       }),
+       do: %{
+         type: "KbPositionDiscount",
+         is_percentual: percentual?,
+         text: text,
+         value: Decimal.to_string(value, :normal)
+       }
 
   defp map_from_quotes(quotes, _env), do: Enum.map(quotes, &map_from_quote/1)
 
@@ -180,15 +492,14 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp mwst_type(1), do: :excluding
   defp mwst_type(2), do: :exempt
 
+  defp mwst_type_id(:including), do: 0
+  defp mwst_type_id(:excluding), do: 1
+  defp mwst_type_id(:exempt), do: 2
+
   defp kb_item_status(1), do: :draft
   defp kb_item_status(2), do: :pending
   defp kb_item_status(3), do: :confirmed
   defp kb_item_status(4), do: :declined
-
-  defp kb_item_status_id(:draft), do: 1
-  defp kb_item_status_id(:pending), do: 2
-  defp kb_item_status_id(:confirmed), do: 3
-  defp kb_item_status_id(:declined), do: 4
 
   defp to_tax(%{"percentage" => percentage, "value" => value}),
     do: %{percentage: percentage, value: value}
@@ -344,11 +655,6 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp order_kb_item_status(6), do: :done
   defp order_kb_item_status(15), do: :partial
   defp order_kb_item_status(21), do: :canceled
-
-  defp order_kb_item_status_id(:pending), do: 5
-  defp order_kb_item_status_id(:done), do: 6
-  defp order_kb_item_status_id(:partial), do: 15
-  defp order_kb_item_status_id(:canceled), do: 21
 
   # Comments
 
@@ -612,7 +918,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          %{
            "id" => id,
            "text" => text,
-           "show_pos_nr" => show_pos_nr,
+           "show_pos_nr" => show_pos_nr?,
            "pos" => pos,
            "internal_pos" => internal_pos,
            "is_optional" => optional?,
@@ -623,7 +929,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     %PositionText{
       id: id,
       text: text,
-      show_pos_nr: show_pos_nr,
+      show_pos_nr?: show_pos_nr?,
       pos: pos,
       internal_pos: internal_pos,
       optional?: optional?,
