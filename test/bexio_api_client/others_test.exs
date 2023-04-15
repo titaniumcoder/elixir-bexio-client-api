@@ -176,4 +176,106 @@ defmodule BexioApiClient.OthersTest do
       assert result.logo_base64 == "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
     end
   end
+
+  describe "fetching a list of countries" do
+    setup do
+      mock(fn
+        %{
+          method: :get,
+          url: "https://api.bexio.com/2.0/country"
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Kiribati",
+              "name_short" => "KI",
+              "iso3166_alpha2" => "KI"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} = BexioApiClient.Others.fetch_countries(client)
+
+      assert result.id == 1
+      assert result.name == "Kiribati"
+      assert result.name_short == "KI"
+      assert result.iso3166_alpha2 == "KI"
+    end
+  end
+
+  describe "searching countries" do
+    setup do
+      mock(fn
+        %{
+          method: :post,
+          url: "https://api.bexio.com/2.0/country/search",
+          body: _body
+        } ->
+          json([
+            %{
+              "id" => 1,
+              "name" => "Kiribati",
+              "name_short" => "KI",
+              "iso3166_alpha2" => "KI"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+
+      assert {:ok, [result]} =
+               BexioApiClient.Others.search_countries(client, [
+                 SearchCriteria.nil?(:name_short),
+                 SearchCriteria.part_of(:name, ["fred", "queen"])
+               ])
+
+      assert result.id == 1
+      assert result.name == "Kiribati"
+      assert result.name_short == "KI"
+      assert result.iso3166_alpha2 == "KI"
+    end
+  end
+
+  describe "fetching a single country" do
+    setup do
+      mock(fn
+        %{method: :get, url: "https://api.bexio.com/2.0/country/1"} ->
+          json(%{
+            "id" => 1,
+            "name" => "Kiribati",
+            "name_short" => "KI",
+            "iso3166_alpha2" => "KI"
+          })
+
+        %{method: :get, url: "https://api.bexio.com/2.0/country/99"} ->
+          %Tesla.Env{status: 404, body: "Contact does not exist"}
+      end)
+
+      :ok
+    end
+
+    test "shows valid result" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:ok, result} = BexioApiClient.Others.fetch_country(client, 1)
+      assert result.id == 1
+      assert result.name == "Kiribati"
+      assert result.name_short == "KI"
+      assert result.iso3166_alpha2 == "KI"
+    end
+
+    test "fails on unknown id" do
+      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      assert {:error, :not_found} = BexioApiClient.Others.fetch_country(client, 99)
+    end
+  end
 end

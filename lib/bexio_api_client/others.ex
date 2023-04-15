@@ -121,4 +121,73 @@ defmodule BexioApiClient.Others do
       logo_base64: logo_base64
     }
   end
+
+  @doc """
+  Fetch a list of countries.
+  """
+  @spec fetch_countries(client :: Tesla.Client.t()) ::
+          {:ok, [Country.t()]} | {:error, any()}
+  def fetch_countries(client) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/country")
+      end,
+      &map_from_countries/1
+    )
+  end
+
+  @doc """
+  Search countries via query.
+  The following search fields are supported:
+
+  * name
+  * name_short
+  """
+  @spec search_countries(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Country.t()]} | {:error, any()}
+  def search_countries(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_return_handling(
+      fn ->
+        Tesla.post(client, "/2.0/country/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_countries/1
+    )
+  end
+
+  @doc """
+  Fetch a single country
+  """
+  @spec fetch_country(client :: Tesla.Client.t(), id :: non_neg_integer()) ::
+          {:ok, Country.t()} | {:error, any()}
+  def fetch_country(client, id) do
+    bexio_return_handling(
+      fn ->
+        Tesla.get(client, "/2.0/country/#{id}")
+      end,
+      &map_from_country/1
+    )
+  end
+
+  defp map_from_countries(countries), do: Enum.map(countries, &map_from_country/1)
+
+  defp map_from_country(%{
+         "id" => id,
+         "name" => name,
+         "name_short" => name_short,
+         "iso3166_alpha2" => iso3166_alpha2
+       }) do
+    %Country{
+      id: id,
+      name: name,
+      name_short: name_short,
+      iso3166_alpha2: iso3166_alpha2
+    }
+  end
 end
