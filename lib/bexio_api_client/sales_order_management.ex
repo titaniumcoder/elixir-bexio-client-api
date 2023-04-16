@@ -440,7 +440,7 @@ defmodule BexioApiClient.SalesOrderManagement do
            "template_slug" => template_slug,
            "taxs" => taxs,
            "network_link" => network_link
-         },
+         } = map,
          _env \\ nil
        ) do
     %Quote{
@@ -480,7 +480,11 @@ defmodule BexioApiClient.SalesOrderManagement do
       taxs: Enum.map(taxs, &to_tax/1),
       network_link: network_link
     }
+    |> map_quote_positions(Map.get(map, "positions"))
   end
+
+  defp map_quote_positions(q, nil), do: q
+  defp map_quote_positions(q, positions), do: %{q | positions: remap_positions(positions)}
 
   defp mwst_type(0), do: :including
   defp mwst_type(1), do: :excluding
@@ -726,7 +730,7 @@ defmodule BexioApiClient.SalesOrderManagement do
            "template_slug" => template_slug,
            "taxs" => taxs,
            "network_link" => network_link
-         },
+         } = map,
          _env \\ nil
        ) do
     %Order{
@@ -764,7 +768,12 @@ defmodule BexioApiClient.SalesOrderManagement do
       taxs: Enum.map(taxs, &to_tax/1),
       network_link: network_link
     }
+
+    |> map_order_positions(Map.get(map, "positions"))
   end
+
+  defp map_order_positions(q, nil), do: q
+  defp map_order_positions(q, positions), do: %{q | positions: remap_positions(positions)}
 
   defp order_kb_item_status(5), do: :pending
   defp order_kb_item_status(6), do: :done
@@ -895,6 +904,18 @@ defmodule BexioApiClient.SalesOrderManagement do
       image_path: image_path
     }
   end
+
+  # Remap positions for single orders / quotes
+  defp remap_positions([]), do: []
+  defp remap_positions([position | tl]), do: [remap_position(position) | remap_positions(tl)]
+
+  defp remap_position(%{"type" => "KbPositionCustom"} = position), do: map_from_default_position(position)
+  defp remap_position(%{"type" => "KbPositionArticle"} = position), do: map_from_item_position(position)
+  defp remap_position(%{"type" => "KbPositionText"} = position), do: map_from_text_position(position)
+  defp remap_position(%{"type" => "KbPositionSubtotal"} = position), do: map_from_subtotal_position(position)
+  defp remap_position(%{"type" => "KbPositionPagebreak"} = position), do: map_from_pagebreak_position(position)
+  defp remap_position(%{"type" => "KbPositionDiscount"} = position), do: map_from_discount_position(position)
+
 
   # Subtotal Positions
 
