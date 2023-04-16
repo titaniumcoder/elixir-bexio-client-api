@@ -102,7 +102,7 @@ defmodule BexioApiClient.Items do
   def edit_item(client, item) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/article/#{item.id}", remap_item(item))
+        Tesla.post(client, "/2.0/article/#{item.id}", remap_edit_item(item))
       end,
       &map_from_article/2
     )
@@ -210,8 +210,19 @@ defmodule BexioApiClient.Items do
   defp article_type(1), do: :physical
   defp article_type(2), do: :service
 
-  defp remap_item(%Item{
-         article_type: article_type,
+  defp remap_item(
+         %Item{
+           article_type: article_type,
+           stock_nr: stock_nr
+         } = item
+       ) do
+    item
+    |> remap_edit_item()
+    |> Map.put(:article_type_id, article_type_id(article_type))
+    |> Map.put(:stock_nr, stock_nr)
+  end
+
+  defp remap_edit_item(%Item{
          user_id: user_id,
          contact_id: contact_id,
          deliverer_code: deliverer_code,
@@ -231,7 +242,6 @@ defmodule BexioApiClient.Items do
          stock?: stock?,
          stock_id: stock_id,
          stock_place_id: stock_place_id,
-         stock_nr: stock_nr,
          stock_min_nr: stock_min_nr,
          width: width,
          height: height,
@@ -241,7 +251,6 @@ defmodule BexioApiClient.Items do
          article_group_id: article_group_id
        }) do
     %{
-      article_type_id: article_type_id(article_type),
       user_id: user_id,
       contact_id: contact_id,
       deliverer_code: deliverer_code,
@@ -261,7 +270,6 @@ defmodule BexioApiClient.Items do
       is_stock: stock?,
       stock_id: stock_id,
       stock_place_id: stock_place_id,
-      stock_nr: stock_nr,
       stock_min_nr: stock_min_nr,
       width: width,
       height: height,
@@ -301,8 +309,8 @@ defmodule BexioApiClient.Items do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-          ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
-          def search_stock_locations(
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+  def search_stock_locations(
         client,
         criteria,
         opts \\ []
@@ -326,8 +334,8 @@ defmodule BexioApiClient.Items do
   @spec fetch_stock_areas(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-          ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
-          def fetch_stock_areas(client, opts \\ []) do
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+  def fetch_stock_areas(client, opts \\ []) do
     bexio_body_handling(
       fn ->
         Tesla.get(client, "/2.0/stock_place", query: opts_to_query(opts))
@@ -347,8 +355,8 @@ defmodule BexioApiClient.Items do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-          ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
-          def search_stock_areas(
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+  def search_stock_areas(
         client,
         criteria,
         opts \\ []
