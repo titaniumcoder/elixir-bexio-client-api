@@ -267,15 +267,13 @@ defmodule BexioApiClient.Contacts do
 
   ### Bexio API for the contact group part of the API.
 
-  alias BexioApiClient.Contacts.ContactGroup
-
   @doc """
   Fetch a list of contacts groups.
   """
   @spec fetch_contact_groups(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [ContactGroup.t()]} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
   def fetch_contact_groups(
         client,
         opts \\ []
@@ -284,7 +282,7 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.get(client, "/2.0/contact_group", query: opts_to_query(opts))
       end,
-      &map_from_contact_groups/2
+      &body_to_map/2
     )
   end
 
@@ -298,7 +296,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [ContactGroup.t()]} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
   def search_contact_groups(
         client,
         criteria,
@@ -308,7 +306,7 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.post(client, "/2.0/contact_group/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_contact_groups/2
+      &body_to_map/2
     )
   end
 
@@ -318,7 +316,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_group(
           client :: Tesla.Client.t(),
           contact_group_id :: pos_integer()
-        ) :: {:ok, [ContactRelation.t()]} | {:error, any()}
+        ) :: {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
   def fetch_contact_group(
         client,
         contact_group_id
@@ -327,29 +325,11 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.get(client, "/2.0/contact_group/#{contact_group_id}")
       end,
-      &map_from_contact_group/2
+      &id_name/2
     )
   end
 
-  defp map_from_contact_groups(contact_groups, _env),
-    do: Enum.map(contact_groups, &map_from_contact_group/1)
-
-  defp map_from_contact_group(
-         %{
-           "id" => id,
-           "name" => name
-         },
-         _env \\ nil
-       ) do
-    %ContactGroup{
-      id: id,
-      name: name
-    }
-  end
-
   ### Bexio API for the contact sector part of the API.
-
-  alias BexioApiClient.Contacts.ContactSector
 
   @doc """
   Fetch a list of contacts sectors.
@@ -357,7 +337,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_sectors(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [ContactSector.t()]} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
   def fetch_contact_sectors(
         client,
         opts \\ []
@@ -366,7 +346,7 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.get(client, "/2.0/contact_branch", query: opts_to_query(opts))
       end,
-      &map_from_contact_sectors/2
+      &body_to_map/2
     )
   end
 
@@ -380,7 +360,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [ContactSector.t()]} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
   def search_contact_sectors(
         client,
         criteria,
@@ -390,21 +370,8 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.post(client, "/2.0/contact_branch/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_contact_sectors/2
+      &body_to_map/2
     )
-  end
-
-  defp map_from_contact_sectors(contact_sectors, _env),
-    do: Enum.map(contact_sectors, &map_from_contact_sector/1)
-
-  defp map_from_contact_sector(%{
-         "id" => id,
-         "name" => name
-       }) do
-    %ContactSector{
-      id: id,
-      name: name
-    }
   end
 
   ### Bexio API for the additional address part of the API.
@@ -521,15 +488,13 @@ defmodule BexioApiClient.Contacts do
 
   ### Bexio API for salutations
 
-  alias BexioApiClient.Contacts.Salutation
-
   @doc """
   Fetch a list of additional addresses.
   """
   @spec fetch_salutations(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Salutation.t()]} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
   def fetch_salutations(
         client,
         opts \\ []
@@ -538,7 +503,7 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.get(client, "/2.0/salutation", query: opts_to_query(opts))
       end,
-      &map_from_salutations/2
+      &body_to_map/2
     )
   end
 
@@ -552,7 +517,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Salutation.t()]} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
   def search_salutations(
         client,
         criteria,
@@ -562,7 +527,7 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.post(client, "/2.0/salutation/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_salutations/2
+      &body_to_map/2
     )
   end
 
@@ -572,7 +537,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_salutation(
           client :: Tesla.Client.t(),
           salutation_id :: non_neg_integer()
-        ) :: {:ok, [Salutation.t()]} | {:error, any()}
+        ) :: {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
   def fetch_salutation(
         client,
         salutation_id
@@ -584,29 +549,11 @@ defmodule BexioApiClient.Contacts do
           "/2.0/salutation/#{salutation_id}"
         )
       end,
-      &map_from_salutation/2
+      &id_name/2
     )
   end
 
-  defp map_from_salutations(salutations, _env),
-    do: Enum.map(salutations, &map_from_salutation/1)
-
-  defp map_from_salutation(
-         %{
-           "id" => id,
-           "name" => name
-         },
-         _env \\ nil
-       ) do
-    %Salutation{
-      id: id,
-      name: name
-    }
-  end
-
   ### Bexio API for the titles part of the API.
-
-  alias BexioApiClient.Contacts.Title
 
   @doc """
   Fetch a list of titles.
@@ -614,7 +561,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_titles(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Title.t()]} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
   def fetch_titles(
         client,
         opts \\ []
@@ -623,7 +570,7 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.get(client, "/2.0/title", query: opts_to_query(opts))
       end,
-      &map_from_titles/2
+      &body_to_map/2
     )
   end
 
@@ -637,7 +584,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Title.t()]} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
   def search_titles(
         client,
         criteria,
@@ -647,7 +594,7 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Tesla.post(client, "/2.0/title/search", criteria, query: opts_to_query(opts))
       end,
-      &map_from_titles/2
+      &body_to_map/2
     )
   end
 
@@ -657,7 +604,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_title(
           client :: Tesla.Client.t(),
           title_id :: non_neg_integer()
-        ) :: {:ok, [Title.t()]} | {:error, any()}
+        ) :: {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
   def fetch_title(
         client,
         title_id
@@ -669,23 +616,7 @@ defmodule BexioApiClient.Contacts do
           "/2.0/title/#{title_id}"
         )
       end,
-      &map_from_title/2
+      &id_name/2
     )
-  end
-
-  defp map_from_titles(titles, _env),
-    do: Enum.map(titles, &map_from_title/1)
-
-  defp map_from_title(
-         %{
-           "id" => id,
-           "name" => name
-         },
-         _env \\ nil
-       ) do
-    %Title{
-      id: id,
-      name: name
-    }
   end
 end

@@ -1676,7 +1676,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
-
   describe "creating a text position" do
     setup do
       mock(fn
@@ -2388,9 +2387,9 @@ defmodule BexioApiClient.SalesOrderManagementTest do
                  :invoice,
                  1,
                  PositionDiscount.new(%{
-                  text: "Partner discount",
-                  value: Decimal.new(10),
-                  percentual?: true
+                   text: "Partner discount",
+                   value: Decimal.new(10),
+                   percentual?: true
                  })
                )
     end
@@ -2426,10 +2425,10 @@ defmodule BexioApiClient.SalesOrderManagementTest do
                  :invoice,
                  1,
                  PositionDiscount.new(%{
-                  id: 2,
-                  text: "Partner discount",
-                  value: Decimal.new(10),
-                  percentual?: true
+                   id: 2,
+                   text: "Partner discount",
+                   value: Decimal.new(10),
+                   percentual?: true
                  })
                )
     end
@@ -2803,7 +2802,10 @@ defmodule BexioApiClient.SalesOrderManagementTest do
   describe "deleting a subposition position" do
     setup do
       mock(fn
-        %{method: :delete, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition/2"} ->
+        %{
+          method: :delete,
+          url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition/2"
+        } ->
           json(%{"success" => true})
       end)
 
@@ -2819,5 +2821,4 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert result == true
     end
   end
-
 end

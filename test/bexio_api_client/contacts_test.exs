@@ -569,13 +569,10 @@ defmodule BexioApiClient.ContactsTest do
     test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_contact_groups(client)
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_contact_groups(client)
 
-      assert result1.id == 111
-      assert result1.name == "Contact Group 1"
-
-      assert result2.id == 222
-      assert result2.name == "Contact Group 2"
+      assert result[111] == "Contact Group 1"
+      assert result[222] == "Contact Group 2"
     end
   end
 
@@ -601,16 +598,13 @@ defmodule BexioApiClient.ContactsTest do
     test "shows found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} =
+      assert {:ok, result} =
                BexioApiClient.Contacts.search_contact_groups(client, [
                  SearchCriteria.part_of(:name, ["fred", "queen"])
                ])
 
-      assert result1.id == 111
-      assert result1.name == "Contact Group 1"
-
-      assert result2.id == 222
-      assert result2.name == "Contact Group 2"
+      assert result[111] == "Contact Group 1"
+      assert result[222] == "Contact Group 2"
     end
   end
 
@@ -665,13 +659,10 @@ defmodule BexioApiClient.ContactsTest do
     test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_contact_sectors(client)
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_contact_sectors(client)
 
-      assert result1.id == 111
-      assert result1.name == "Contact Sector 1"
-
-      assert result2.id == 222
-      assert result2.name == "Contact Sector 2"
+      assert result[111] == "Contact Sector 1"
+      assert result[222] == "Contact Sector 2"
     end
   end
 
@@ -697,16 +688,13 @@ defmodule BexioApiClient.ContactsTest do
     test "shows found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} =
+      assert {:ok, result} =
                BexioApiClient.Contacts.search_contact_sectors(client, [
                  SearchCriteria.part_of(:name, ["fred", "queen"])
                ])
 
-      assert result1.id == 111
-      assert result1.name == "Contact Sector 1"
-
-      assert result2.id == 222
-      assert result2.name == "Contact Sector 2"
+      assert result[111] == "Contact Sector 1"
+      assert result[222] == "Contact Sector 2"
     end
   end
 
@@ -879,12 +867,10 @@ defmodule BexioApiClient.ContactsTest do
     test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_salutations(client)
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_salutations(client)
 
-      assert result1.id == 1
-      assert result1.name == "Herr"
-
-      assert result2.id == 2
+      assert result[1] == "Herr"
+      assert result[2] == "Frau"
     end
   end
 
@@ -914,15 +900,13 @@ defmodule BexioApiClient.ContactsTest do
     test "shows found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} =
+      assert {:ok, result} =
                BexioApiClient.Contacts.search_salutations(client, [
                  SearchCriteria.part_of(:name, ["fred", "queen"])
                ])
 
-      assert result1.id == 1
-      assert result1.name == "Herr"
-
-      assert result2.id == 2
+      assert result[1] == "Herr"
+      assert result[2] == "Frau"
     end
   end
 
@@ -977,12 +961,10 @@ defmodule BexioApiClient.ContactsTest do
     test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_titles(client)
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_titles(client)
 
-      assert result1.id == 1
-      assert result1.name == "Dr."
-
-      assert result2.id == 2
+      assert result[1] == "Dr."
+      assert result[2] == "Prof."
     end
   end
 
@@ -1012,15 +994,13 @@ defmodule BexioApiClient.ContactsTest do
     test "shows found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result1, result2]} =
+      assert {:ok, result} =
                BexioApiClient.Contacts.search_titles(client, [
                  SearchCriteria.part_of(:name, ["fred", "queen"])
                ])
 
-      assert result1.id == 1
-      assert result1.name == "Dr."
-
-      assert result2.id == 2
+      assert result[1] == "Dr."
+      assert result[2] == "Prof."
     end
   end
 

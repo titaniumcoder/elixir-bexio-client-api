@@ -15,7 +15,7 @@ defmodule BexioApiClient.AccountingTest do
               "id" => 1,
               "account_no" => "3201",
               "name" => "Gross proceeds credit sales",
-              "account_group_id" => 65,
+              "fibu_account_group_id" => 65,
               "account_type" => 1,
               "tax_id" => 40,
               "is_active" => true,
@@ -25,7 +25,7 @@ defmodule BexioApiClient.AccountingTest do
               "id" => 2,
               "account_no" => "3202",
               "name" => "Gross proceeds credit sales 2",
-              "account_group_id" => 66,
+              "fibu_account_group_id" => 66,
               "account_type" => 2,
               "tax_id" => 41,
               "is_active" => false,
@@ -75,7 +75,7 @@ defmodule BexioApiClient.AccountingTest do
               "id" => 1,
               "account_no" => "3201",
               "name" => "Gross proceeds credit sales",
-              "account_group_id" => 65,
+              "fibu_account_group_id" => 65,
               "account_type" => 1,
               "tax_id" => 40,
               "is_active" => true,
@@ -85,7 +85,7 @@ defmodule BexioApiClient.AccountingTest do
               "id" => 2,
               "account_no" => "3202",
               "name" => "Gross proceeds credit sales 2",
-              "account_group_id" => 66,
+              "fibu_account_group_id" => 66,
               "account_type" => 2,
               "tax_id" => 41,
               "is_active" => false,
@@ -165,7 +165,7 @@ defmodule BexioApiClient.AccountingTest do
   describe "fetching a list of calendar years" do
     setup do
       mock(fn
-        %{method: :get, url: "https://api.bexio.com/3.0/calendar_years"} ->
+        %{method: :get, url: "https://api.bexio.com/3.0/accounting/calendar_years"} ->
           json([
             %{
               "id" => 1,

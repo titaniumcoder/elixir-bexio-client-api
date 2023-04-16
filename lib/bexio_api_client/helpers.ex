@@ -134,6 +134,7 @@ defmodule BexioApiClient.Helpers do
     end
   end
 
+  defp error_code(400), do: :bad_request
   defp error_code(401), do: :invalid_access
   defp error_code(403), do: :unauthorized
   defp error_code(404), do: :not_found

@@ -374,10 +374,9 @@ defmodule BexioApiClient.ItemsTest do
     test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result]} = BexioApiClient.Items.fetch_stock_locations(client)
+      assert {:ok, result} = BexioApiClient.Items.fetch_stock_locations(client)
 
-      assert result.id == 1
-      assert result.name == "Stock Berlin"
+      assert result[1] == "Stock Berlin"
     end
   end
 
@@ -403,10 +402,9 @@ defmodule BexioApiClient.ItemsTest do
     test "lists found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result]} = BexioApiClient.Items.search_stock_locations(client, [])
+      assert {:ok, result} = BexioApiClient.Items.search_stock_locations(client, [])
 
-      assert result.id == 1
-      assert result.name == "Stock Berlin"
+      assert result[1] == "Stock Berlin"
     end
   end
 
@@ -431,10 +429,9 @@ defmodule BexioApiClient.ItemsTest do
     test "lists valid results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result]} = BexioApiClient.Items.fetch_stock_areas(client)
+      assert {:ok, result} = BexioApiClient.Items.fetch_stock_areas(client)
 
-      assert result.id == 1
-      assert result.name == "Shelf A-06"
+      assert result[1] == "Shelf A-06"
     end
   end
 
@@ -460,10 +457,9 @@ defmodule BexioApiClient.ItemsTest do
     test "lists found results" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:ok, [result]} = BexioApiClient.Items.search_stock_areas(client, [])
+      assert {:ok, result} = BexioApiClient.Items.search_stock_areas(client, [])
 
-      assert result.id == 1
-      assert result.name == "Shelf A-06"
+      assert result[1] == "Shelf A-06"
     end
   end
 end

@@ -67,12 +67,12 @@ defmodule BexioApiClient.Accounting do
   end
 
   defp update_account_type_in_search_criteria(%SearchCriteria{
-         name: :account_type,
+         field: :account_type,
          criteria: criteria,
          value: value
        }) do
     %SearchCriteria{
-      name: :acount_type,
+      field: :acount_type,
       criteria: criteria,
       value:
         case value do
@@ -94,7 +94,7 @@ defmodule BexioApiClient.Accounting do
            "id" => id,
            "account_no" => account_no,
            "name" => name,
-           "account_group_id" => account_group_id,
+           "fibu_account_group_id" => account_group_id,
            "account_type" => account_type_id,
            "tax_id" => tax_id,
            "is_active" => active?,
@@ -169,7 +169,7 @@ defmodule BexioApiClient.Accounting do
   def fetch_calendar_years(client, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/calendar_years", query: opts_to_query(opts))
+        Tesla.get(client, "/3.0/accounting/calendar_years", query: opts_to_query(opts))
       end,
       &map_from_calendar_years/2
     )

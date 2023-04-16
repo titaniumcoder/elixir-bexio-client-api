@@ -190,7 +190,7 @@ defmodule BexioApiClient.OthersTest do
               "id" => 1,
               "name" => "Kiribati",
               "name_short" => "KI",
-              "iso3166_alpha2" => "KI"
+              "iso_3166_alpha2" => "KI"
             }
           ])
       end)
@@ -206,7 +206,7 @@ defmodule BexioApiClient.OthersTest do
       assert result.id == 1
       assert result.name == "Kiribati"
       assert result.name_short == "KI"
-      assert result.iso3166_alpha2 == "KI"
+      assert result.iso_3166_alpha2 == "KI"
     end
   end
 
@@ -223,7 +223,7 @@ defmodule BexioApiClient.OthersTest do
               "id" => 1,
               "name" => "Kiribati",
               "name_short" => "KI",
-              "iso3166_alpha2" => "KI"
+              "iso_3166_alpha2" => "KI"
             }
           ])
       end)
@@ -243,7 +243,7 @@ defmodule BexioApiClient.OthersTest do
       assert result.id == 1
       assert result.name == "Kiribati"
       assert result.name_short == "KI"
-      assert result.iso3166_alpha2 == "KI"
+      assert result.iso_3166_alpha2 == "KI"
     end
   end
 
@@ -255,7 +255,7 @@ defmodule BexioApiClient.OthersTest do
             "id" => 1,
             "name" => "Kiribati",
             "name_short" => "KI",
-            "iso3166_alpha2" => "KI"
+            "iso_3166_alpha2" => "KI"
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/country/99"} ->
@@ -271,7 +271,7 @@ defmodule BexioApiClient.OthersTest do
       assert result.id == 1
       assert result.name == "Kiribati"
       assert result.name_short == "KI"
-      assert result.iso3166_alpha2 == "KI"
+      assert result.iso_3166_alpha2 == "KI"
     end
 
     test "fails on unknown id" do

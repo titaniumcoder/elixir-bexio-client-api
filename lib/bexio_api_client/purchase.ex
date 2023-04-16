@@ -93,6 +93,7 @@ defmodule BexioApiClient.Purchase do
                 opts_to_query(opts)
               )
             )
+            |> Keyword.filter(fn {_k, v} -> v != nil end)
         )
       end,
       &map_from_paged_bills/2

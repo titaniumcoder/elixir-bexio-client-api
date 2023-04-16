@@ -14,6 +14,6 @@ defmodule BexioApiClient.Others.FictionalUser do
           email: String.t(),
           title_id: integer() | nil
         }
-  @enforce_keys [:id, :email, :firstname, :lastname]
+  @enforce_keys [:id, :email, :firstname, :lastname, :salutation_type]
   defstruct [:id, :salutation_type, :firstname, :lastname, :email, :title_id]
 end

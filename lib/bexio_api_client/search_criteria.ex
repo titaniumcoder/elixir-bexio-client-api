@@ -17,7 +17,7 @@ defmodule BexioApiClient.SearchCriteria do
     * `:value` - the value to search for
   """
   @type t :: %__MODULE__{
-          name: atom(),
+          field: atom(),
           criteria:
             :equal
             | :=
@@ -40,16 +40,16 @@ defmodule BexioApiClient.SearchCriteria do
           value: any() | nil
         }
   @enforce_keys [
-    :name,
+    :field,
     :criteria,
     :value
   ]
   @derive Jason.Encoder
-  defstruct [:name, :criteria, :value]
+  defstruct [:field, :criteria, :value]
 
   defp new(name, criteria, value) do
     %__MODULE__{
-      name: name,
+      field: name,
       criteria: criteria,
       value: value
     }

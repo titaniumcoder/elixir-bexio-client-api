@@ -8,7 +8,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "equal will generate search criteria" do
       sc = equal(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :=
       assert sc.value == "fred"
     end
@@ -16,7 +16,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "not_equal will generate search criteria" do
       sc = not_equal(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :!=
       assert sc.value == "fred"
     end
@@ -24,7 +24,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "greater_than will generate search criteria" do
       sc = greater_than(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :>
       assert sc.value == "fred"
     end
@@ -32,7 +32,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "less_than will generate search criteria" do
       sc = less_than(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :<
       assert sc.value == "fred"
     end
@@ -40,7 +40,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "greater_equal will generate search criteria" do
       sc = greater_equal(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :>=
       assert sc.value == "fred"
     end
@@ -48,7 +48,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "less_equal will generate search criteria" do
       sc = less_equal(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :<=
       assert sc.value == "fred"
     end
@@ -56,7 +56,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "like will generate search criteria" do
       sc = like(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :like
       assert sc.value == "fred"
     end
@@ -64,7 +64,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "not_like will generate search criteria" do
       sc = not_like(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :not_like
       assert sc.value == "fred"
     end
@@ -72,7 +72,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "part_of will generate search criteria" do
       sc = part_of(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :in
       assert sc.value == "fred"
     end
@@ -80,7 +80,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "not_part_of will generate search criteria" do
       sc = not_part_of(:name, "fred")
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :not_in
       assert sc.value == "fred"
     end
@@ -88,7 +88,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "nil? will generate search criteria" do
       sc = nil?(:name)
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :is_null
       assert sc.value == nil
     end
@@ -96,7 +96,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
     test "not_nil? will generate search criteria" do
       sc = not_nil?(:name)
 
-      assert sc.name == :name
+      assert sc.field == :name
       assert sc.criteria == :not_null
       assert sc.value == nil
     end

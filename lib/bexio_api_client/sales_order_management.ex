@@ -333,7 +333,6 @@ defmodule BexioApiClient.SalesOrderManagement do
          text: text,
          unit_price: unit_price,
          discount_in_percent: discount_in_percent,
-         parent_id: parent_id
        }),
        do: %{
          type: "KbPositionCustom",
@@ -343,7 +342,6 @@ defmodule BexioApiClient.SalesOrderManagement do
          tax_id: tax_id,
          unit_price: Decimal.to_string(unit_price, :normal),
          discount_in_percent: Decimal.to_string(discount_in_percent, :normal),
-         parent_id: parent_id,
          text: text
        }
 
@@ -355,7 +353,6 @@ defmodule BexioApiClient.SalesOrderManagement do
          text: text,
          unit_price: unit_price,
          discount_in_percent: discount_in_percent,
-         parent_id: parent_id,
          article_id: article_id
        }),
        do: %{
@@ -366,7 +363,6 @@ defmodule BexioApiClient.SalesOrderManagement do
          tax_id: tax_id,
          unit_price: Decimal.to_string(unit_price, :normal),
          discount_in_percent: Decimal.to_string(discount_in_percent, :normal),
-         parent_id: parent_id,
          text: text,
          article_id: article_id
        }
@@ -374,13 +370,11 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp map_to_post_position(%PositionText{
          text: text,
          show_pos_nr?: show_pos_nr?,
-         parent_id: parent_id
        }),
        do: %{
          type: "KbPositionText",
          text: text,
          show_pos_nr: show_pos_nr?,
-         parent_id: parent_id
        }
 
   defp map_to_post_position(%PositionSubtotal{text: text}),
@@ -1093,7 +1087,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     )
   end
 
-    @doc """
+  @doc """
   Create a text position
   """
   @spec create_text_position(
@@ -1658,9 +1652,9 @@ defmodule BexioApiClient.SalesOrderManagement do
   end
 
   defp remap_discount_position(%PositionDiscount{
-    text: text,
-    percentual?: percentual?,
-    value: value
+         text: text,
+         percentual?: percentual?,
+         value: value
        }) do
     %{
       text: text,
@@ -1668,7 +1662,6 @@ defmodule BexioApiClient.SalesOrderManagement do
       value: Decimal.to_string(value, :normal)
     }
   end
-
 
   defp map_from_discount_positions(discount_positions, _env),
     do: Enum.map(discount_positions, &map_from_discount_position/1)
@@ -1801,7 +1794,10 @@ defmodule BexioApiClient.SalesOrderManagement do
   def delete_pagebreak_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{id}")
+        Tesla.delete(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{id}"
+        )
       end,
       &success_response/2
     )
@@ -1916,7 +1912,14 @@ defmodule BexioApiClient.SalesOrderManagement do
           text :: String.t(),
           show_pos_nr? :: boolean()
         ) :: {:ok, PositionSubposition.t()} | {:error, any()}
-  def edit_subposition_position(client, document_type, document_id, position_id, text, show_pos_nr?) do
+  def edit_subposition_position(
+        client,
+        document_type,
+        document_id,
+        position_id,
+        text,
+        show_pos_nr?
+      ) do
     bexio_body_handling(
       fn ->
         Tesla.post(
@@ -1941,7 +1944,10 @@ defmodule BexioApiClient.SalesOrderManagement do
   def delete_subposition_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{id}")
+        Tesla.delete(
+          client,
+          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{id}"
+        )
       end,
       &success_response/2
     )

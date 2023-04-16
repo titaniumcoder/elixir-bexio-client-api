@@ -183,7 +183,7 @@ defmodule BexioApiClient.Others do
            "id" => id,
            "name" => name,
            "name_short" => name_short,
-           "iso3166_alpha2" => iso3166_alpha2
+           "iso_3166_alpha2" => iso_3166_alpha2
          },
          _env \\ nil
        ) do
@@ -191,7 +191,7 @@ defmodule BexioApiClient.Others do
       id: id,
       name: name,
       name_short: name_short,
-      iso3166_alpha2: iso3166_alpha2
+      iso_3166_alpha2: iso_3166_alpha2
     }
   end
 
