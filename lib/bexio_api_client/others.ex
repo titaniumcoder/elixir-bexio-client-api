@@ -671,7 +671,7 @@ defmodule BexioApiClient.Others do
   @spec fetch_units(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) ::          {:ok, map()} | {:error, any()}
+        ) :: {:ok, map()} | {:error, any()}
   def fetch_units(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -692,8 +692,8 @@ defmodule BexioApiClient.Others do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-          ) ::          {:ok, map()} | {:error, any()}
-          def search_units(client, criteria, opts \\ []) do
+        ) :: {:ok, map()} | {:error, any()}
+  def search_units(client, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/unit/search", criteria, query: opts_to_query(opts))

@@ -94,7 +94,10 @@ defmodule BexioApiClient.Helpers do
 
   @type handler_callback_result_type :: any()
   @type tesla_body_callback_type :: any()
-  @spec bexio_body_handling(call :: (() -> tesla_body_callback_type), callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)) ::
+  @spec bexio_body_handling(
+          call :: (() -> tesla_body_callback_type),
+          callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
+        ) ::
           {:ok, handler_callback_result_type}
           | {:error,
              :invalid_access
@@ -112,7 +115,10 @@ defmodule BexioApiClient.Helpers do
     end)
   end
 
-  @spec bexio_handling(call :: (() -> tesla_body_callback_type), callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)) ::
+  @spec bexio_handling(
+          call :: (() -> tesla_body_callback_type),
+          callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
+        ) ::
           handler_callback_result_type
           | {:error,
              :invalid_access

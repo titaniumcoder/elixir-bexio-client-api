@@ -12,6 +12,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     Comment,
     Order,
     Quote,
+    Invoice,
     PositionSubposition,
     PositionPagebreak,
     PositionDiscount,
@@ -332,7 +333,7 @@ defmodule BexioApiClient.SalesOrderManagement do
          tax_id: tax_id,
          text: text,
          unit_price: unit_price,
-         discount_in_percent: discount_in_percent,
+         discount_in_percent: discount_in_percent
        }),
        do: %{
          type: "KbPositionCustom",
@@ -369,12 +370,12 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   defp map_to_post_position(%PositionText{
          text: text,
-         show_pos_nr?: show_pos_nr?,
+         show_pos_nr?: show_pos_nr?
        }),
        do: %{
          type: "KbPositionText",
          text: text,
-         show_pos_nr: show_pos_nr?,
+         show_pos_nr: show_pos_nr?
        }
 
   defp map_to_post_position(%PositionSubtotal{text: text}),
@@ -779,6 +780,326 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp order_kb_item_status(15), do: :partial
   defp order_kb_item_status(21), do: :canceled
 
+  # Invoices
+
+  @doc """
+  This action fetches a list of all invoices.
+  """
+  @spec fetch_invoices(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Invoice.t()]} | {:error, any()}
+  def fetch_invoices(client, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_invoice", query: opts_to_query(opts))
+      end,
+      &map_from_invoices/2
+    )
+  end
+
+  @doc """
+  Search invoices via query.
+  The following search fields are supported:
+
+  * id
+  * kb_item_status
+  * document_nr
+  * title
+  * contact_id
+  * contact_sub_id
+  * user_id
+  * currency_id
+  * total_gross
+  * total_net
+  * total
+  * is_valid_from
+  * is_valid_to
+  * updated_at
+  """
+  @spec search_invoices(
+          client :: Tesla.Client.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Invoice.t()]} | {:error, any()}
+  def search_invoices(
+        client,
+        criteria,
+        opts \\ []
+      ) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_invoice/search", criteria, query: opts_to_query(opts))
+      end,
+      &map_from_invoices/2
+    )
+  end
+
+  @doc """
+  This action fetches a single invoice
+  """
+  @spec fetch_invoice(
+          client :: Tesla.Client.t(),
+          invoice_id :: pos_integer()
+        ) :: {:ok, Quote.t()} | {:error, any()}
+  def fetch_invoice(client, invoice_id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_invoice/#{invoice_id}")
+      end,
+      &map_from_invoice/2
+    )
+  end
+
+  @doc """
+  Create an invoice (id in order will be ignored). Be also aware: whether you need or must not send a document number depends on the settings in Bexio. It cannot be controlled by the API
+  and as such will just send if it exists.
+  """
+  @spec create_invoice(
+          client :: Tesla.Client.t(),
+          invoice :: Invoice.t()
+        ) :: {:ok, Invoice.t()} | {:error, any()}
+  def create_invoice(client, invoice) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_invoice", remap_invoice(invoice))
+      end,
+      &map_from_invoice/2
+    )
+  end
+
+  @doc """
+  Edit an invoice.
+  """
+  @spec edit_invoice(
+          client :: Tesla.Client.t(),
+          invoice :: Invoice.t()
+        ) :: {:ok, Invoice.t()} | {:error, any()}
+  def edit_invoice(client, invoice) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_invoice/#{invoice.id}", remap_edit_invoice(invoice))
+      end,
+      &map_from_invoice/2
+    )
+  end
+
+  @doc """
+  Delete an invoice.
+  """
+  @spec delete_invoice(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def delete_invoice(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.delete(client, "/2.0/kb_invoice/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Issue an invoice.
+  """
+  @spec issue_invoice(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def issue_invoice(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_invoice/#{id}/issue", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Revert Issue an invoice.
+  """
+  @spec revert_issue_invoice(
+          client :: Tesla.Client.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | {:error, any()}
+  def revert_issue_invoice(client, id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_invoice/#{id}/revert_issue", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  This action returns a pdf document of the quote
+  """
+  @spec invoice_pdf(
+          client :: Tesla.Client.t(),
+          invoice_id :: pos_integer()
+        ) :: {:ok, map()} | {:error, any()}
+  def invoice_pdf(client, invoice_id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_invoice/#{invoice_id}/pdf")
+      end,
+      &map_from_pdf/2
+    )
+  end
+
+  defp remap_invoice(
+         %Invoice{
+           positions: positions
+         } = invoice
+       ) do
+    invoice
+    |> remap_edit_invoice()
+    |> Map.put(:positions, Enum.map(positions, &map_to_post_position/1))
+  end
+
+  defp remap_edit_invoice(%Invoice{
+         title: title,
+         document_nr: document_nr,
+         contact_id: contact_id,
+         contact_sub_id: contact_sub_id,
+         user_id: user_id,
+         project_id: project_id,
+         language_id: language_id,
+         bank_account_id: bank_account_id,
+         currency_id: curency_id,
+         payment_type_id: payment_type_id,
+         header: header,
+         footer: footer,
+         mwst_type: mwst_type,
+         mwst_is_net?: mwst_is_net?,
+         show_position_taxes?: show_position_taxes?,
+         is_valid_from: is_valid_from,
+         is_valid_to: is_valid_to,
+         api_reference: api_reference,
+         template_slug: template_slug,
+         reference: reference
+       }) do
+    %{
+      title: title,
+      document_nr: document_nr,
+      contact_id: contact_id,
+      contact_sub_id: contact_sub_id,
+      user_id: user_id,
+      pr_project_id: project_id,
+      language_id: language_id,
+      bank_account_id: bank_account_id,
+      currency_id: curency_id,
+      payment_type_id: payment_type_id,
+      header: header,
+      footer: footer,
+      mwst_type: mwst_type_id(mwst_type),
+      mwst_is_net: mwst_is_net?,
+      show_position_taxes: show_position_taxes?,
+      is_valid_from: to_iso8601(is_valid_from),
+      is_valid_to: to_iso8601(is_valid_to),
+      reference: reference,
+      api_reference: api_reference,
+      template_slug: template_slug
+    }
+  end
+
+  defp map_from_invoices(invoices, _env), do: Enum.map(invoices, &map_from_invoice/1)
+
+  defp map_from_invoice(
+         %{
+           "id" => id,
+           "document_nr" => document_nr,
+           "title" => title,
+           "contact_id" => contact_id,
+           "contact_sub_id" => contact_sub_id,
+           "user_id" => user_id,
+           "project_id" => project_id,
+           "language_id" => language_id,
+           "bank_account_id" => bank_account_id,
+           "currency_id" => currency_id,
+           "payment_type_id" => payment_type_id,
+           "header" => header,
+           "footer" => footer,
+           "total_gross" => total_gross,
+           "total_net" => total_net,
+           "total_taxes" => total_taxes,
+           "total" => total,
+           "total_rounding_difference" => total_rounding_difference,
+           "mwst_type" => mwst_type_id,
+           "mwst_is_net" => mwst_is_net?,
+           "show_position_taxes" => show_position_taxes?,
+           "is_valid_from" => is_valid_from,
+           "is_valid_to" => is_valid_to,
+           "contact_address" => contact_address,
+           "kb_item_status_id" => kb_item_status_id,
+           "api_reference" => api_reference,
+           "viewed_by_client_at" => viewed_by_client_at,
+           "updated_at" => updated_at,
+           "template_slug" => template_slug,
+           "taxs" => taxs,
+           "network_link" => network_link,
+           "esr_id" => esr_id,
+           "qr_invoice_id" => qr_invoice_id,
+           "reference" => reference,
+           "total_credit_vouchers" => total_credit_vouchers,
+           "total_received_payments" => total_received_payments,
+           "total_remaining_payments" => total_remaining_payments
+         } = map,
+         _env \\ nil
+       ) do
+    %Invoice{
+      id: id,
+      document_nr: document_nr,
+      title: title,
+      contact_id: contact_id,
+      contact_sub_id: contact_sub_id,
+      user_id: user_id,
+      project_id: project_id,
+      language_id: language_id,
+      bank_account_id: bank_account_id,
+      currency_id: currency_id,
+      payment_type_id: payment_type_id,
+      header: header,
+      footer: footer,
+      total_gross: to_decimal(total_gross),
+      total_net: to_decimal(total_net),
+      total_taxes: to_decimal(total_taxes),
+      total: to_decimal(total),
+      total_rounding_difference: total_rounding_difference,
+      mwst_type: mwst_type(mwst_type_id),
+      mwst_is_net?: mwst_is_net?,
+      show_position_taxes?: show_position_taxes?,
+      is_valid_from: to_date(is_valid_from),
+      is_valid_to: to_date(is_valid_to),
+      contact_address: contact_address,
+      kb_item_status: invoice_kb_item_status(kb_item_status_id),
+      api_reference: api_reference,
+      viewed_by_client_at: to_datetime(viewed_by_client_at),
+      updated_at: to_datetime(updated_at),
+      template_slug: template_slug,
+      taxs: Enum.map(taxs, &to_tax/1),
+      network_link: network_link,
+      esr_id: esr_id,
+      qr_invoice_id: qr_invoice_id,
+      reference: reference,
+      total_credit_vouchers: to_decimal(total_credit_vouchers),
+      total_received_payments: to_decimal(total_received_payments),
+      total_remaining_payments: to_decimal(total_remaining_payments)
+    }
+    |> map_invoice_positions(Map.get(map, "positions"))
+  end
+
+  defp map_invoice_positions(q, nil), do: q
+  defp map_invoice_positions(q, positions), do: %{q | positions: remap_positions(positions)}
+
+  defp invoice_kb_item_status(7), do: :draft
+  defp invoice_kb_item_status(8), do: :pending
+  defp invoice_kb_item_status(9), do: :paid
+  defp invoice_kb_item_status(16), do: :partial
+  defp invoice_kb_item_status(19), do: :canceled
+  defp invoice_kb_item_status(31), do: :unpaid
+
   # Comments
 
   @doc """
@@ -908,13 +1229,23 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp remap_positions([]), do: []
   defp remap_positions([position | tl]), do: [remap_position(position) | remap_positions(tl)]
 
-  defp remap_position(%{"type" => "KbPositionCustom"} = position), do: map_from_default_position(position)
-  defp remap_position(%{"type" => "KbPositionArticle"} = position), do: map_from_item_position(position)
-  defp remap_position(%{"type" => "KbPositionText"} = position), do: map_from_text_position(position)
-  defp remap_position(%{"type" => "KbPositionSubtotal"} = position), do: map_from_subtotal_position(position)
-  defp remap_position(%{"type" => "KbPositionPagebreak"} = position), do: map_from_pagebreak_position(position)
-  defp remap_position(%{"type" => "KbPositionDiscount"} = position), do: map_from_discount_position(position)
+  defp remap_position(%{"type" => "KbPositionCustom"} = position),
+    do: map_from_default_position(position)
 
+  defp remap_position(%{"type" => "KbPositionArticle"} = position),
+    do: map_from_item_position(position)
+
+  defp remap_position(%{"type" => "KbPositionText"} = position),
+    do: map_from_text_position(position)
+
+  defp remap_position(%{"type" => "KbPositionSubtotal"} = position),
+    do: map_from_subtotal_position(position)
+
+  defp remap_position(%{"type" => "KbPositionPagebreak"} = position),
+    do: map_from_pagebreak_position(position)
+
+  defp remap_position(%{"type" => "KbPositionDiscount"} = position),
+    do: map_from_discount_position(position)
 
   # Subtotal Positions
 

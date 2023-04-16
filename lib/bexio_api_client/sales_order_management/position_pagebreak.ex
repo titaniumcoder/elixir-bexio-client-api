@@ -35,8 +35,10 @@ defmodule BexioApiClient.SalesOrderManagement.PositionPagebreak do
   @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
-    %__MODULE__{
-      optional?: false
-    }, attrs)
+      %__MODULE__{
+        optional?: false
+      },
+      attrs
+    )
   end
 end

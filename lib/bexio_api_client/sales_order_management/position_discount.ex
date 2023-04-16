@@ -24,7 +24,7 @@ defmodule BexioApiClient.SalesOrderManagement.PositionDiscount do
   @enforce_keys [
     :text,
     :percentual?,
-    :value,
+    :value
   ]
   defstruct [
     :id,

@@ -35,10 +35,12 @@ defmodule BexioApiClient.SalesOrderManagement.PositionText do
   @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
-    %__MODULE__{
-      text: "",
-      show_pos_nr?: false,
-      optional?: false
-    }, attrs)
+      %__MODULE__{
+        text: "",
+        show_pos_nr?: false,
+        optional?: false
+      },
+      attrs
+    )
   end
 end
