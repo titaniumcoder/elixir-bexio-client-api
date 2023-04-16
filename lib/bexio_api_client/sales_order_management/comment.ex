@@ -31,7 +31,6 @@ defmodule BexioApiClient.SalesOrderManagement.Comment do
           image_path: String.t() | nil
         }
   @enforce_keys [
-    :id,
     :text,
     :date,
     :public?
@@ -51,10 +50,10 @@ defmodule BexioApiClient.SalesOrderManagement.Comment do
   @doc """
   Create a new record.
   """
+  @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
       %__MODULE__{
-        id: nil,
         text: "",
         date: Date.utc_today(),
         public?: false

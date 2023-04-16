@@ -102,7 +102,7 @@ defmodule BexioApiClient.PurchaseTest do
       assert result1.gross == 13.42
       assert result1.bill_date == ~D[2019-02-12]
       assert result1.due_date == ~D[2019-03-14]
-      assert result1.overdue == false
+      assert result1.overdue? == false
       assert result1.booking_account_ids == [10, 12]
 
       assert result1.attachment_ids == [
@@ -126,7 +126,7 @@ defmodule BexioApiClient.PurchaseTest do
       assert result2.gross == 1.42
       assert result2.bill_date == ~D[2019-04-02]
       assert result2.due_date == ~D[2019-05-27]
-      assert result2.overdue == true
+      assert result2.overdue? == true
       assert result2.booking_account_ids == [12, 134, 9]
 
       assert result2.attachment_ids == [

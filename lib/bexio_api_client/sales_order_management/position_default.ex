@@ -43,19 +43,13 @@ defmodule BexioApiClient.SalesOrderManagement.PositionDefault do
           parent_id: integer() | nil
         }
   @enforce_keys [
-    :id,
     :amount,
     :unit_id,
     :account_id,
-    :unit_name,
     :tax_id,
-    :tax_value,
     :text,
     :unit_price,
     :discount_in_percent,
-    :position_total,
-    :pos,
-    :internal_pos,
     :optional?
   ]
   defstruct [
@@ -79,24 +73,18 @@ defmodule BexioApiClient.SalesOrderManagement.PositionDefault do
   @doc """
   Create a new record.
   """
+  @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
       %__MODULE__{
-        id: nil,
         amount: Decimal.new(0),
         unit_id: nil,
         account_id: nil,
-        unit_name: "",
         tax_id: nil,
-        tax_value: Decimal.new(0),
         text: "",
         unit_price: Decimal.new(0),
         discount_in_percent: Decimal.new(0),
-        position_total: Decimal.new(0),
-        pos: 0,
-        internal_pos: 0,
-        optional?: false,
-        parent_id: nil
+        optional?: false
       },
       attrs
     )

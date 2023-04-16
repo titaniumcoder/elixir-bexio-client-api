@@ -148,6 +148,7 @@ defmodule BexioApiClient.SalesOrderManagement.Quote do
   @doc """
   Create a new quote
   """
+  @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
       %__MODULE__{

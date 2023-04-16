@@ -20,8 +20,6 @@ defmodule BexioApiClient.SalesOrderManagement.PositionPagebreak do
           parent_id: integer() | nil
         }
   @enforce_keys [
-    :id,
-    :internal_pos,
     :optional?
   ]
   defstruct [
@@ -34,15 +32,11 @@ defmodule BexioApiClient.SalesOrderManagement.PositionPagebreak do
   @doc """
   Create a new record.
   """
+  @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
-      %__MODULE__{
-        id: nil,
-        internal_pos: 0,
-        optional?: false,
-        parent_id: nil
-      },
-      attrs
-    )
+    %__MODULE__{
+      optional?: false
+    }, attrs)
   end
 end

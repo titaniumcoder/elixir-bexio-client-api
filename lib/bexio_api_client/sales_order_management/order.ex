@@ -59,7 +59,6 @@ defmodule BexioApiClient.SalesOrderManagement.Order do
           network_link: String.t() | nil
         }
   @enforce_keys [
-    :id,
     :document_nr,
     :user_id,
     :language_id,
@@ -68,11 +67,6 @@ defmodule BexioApiClient.SalesOrderManagement.Order do
     :payment_type_id,
     :header,
     :footer,
-    :total_gross,
-    :total_net,
-    :total_taxes,
-    :total,
-    :total_rounding_difference,
     :mwst_type,
     :mwst_is_net?,
     :show_position_taxes?,
@@ -125,6 +119,7 @@ defmodule BexioApiClient.SalesOrderManagement.Order do
   @doc """
   Create a new order
   """
+  @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
       %__MODULE__{

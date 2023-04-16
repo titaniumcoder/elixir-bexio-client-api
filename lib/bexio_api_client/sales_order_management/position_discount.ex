@@ -22,11 +22,9 @@ defmodule BexioApiClient.SalesOrderManagement.PositionDiscount do
           discount_total: Decimal.t()
         }
   @enforce_keys [
-    :id,
     :text,
     :percentual?,
     :value,
-    :discount_total
   ]
   defstruct [
     :id,
@@ -39,10 +37,10 @@ defmodule BexioApiClient.SalesOrderManagement.PositionDiscount do
   @doc """
   Create a new record.
   """
+  @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
       %__MODULE__{
-        id: nil,
         text: "",
         percentual?: true,
         value: Decimal.new(0),

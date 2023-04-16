@@ -3,21 +3,6 @@ defmodule BexioApiClient.Purchase.Bill do
   Bill in purchase
   """
 
-  @status [
-    :draft,
-    :booked,
-    :partially_created,
-    :created,
-    :partially_sent,
-    :sent,
-    :partially_downloaded,
-    :downloaded,
-    :partially_paid,
-    :paid,
-    :partially_failed,
-    :failed
-  ]
-
   @typedoc """
   Bill in purchase.
 
@@ -57,7 +42,7 @@ defmodule BexioApiClient.Purchase.Bill do
           gross: float() | nil,
           bill_date: Date.t(),
           due_date: Date.t(),
-          overdue: boolean(),
+          overdue?: boolean(),
           booking_account_ids: list(integer()),
           attachment_ids: list(String.t())
         }
@@ -71,7 +56,7 @@ defmodule BexioApiClient.Purchase.Bill do
     :currency_code,
     :bill_date,
     :due_date,
-    :overdue,
+    :overdue?,
     :booking_account_ids,
     :attachment_ids
   ]
@@ -91,8 +76,29 @@ defmodule BexioApiClient.Purchase.Bill do
     :gross,
     :bill_date,
     :due_date,
-    :overdue,
+    :overdue?,
     :booking_account_ids,
     :attachment_ids
   ]
+
+  @spec new(map()) :: __MODULE__.t()
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        document_no: nil,
+        status: :draft,
+        lastname_company: nil,
+        vendor: nil,
+        created_at: NaiveDateTime.utc_now(),
+        currency_code: "",
+        bill_date: Date.utc_today(),
+        due_date: Date.utc_today(),
+        overdue?: false,
+        booking_account_ids: [],
+        attachment_ids: []
+      },
+      attrs
+    )
+  end
 end

@@ -28,12 +28,9 @@ defmodule BexioApiClient.SalesOrderManagement.PositionSubposition do
           parent_id: pos_integer() | nil
         }
   @enforce_keys [
-    :id,
     :text,
-    :internal_pos,
     :show_pos_nr?,
     :optional?,
-    :total_sum,
     :show_pos_prices?
   ]
   defstruct [
@@ -51,18 +48,15 @@ defmodule BexioApiClient.SalesOrderManagement.PositionSubposition do
   @doc """
   Create a new record.
   """
+  @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
       %__MODULE__{
-        id: nil,
         text: "",
-        pos: 0,
-        internal_pos: 0,
         show_pos_nr?: false,
         total_sum: Decimal.new(0),
         show_pos_prices?: false,
-        optional?: false,
-        parent_id: nil
+        optional?: false
       },
       attrs
     )

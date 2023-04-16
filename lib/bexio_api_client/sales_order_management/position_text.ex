@@ -26,23 +26,19 @@ defmodule BexioApiClient.SalesOrderManagement.PositionText do
           optional?: boolean(),
           parent_id: integer() | nil
         }
-  @enforce_keys [:id, :text, :show_pos_nr?, :internal_pos, :optional?]
+  @enforce_keys [:text, :show_pos_nr?, :optional?]
   defstruct [:id, :text, :pos, :show_pos_nr?, :internal_pos, :optional?, :parent_id]
 
   @doc """
   Create a new record.
   """
+  @spec new(map()) :: __MODULE__.t()
   def new(attrs \\ %{}) do
     Map.merge(
-      %__MODULE__{
-        id: nil,
-        text: "",
-        show_pos_nr?: false,
-        internal_pos: 0,
-        optional?: false,
-        parent_id: nil
-      },
-      attrs
-    )
+    %__MODULE__{
+      text: "",
+      show_pos_nr?: false,
+      optional?: false
+    }, attrs)
   end
 end

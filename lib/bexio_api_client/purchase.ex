@@ -139,7 +139,7 @@ defmodule BexioApiClient.Purchase do
          "gross" => gross,
          "bill_date" => bill_date,
          "due_date" => due_date,
-         "overdue" => overdue,
+         "overdue" => overdue?,
          "booking_account_ids" => booking_account_ids,
          "attachment_ids" => attachment_ids
        }) do
@@ -159,7 +159,7 @@ defmodule BexioApiClient.Purchase do
       gross: gross,
       bill_date: Date.from_iso8601!(bill_date),
       due_date: Date.from_iso8601!(due_date),
-      overdue: overdue,
+      overdue?: overdue?,
       booking_account_ids: booking_account_ids,
       attachment_ids: attachment_ids
     }
