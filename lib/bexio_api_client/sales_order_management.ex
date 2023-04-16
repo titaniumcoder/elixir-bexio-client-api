@@ -768,7 +768,6 @@ defmodule BexioApiClient.SalesOrderManagement do
       taxs: Enum.map(taxs, &to_tax/1),
       network_link: network_link
     }
-
     |> map_order_positions(Map.get(map, "positions"))
   end
 
