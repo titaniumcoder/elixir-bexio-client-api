@@ -558,7 +558,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec fetch_order(
           client :: Tesla.Client.t(),
           order_id :: pos_integer()
-        ) :: {:ok, [Order.t()]} | {:error, any()}
+        ) :: {:ok, Order.t()} | {:error, any()}
   def fetch_order(client, order_id) do
     bexio_body_handling(
       fn ->
@@ -806,7 +806,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           comment_id :: pos_integer()
-        ) :: {:ok, [Comment.t()]} | {:error, any()}
+        ) :: {:ok, Comment.t()} | {:error, any()}
   def fetch_comment(
         client,
         document_type,
@@ -832,7 +832,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           comment :: Comment.t()
-        ) :: {:ok, [Comment.t()]} | {:error, any()}
+        ) :: {:ok, Comment.t()} | {:error, any()}
   def create_comment(
         client,
         document_type,
@@ -931,7 +931,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [PositionSubtotal.t()]} | {:error, any()}
+        ) :: {:ok, PositionSubtotal.t()} | {:error, any()}
   def fetch_subtotal_position(
         client,
         document_type,
@@ -1120,7 +1120,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           position_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionDefault.t()} | {:error, any()}
+        ) :: {:ok, PositionText.t()} | {:error, any()}
   def edit_text_position(client, document_type, document_id, position_id, text, show_pos_nr?) do
     bexio_body_handling(
       fn ->
@@ -1213,7 +1213,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [PositionDefault.t()]} | {:error, any()}
+        ) :: {:ok, PositionDefault.t()} | {:error, any()}
   def fetch_default_position(
         client,
         document_type,
@@ -1390,7 +1390,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, [PositionItem.t()]} | {:error, any()}
+        ) :: {:ok, PositionItem.t()} | {:error, any()}
   def fetch_item_position(
         client,
         document_type,
@@ -1860,7 +1860,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_id :: pos_integer(),
           position_id :: pos_integer()
         ) ::
-          {:ok, [PositionSubposition.t()]} | {:error, any()}
+          {:ok, PositionSubposition.t()} | {:error, any()}
   def fetch_subposition_position(
         client,
         document_type,

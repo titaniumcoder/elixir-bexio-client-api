@@ -63,7 +63,7 @@ defmodule BexioApiClient.Items do
   @spec fetch_item(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, [Item.t()]} | {:error, any()}
+        ) :: {:ok, Item.t()} | {:error, any()}
   def fetch_item(client, id) do
     bexio_body_handling(
       fn ->

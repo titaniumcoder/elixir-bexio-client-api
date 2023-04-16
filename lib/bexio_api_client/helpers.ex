@@ -91,8 +91,10 @@ defmodule BexioApiClient.Helpers do
     |> Enum.sort()
   end
 
-  @spec bexio_body_handling(call :: (() -> any()), callback :: (any(), Tesla.Env.t() -> any())) ::
-          {:ok, any()}
+  @type handler_callback_result_type :: any()
+  @type tesla_body_callback_type :: any()
+  @spec bexio_body_handling(call :: (() -> tesla_body_callback_type), callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)) ::
+          {:ok, handler_callback_result_type}
           | {:error,
              :invalid_access
              | :unauthorized
@@ -109,8 +111,8 @@ defmodule BexioApiClient.Helpers do
     end)
   end
 
-  @spec bexio_handling(call :: (() -> any()), callback :: (any(), Tesla.Env.t() -> any())) ::
-          {:ok, any()}
+  @spec bexio_handling(call :: (() -> tesla_body_callback_type), callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)) ::
+          handler_callback_result_type
           | {:error,
              :invalid_access
              | :unauthorized

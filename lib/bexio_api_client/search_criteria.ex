@@ -47,9 +47,9 @@ defmodule BexioApiClient.SearchCriteria do
   @derive Jason.Encoder
   defstruct [:field, :criteria, :value]
 
-  defp new(name, criteria, value) do
+  defp new(field, criteria, value) do
     %__MODULE__{
-      field: name,
+      field: field,
       criteria: criteria,
       value: value
     }
@@ -57,38 +57,38 @@ defmodule BexioApiClient.SearchCriteria do
 
   @doc "Creates a = search criteria"
   @spec equal(atom(), any()) :: t()
-  def equal(name, value), do: new(name, :=, value)
+  def equal(field, value), do: new(field, :=, value)
   @doc "Creates a != search criteria"
   @spec not_equal(atom(), any()) :: t()
-  def not_equal(name, value), do: new(name, :!=, value)
+  def not_equal(field, value), do: new(field, :!=, value)
   @doc "Creates a > search criteria"
   @spec greater_than(atom(), any()) :: t()
-  def greater_than(name, value), do: new(name, :>, value)
+  def greater_than(field, value), do: new(field, :>, value)
   @doc "Creates a < search criteria"
   @spec less_than(atom(), any()) :: t()
-  def less_than(name, value), do: new(name, :<, value)
+  def less_than(field, value), do: new(field, :<, value)
   @doc "Creates a >= search criteria"
   @spec greater_equal(atom(), any()) :: t()
-  def greater_equal(name, value), do: new(name, :>=, value)
+  def greater_equal(field, value), do: new(field, :>=, value)
   @doc "Creates a <= search criteria"
   @spec less_equal(atom(), any()) :: t()
-  def less_equal(name, value), do: new(name, :<=, value)
+  def less_equal(field, value), do: new(field, :<=, value)
   @doc "Creates a like search criteria"
   @spec like(atom(), any()) :: t()
-  def like(name, value), do: new(name, :like, value)
+  def like(field, value), do: new(field, :like, value)
   @doc "Creates a not_like search criteria"
   @spec not_like(atom(), any()) :: t()
-  def not_like(name, value), do: new(name, :not_like, value)
+  def not_like(field, value), do: new(field, :not_like, value)
   @doc "Creates a in search criteria"
   @spec part_of(atom(), list()) :: t()
-  def part_of(name, value), do: new(name, :in, value)
+  def part_of(field, value), do: new(field, :in, value)
   @doc "Creates a not_in search criteria"
   @spec not_part_of(atom(), list()) :: t()
-  def not_part_of(name, value), do: new(name, :not_in, value)
+  def not_part_of(field, value), do: new(field, :not_in, value)
   @doc "Creates a is_null search criteria"
   @spec nil?(atom()) :: t()
-  def nil?(name), do: new(name, :is_null, nil)
+  def nil?(field), do: new(field, :is_null, nil)
   @doc "Creates a not_null search criteria"
   @spec not_nil?(atom()) :: t()
-  def not_nil?(name), do: new(name, :not_null, nil)
+  def not_nil?(field), do: new(field, :not_null, nil)
 end

@@ -91,7 +91,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           contact_id :: pos_integer(),
           show_archived :: boolean() | nil
-        ) :: {:ok, [Contact.t()]} | {:error, any()}
+        ) :: {:ok, Contact.t()} | {:error, any()}
   def fetch_contact(
         client,
         contact_id,
@@ -230,7 +230,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_relation(
           client :: Tesla.Client.t(),
           contact_relation_id :: pos_integer()
-        ) :: {:ok, [ContactRelation.t()]} | {:error, any()}
+        ) :: {:ok, ContactRelation.t()} | {:error, any()}
   def fetch_contact_relation(
         client,
         contact_relation_id
@@ -441,7 +441,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           contact_id :: non_neg_integer(),
           additional_address_id :: non_neg_integer()
-        ) :: {:ok, [AdditionalAddress.t()]} | {:error, any()}
+        ) :: {:ok, AdditionalAddress.t()} | {:error, any()}
   def fetch_additional_address(
         client,
         contact_id,

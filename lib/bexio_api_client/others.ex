@@ -280,7 +280,7 @@ defmodule BexioApiClient.Others do
   Fetch a single user.
   """
   @spec fetch_user(client :: Tesla.Client.t(), user_id :: non_neg_integer()) ::
-          {:ok, [User.t()]} | {:error, any()}
+          {:ok, User.t()} | {:error, any()}
   def fetch_user(client, user_id) do
     bexio_body_handling(
       fn ->
@@ -421,7 +421,7 @@ defmodule BexioApiClient.Others do
   Get access information of logged in user
   """
   @spec get_access_information(client :: Tesla.Client.t()) ::
-          {:ok, FictionalUser.t()} | {:error, any()}
+          {:ok, Permission.t()} | {:error, any()}
   def get_access_information(client) do
     bexio_body_handling(
       fn ->
@@ -671,8 +671,7 @@ defmodule BexioApiClient.Others do
   @spec fetch_units(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) ::
-          {:ok, map()} | {:error, any()}
+        ) ::          {:ok, map()} | {:error, any()}
   def fetch_units(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -693,8 +692,8 @@ defmodule BexioApiClient.Others do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Task.t()]} | {:error, any()}
-  def search_units(client, criteria, opts \\ []) do
+          ) ::          {:ok, map()} | {:error, any()}
+          def search_units(client, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
         Tesla.post(client, "/2.0/unit/search", criteria, query: opts_to_query(opts))

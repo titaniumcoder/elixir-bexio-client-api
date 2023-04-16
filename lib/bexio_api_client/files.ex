@@ -86,7 +86,7 @@ defmodule BexioApiClient.Files do
   @spec fetch_file(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, [File.t()]} | {:error, any()}
+        ) :: {:ok, File.t()} | {:error, any()}
   def fetch_file(client, id) do
     bexio_body_handling(
       fn ->
