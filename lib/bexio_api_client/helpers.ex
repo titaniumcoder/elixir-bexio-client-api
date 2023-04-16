@@ -56,6 +56,7 @@ defmodule BexioApiClient.Helpers do
   def to_iso8601(nil), do: nil
   def to_iso8601(%NaiveDateTime{} = n), do: NaiveDateTime.to_iso8601(n)
   def to_iso8601(%DateTime{} = dt), do: DateTime.to_iso8601(dt)
+  def to_iso8601(%Date{} = dt), do: Date.to_iso8601(dt)
 
   def to_naive_string(nil), do: nil
   def to_naive_string(n), do: NaiveDateTime.to_string(n)

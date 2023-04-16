@@ -173,7 +173,7 @@ defmodule BexioApiClient.SalesOrderManagement.Quote do
         mwst_is_net?: true,
         show_position_taxes?: false,
         is_valid_from: Date.utc_today(),
-        is_valid_until: Date.utc_today(),
+        is_valid_until: nil,
         contact_address: "",
         delivery_address_type: 0,
         delivery_address: "",
