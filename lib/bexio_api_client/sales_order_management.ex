@@ -667,7 +667,6 @@ defmodule BexioApiClient.SalesOrderManagement do
          is_valid_from: is_valid_from,
          delivery_address_type: delivery_address_type,
          api_reference: api_reference,
-         viewed_by_client_at: viewed_by_client_at,
          template_slug: template_slug
        }) do
     %{
@@ -689,7 +688,6 @@ defmodule BexioApiClient.SalesOrderManagement do
       is_valid_from: Date.to_iso8601(is_valid_from),
       delivery_address_type: delivery_address_type,
       api_reference: api_reference,
-      viewed_by_client_at: to_naive_string(viewed_by_client_at),
       template_slug: template_slug
     }
   end
