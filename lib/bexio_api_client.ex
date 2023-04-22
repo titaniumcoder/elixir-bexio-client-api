@@ -51,7 +51,7 @@ defmodule BexioApiClient do
        max_retries: max_retries,
        max_delay: max_delay,
        should_retry: fn
-         {:ok, %{status: status}} when status in [500, 503, 429] -> true
+         {:ok, %{status: status}} when status in [500, 502, 503, 429] -> true
          {:ok, _} -> false
          {:error, _} -> true
        end}

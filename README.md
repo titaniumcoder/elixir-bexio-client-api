@@ -11,7 +11,7 @@ by adding `bexio_api_client` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:bexio_api_client, "~> 0.2.7"}
+    {:bexio_api_client, "~> 0.2.8"}
   ]
 end
 ```
