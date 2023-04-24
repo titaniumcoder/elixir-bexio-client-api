@@ -152,7 +152,7 @@ defmodule BexioApiClient.Helpers do
   defp error_code(422), do: :could_not_be_saved
   defp error_code(429), do: :rate_limited
   defp error_code(500), do: :unexpected_api_condition
-  defp error_code(500), do: :bad_gateway
+  defp error_code(502), do: :bad_gateway
   defp error_code(503), do: :api_not_available
 
   @doc """
