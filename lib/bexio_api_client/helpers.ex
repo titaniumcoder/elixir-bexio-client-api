@@ -129,14 +129,14 @@ defmodule BexioApiClient.Helpers do
              | :could_not_be_saved
              | :rate_limited
              | :unexpected_api_condition
-             | :api_not_available}
+             | :api_not_available, nil | any()}
   def bexio_handling(call, callback) do
     case call.() do
       {:ok, %Tesla.Env{status: status, body: body} = env} when status in [200, 201, 301] ->
         callback.(body, env)
 
-      {:ok, %Tesla.Env{status: status}} ->
-        {:error, error_code(status)}
+      {:ok, %Tesla.Env{status: status, body: body}} ->
+        {:error, error_code(status), body}
 
       {:error, error} ->
         {:error, error}
