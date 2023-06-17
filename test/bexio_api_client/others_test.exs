@@ -259,7 +259,7 @@ defmodule BexioApiClient.OthersTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/country/99"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Country does not exist"}
       end)
 
       :ok
@@ -276,7 +276,7 @@ defmodule BexioApiClient.OthersTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found} = BexioApiClient.Others.fetch_country(client, 99)
+      assert {:error, :not_found, "Country does not exist"} = BexioApiClient.Others.fetch_country(client, 99)
     end
   end
 

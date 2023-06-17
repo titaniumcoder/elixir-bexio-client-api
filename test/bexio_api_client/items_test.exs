@@ -194,7 +194,7 @@ defmodule BexioApiClient.ItemsTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/article/2"} ->
-          %Tesla.Env{status: 404, body: "Salutation does not exist"}
+          %Tesla.Env{status: 404, body: "Article does not exist"}
       end)
 
       :ok
@@ -217,7 +217,7 @@ defmodule BexioApiClient.ItemsTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found} = BexioApiClient.Items.fetch_item(client, 2)
+      assert {:error, :not_found, "Article does not exist"} = BexioApiClient.Items.fetch_item(client, 2)
     end
   end
 

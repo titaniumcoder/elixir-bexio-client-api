@@ -124,7 +124,7 @@ defmodule BexioApiClient.FilesTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/3.0/files/2"} ->
-          %Tesla.Env{status: 404, body: "Salutation does not exist"}
+          %Tesla.Env{status: 404, body: "File does not exist"}
       end)
 
       :ok
@@ -149,7 +149,7 @@ defmodule BexioApiClient.FilesTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found} = BexioApiClient.Files.fetch_file(client, 2)
+      assert {:error, :not_found, "File does not exist"} = BexioApiClient.Files.fetch_file(client, 2)
     end
   end
 

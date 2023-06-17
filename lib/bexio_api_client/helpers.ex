@@ -198,4 +198,9 @@ defmodule BexioApiClient.Helpers do
   @spec success_response(map(), Tesla.Env.t()) :: boolean()
   def success_response(%{"success" => true}, _env), do: true
   def success_response(_result, _env), do: false
+
+  @spec decimal_nil_as_zero(nil | integer() | binary() | float()) :: Decimal.t()
+  def decimal_nil_as_zero(nil), do: Decimal.new(0)
+  def decimal_nil_as_zero(number) when is_integer(number) or is_binary(number), do: Decimal.new(number)
+  def decimal_nil_as_zero(number) when is_float(number), do: Decimal.from_float(number)
 end

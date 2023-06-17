@@ -1376,7 +1376,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     %PositionSubtotal{
       id: id,
       text: text,
-      value: Decimal.new(value),
+      value: decimal_nil_as_zero(value),
       internal_pos: internal_pos,
       optional?: optional?,
       parent_id: parent_id
@@ -1687,16 +1687,16 @@ defmodule BexioApiClient.SalesOrderManagement do
        ) do
     %PositionDefault{
       id: id,
-      amount: Decimal.new(amount),
+      amount: decimal_nil_as_zero(amount),
       unit_id: unit_id,
       account_id: account_id,
       unit_name: unit_name,
       tax_id: tax_id,
-      tax_value: Decimal.new(tax_value),
+      tax_value: decimal_nil_as_zero(tax_value),
       text: text,
-      unit_price: Decimal.new(unit_price),
-      discount_in_percent: Decimal.new(discount_in_percent),
-      position_total: Decimal.new(position_total),
+      unit_price: decimal_nil_as_zero(unit_price),
+      discount_in_percent: decimal_nil_as_zero(discount_in_percent),
+      position_total: decimal_nil_as_zero(position_total),
       pos: pos,
       internal_pos: internal_pos,
       optional?: optional?,
@@ -1867,16 +1867,16 @@ defmodule BexioApiClient.SalesOrderManagement do
        ) do
     %PositionItem{
       id: id,
-      amount: Decimal.new(amount),
+      amount: decimal_nil_as_zero(amount),
       unit_id: unit_id,
       account_id: account_id,
       unit_name: unit_name,
       tax_id: tax_id,
-      tax_value: Decimal.new(tax_value),
+      tax_value: decimal_nil_as_zero(tax_value),
       text: text,
-      unit_price: Decimal.new(unit_price),
-      discount_in_percent: Decimal.new(discount_in_percent),
-      position_total: Decimal.new(position_total),
+      unit_price: decimal_nil_as_zero(unit_price),
+      discount_in_percent: decimal_nil_as_zero(discount_in_percent),
+      position_total: decimal_nil_as_zero(position_total),
       pos: pos,
       internal_pos: internal_pos,
       optional?: optional?,
@@ -2028,8 +2028,8 @@ defmodule BexioApiClient.SalesOrderManagement do
     %PositionDiscount{
       id: id,
       text: text,
-      value: Decimal.new(value),
-      discount_total: Decimal.new(discount_total),
+      value: decimal_nil_as_zero(value),
+      discount_total: decimal_nil_as_zero(discount_total),
       percentual?: percentual?
     }
   end
@@ -2326,7 +2326,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       internal_pos: internal_pos,
       show_pos_prices?: show_pos_prices?,
       show_pos_nr?: show_pos_nr?,
-      total_sum: Decimal.new(total_sum),
+      total_sum: decimal_nil_as_zero(total_sum),
       optional?: optional?,
       parent_id: parent_id
     }

@@ -293,7 +293,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_offer/99"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Offer does not exist"}
       end)
 
       :ok
@@ -348,7 +348,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found} = BexioApiClient.SalesOrderManagement.fetch_quote(client, 99)
+      assert {:error, :not_found, "Offer does not exist"} = BexioApiClient.SalesOrderManagement.fetch_quote(client, 99)
     end
   end
 
@@ -982,7 +982,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_order/99"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Order does not exist"}
       end)
 
       :ok
@@ -1034,7 +1034,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found} = BexioApiClient.SalesOrderManagement.fetch_order(client, 99)
+      assert {:error, :not_found, "Order does not exist"} = BexioApiClient.SalesOrderManagement.fetch_order(client, 99)
     end
   end
 
@@ -1580,7 +1580,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/99"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Invoice does not exist"}
       end)
 
       :ok
@@ -1631,7 +1631,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found} = BexioApiClient.SalesOrderManagement.fetch_invoice(client, 99)
+      assert {:error, :not_found, "Invoice does not exist"} = BexioApiClient.SalesOrderManagement.fetch_invoice(client, 99)
     end
   end
 
@@ -2031,7 +2031,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/comment/3"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Invoice Comment does not exist"}
       end)
 
       :ok
@@ -2059,7 +2059,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:error, :not_found} =
+      assert {:error, :not_found, "Invoice Comment does not exist"} =
                BexioApiClient.SalesOrderManagement.fetch_comment(client, :invoice, 1, 3)
     end
   end
@@ -2161,7 +2161,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subtotal/3"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Subtotal Position does not exist"}
       end)
 
       :ok
@@ -2184,7 +2184,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:error, :not_found} =
+      assert {:error, :not_found, "Subtotal Position does not exist"} =
                BexioApiClient.SalesOrderManagement.fetch_subtotal_position(client, :invoice, 1, 3)
     end
   end
@@ -2332,7 +2332,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_text/3"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Text Position does not exist"}
       end)
 
       :ok
@@ -2355,7 +2355,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:error, :not_found} =
+      assert {:error, :not_found, "Text Position does not exist"} =
                BexioApiClient.SalesOrderManagement.fetch_text_position(client, :invoice, 1, 3)
     end
   end
@@ -2530,7 +2530,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_custom/3"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Default Position does not exist"}
       end)
 
       :ok
@@ -2561,7 +2561,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:error, :not_found} =
+      assert {:error, :not_found, "Default Position does not exist"} =
                BexioApiClient.SalesOrderManagement.fetch_default_position(client, :invoice, 1, 3)
     end
   end
@@ -2785,7 +2785,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_article/3"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Item Position does not exist"}
       end)
 
       :ok
@@ -2817,7 +2817,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:error, :not_found} =
+      assert {:error, :not_found, "Item Position does not exist"} =
                BexioApiClient.SalesOrderManagement.fetch_item_position(client, :invoice, 1, 3)
     end
   end
@@ -3015,7 +3015,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_discount/3"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Discount Position does not exist"}
       end)
 
       :ok
@@ -3037,7 +3037,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:error, :not_found} =
+      assert {:error, :not_found, "Discount Position does not exist"} =
                BexioApiClient.SalesOrderManagement.fetch_discount_position(client, :invoice, 1, 3)
     end
   end
@@ -3182,7 +3182,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_pagebreak/3"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Pagebreak Position does not exist"}
       end)
 
       :ok
@@ -3208,7 +3208,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:error, :not_found} =
+      assert {:error, :not_found, "Pagebreak Position does not exist"} =
                BexioApiClient.SalesOrderManagement.fetch_pagebreak_position(
                  client,
                  :invoice,
@@ -3365,7 +3365,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           })
 
         %{method: :get, url: "https://api.bexio.com/2.0/kb_invoice/1/kb_position_subposition/3"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+          %Tesla.Env{status: 404, body: "Subposition does not exist"}
       end)
 
       :ok
@@ -3395,7 +3395,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
 
-      assert {:error, :not_found} =
+      assert {:error, :not_found, "Subposition does not exist"} =
                BexioApiClient.SalesOrderManagement.fetch_subposition_position(
                  client,
                  :invoice,
