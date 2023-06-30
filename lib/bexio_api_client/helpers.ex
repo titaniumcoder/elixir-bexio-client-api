@@ -108,7 +108,7 @@ defmodule BexioApiClient.Helpers do
           | {:error, nil | any()}
 
   @spec bexio_body_handling(
-          call :: (() -> tesla_body_callback_type),
+          call :: (-> tesla_body_callback_type),
           callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
         ) ::
           {:ok, handler_callback_result_type} | tesla_error_type
@@ -119,7 +119,7 @@ defmodule BexioApiClient.Helpers do
   end
 
   @spec bexio_handling(
-          call :: (() -> tesla_body_callback_type),
+          call :: (-> tesla_body_callback_type),
           callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
         ) ::
           handler_callback_result_type | tesla_error_type | {:error, nil | any()}
@@ -199,4 +199,9 @@ defmodule BexioApiClient.Helpers do
     do: Decimal.new(number)
 
   def decimal_nil_as_zero(number) when is_float(number), do: Decimal.from_float(number)
+
+  @spec remove_document_no_if_nil(map() | nil) :: map() | nil
+  def remove_document_no_if_nil(nil), do: nil
+  def remove_document_no_if_nil(%{document_nr: nil} = map), do: Map.delete(map, :document_nr)
+  def remove_document_no_if_nil(map_without), do: map_without
 end
