@@ -18,13 +18,15 @@ defmodule BexioApiClient.Accounting do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
+  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+
   @doc """
   Fetch a list of accounts.
   """
   @spec fetch_accounts(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [Account.t()]} | {:error, any()}
+        ) :: {:ok, [Account.t()]} | tesla_error_type()
   def fetch_accounts(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -47,7 +49,7 @@ defmodule BexioApiClient.Accounting do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [Account.t()]} | {:error, any()}
+        ) :: {:ok, [Account.t()]} | tesla_error_type()
   def search_accounts(
         client,
         criteria,
@@ -126,7 +128,7 @@ defmodule BexioApiClient.Accounting do
   @spec fetch_account_groups(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [AccountGroup.t()]} | {:error, any()}
+        ) :: {:ok, [AccountGroup.t()]} | tesla_error_type()
   def fetch_account_groups(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -165,7 +167,7 @@ defmodule BexioApiClient.Accounting do
   @spec fetch_calendar_years(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [CalendarYear.t()]} | {:error, any()}
+        ) :: {:ok, [CalendarYear.t()]} | tesla_error_type()
   def fetch_calendar_years(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -206,7 +208,7 @@ defmodule BexioApiClient.Accounting do
   @spec fetch_currencies(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [Currency.t()]} | {:error, any()}
+        ) :: {:ok, [Currency.t()]} | tesla_error_type()
   def fetch_currencies(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -238,7 +240,7 @@ defmodule BexioApiClient.Accounting do
           client :: Tesla.Client.t(),
           id :: integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [Currency.t()]} | {:error, any()}
+        ) :: {:ok, [Currency.t()]} | tesla_error_type()
   def fetch_exchange_rates(client, id, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -274,7 +276,7 @@ defmodule BexioApiClient.Accounting do
           date :: Date.t() | nil,
           types :: :sales_tax | :pre_tax | nil,
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [Tax.t()]} | {:error, any()}
+        ) :: {:ok, [Tax.t()]} | tesla_error_type()
   def fetch_taxes(client, date \\ nil, types \\ nil, opts \\ []) do
     bexio_body_handling(
       fn ->

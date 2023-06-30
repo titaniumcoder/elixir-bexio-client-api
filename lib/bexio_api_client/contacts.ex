@@ -10,6 +10,8 @@ defmodule BexioApiClient.Contacts do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
+  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+
   defp contact_opts_to_query(show_archived, opts) do
     opts = opts_to_query(opts)
 
@@ -31,7 +33,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           show_archived :: boolean(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Contact.t()]} | {:error, any()}
+        ) :: {:ok, [Contact.t()]} | tesla_error_type()
   def fetch_contacts(client, show_archived \\ false, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -67,7 +69,7 @@ defmodule BexioApiClient.Contacts do
           criteria :: list(SearchCriteria.t()),
           show_archived :: boolean(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Contact.t()]} | {:error, any()}
+        ) :: {:ok, [Contact.t()]} | tesla_error_type()
   def search_contacts(
         client,
         criteria,
@@ -91,7 +93,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           contact_id :: pos_integer(),
           show_archived :: boolean() | nil
-        ) :: {:ok, Contact.t()} | {:error, any()}
+        ) :: {:ok, Contact.t()} | tesla_error_type()
   def fetch_contact(
         client,
         contact_id,
@@ -185,7 +187,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_relations(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [ContactRelation.t()]} | {:error, any()}
+        ) :: {:ok, [ContactRelation.t()]} | tesla_error_type()
   def fetch_contact_relations(
         client,
         opts \\ []
@@ -210,7 +212,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [ContactRelation.t()]} | {:error, any()}
+        ) :: {:ok, [ContactRelation.t()]} | tesla_error_type()
   def search_contact_relations(
         client,
         criteria,
@@ -230,7 +232,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_relation(
           client :: Tesla.Client.t(),
           contact_relation_id :: pos_integer()
-        ) :: {:ok, ContactRelation.t()} | {:error, any()}
+        ) :: {:ok, ContactRelation.t()} | tesla_error_type()
   def fetch_contact_relation(
         client,
         contact_relation_id
@@ -273,7 +275,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_groups(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def fetch_contact_groups(
         client,
         opts \\ []
@@ -296,7 +298,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def search_contact_groups(
         client,
         criteria,
@@ -316,7 +318,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_group(
           client :: Tesla.Client.t(),
           contact_group_id :: pos_integer()
-        ) :: {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+        ) :: {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
   def fetch_contact_group(
         client,
         contact_group_id
@@ -337,7 +339,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_contact_sectors(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def fetch_contact_sectors(
         client,
         opts \\ []
@@ -360,7 +362,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def search_contact_sectors(
         client,
         criteria,
@@ -385,7 +387,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           contact_id :: integer(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [AdditionalAddress.t()]} | {:error, any()}
+        ) :: {:ok, [AdditionalAddress.t()]} | tesla_error_type()
   def fetch_additional_addresses(
         client,
         contact_id,
@@ -417,7 +419,7 @@ defmodule BexioApiClient.Contacts do
           contact_id :: integer(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [AdditionalAddress.t()]} | {:error, any()}
+        ) :: {:ok, [AdditionalAddress.t()]} | tesla_error_type()
   def search_additional_addresses(
         client,
         contact_id,
@@ -441,7 +443,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           contact_id :: non_neg_integer(),
           additional_address_id :: non_neg_integer()
-        ) :: {:ok, AdditionalAddress.t()} | {:error, any()}
+        ) :: {:ok, AdditionalAddress.t()} | tesla_error_type()
   def fetch_additional_address(
         client,
         contact_id,
@@ -494,7 +496,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_salutations(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def fetch_salutations(
         client,
         opts \\ []
@@ -517,7 +519,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def search_salutations(
         client,
         criteria,
@@ -537,7 +539,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_salutation(
           client :: Tesla.Client.t(),
           salutation_id :: non_neg_integer()
-        ) :: {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+        ) :: {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
   def fetch_salutation(
         client,
         salutation_id
@@ -561,7 +563,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_titles(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def fetch_titles(
         client,
         opts \\ []
@@ -584,7 +586,7 @@ defmodule BexioApiClient.Contacts do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def search_titles(
         client,
         criteria,
@@ -604,7 +606,7 @@ defmodule BexioApiClient.Contacts do
   @spec fetch_title(
           client :: Tesla.Client.t(),
           title_id :: non_neg_integer()
-        ) :: {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+        ) :: {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
   def fetch_title(
         client,
         title_id

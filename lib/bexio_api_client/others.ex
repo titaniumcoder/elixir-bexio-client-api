@@ -19,11 +19,13 @@ defmodule BexioApiClient.Others do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
+  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+
   @doc """
   Fetch a list of company profiles.
   """
   @spec fetch_company_profiles(client :: Tesla.Client.t()) ::
-          {:ok, [CompanyProfile.t()]} | {:error, any()}
+          {:ok, [CompanyProfile.t()]} | tesla_error_type()
   def fetch_company_profiles(client) do
     bexio_body_handling(
       fn ->
@@ -37,7 +39,7 @@ defmodule BexioApiClient.Others do
   Fetch a single company profile
   """
   @spec fetch_company_profile(client :: Tesla.Client.t(), id :: non_neg_integer()) ::
-          {:ok, CompanyProfile.t()} | {:error, any()}
+          {:ok, CompanyProfile.t()} | tesla_error_type()
   def fetch_company_profile(client, id) do
     bexio_body_handling(
       fn ->
@@ -127,7 +129,7 @@ defmodule BexioApiClient.Others do
   Fetch a list of countries.
   """
   @spec fetch_countries(client :: Tesla.Client.t()) ::
-          {:ok, [Country.t()]} | {:error, any()}
+          {:ok, [Country.t()]} | tesla_error_type()
   def fetch_countries(client) do
     bexio_body_handling(
       fn ->
@@ -148,7 +150,7 @@ defmodule BexioApiClient.Others do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Country.t()]} | {:error, any()}
+        ) :: {:ok, [Country.t()]} | tesla_error_type()
   def search_countries(
         client,
         criteria,
@@ -166,7 +168,7 @@ defmodule BexioApiClient.Others do
   Fetch a single country
   """
   @spec fetch_country(client :: Tesla.Client.t(), id :: non_neg_integer()) ::
-          {:ok, Country.t()} | {:error, any()}
+          {:ok, Country.t()} | tesla_error_type()
   def fetch_country(client, id) do
     bexio_body_handling(
       fn ->
@@ -199,7 +201,7 @@ defmodule BexioApiClient.Others do
   Fetch a list of languages.
   """
   @spec fetch_languages(client :: Tesla.Client.t()) ::
-          {:ok, [Language.t()]} | {:error, any()}
+          {:ok, [Language.t()]} | tesla_error_type()
   def fetch_languages(client) do
     bexio_body_handling(
       fn ->
@@ -220,7 +222,7 @@ defmodule BexioApiClient.Others do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Language.t()]} | {:error, any()}
+        ) :: {:ok, [Language.t()]} | tesla_error_type()
   def search_languages(
         client,
         criteria,
@@ -266,7 +268,7 @@ defmodule BexioApiClient.Others do
   Fetch a list of users.
   """
   @spec fetch_users(client :: Tesla.Client.t()) ::
-          {:ok, [User.t()]} | {:error, any()}
+          {:ok, [User.t()]} | tesla_error_type()
   def fetch_users(client) do
     bexio_body_handling(
       fn ->
@@ -280,7 +282,7 @@ defmodule BexioApiClient.Others do
   Fetch a single user.
   """
   @spec fetch_user(client :: Tesla.Client.t(), user_id :: non_neg_integer()) ::
-          {:ok, User.t()} | {:error, any()}
+          {:ok, User.t()} | tesla_error_type()
   def fetch_user(client, user_id) do
     bexio_body_handling(
       fn ->
@@ -294,7 +296,7 @@ defmodule BexioApiClient.Others do
   Fetch a list of finctional users.
   """
   @spec fetch_fictional_users(client :: Tesla.Client.t()) ::
-          {:ok, [FictionalUser.t()]} | {:error, any()}
+          {:ok, [FictionalUser.t()]} | tesla_error_type()
   def fetch_fictional_users(client) do
     bexio_body_handling(
       fn ->
@@ -308,7 +310,7 @@ defmodule BexioApiClient.Others do
   Fetch a finctional user.
   """
   @spec fetch_fictional_user(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, FictionalUser.t()} | {:error, any()}
+          {:ok, FictionalUser.t()} | tesla_error_type()
   def fetch_fictional_user(client, id) do
     bexio_body_handling(
       fn ->
@@ -322,7 +324,7 @@ defmodule BexioApiClient.Others do
   Create a fictional user, the id of the fictional user will be ignored!
   """
   @spec create_fictional_user(client :: Tesla.Client.t(), finctional_user :: FictionalUser.t()) ::
-          {:ok, FictionalUser.t()} | {:error, any()}
+          {:ok, FictionalUser.t()} | tesla_error_type()
   def create_fictional_user(client, fictional_user) do
     bexio_body_handling(
       fn ->
@@ -340,7 +342,7 @@ defmodule BexioApiClient.Others do
   Create a fictional user
   """
   @spec update_fictional_user(client :: Tesla.Client.t(), fictional_user :: FictionalUser.t()) ::
-          {:ok, FictionalUser.t()} | {:error, any()}
+          {:ok, FictionalUser.t()} | tesla_error_type()
   def update_fictional_user(client, fictional_user) do
     bexio_body_handling(
       fn ->
@@ -358,7 +360,7 @@ defmodule BexioApiClient.Others do
   Create a fictional user
   """
   @spec delete_fictional_user(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, true | false} | {:error, any()}
+          {:ok, true | false} | tesla_error_type()
   def delete_fictional_user(client, id) do
     bexio_body_handling(
       fn ->
@@ -421,7 +423,7 @@ defmodule BexioApiClient.Others do
   Get access information of logged in user
   """
   @spec get_access_information(client :: Tesla.Client.t()) ::
-          {:ok, Permission.t()} | {:error, any()}
+          {:ok, Permission.t()} | tesla_error_type()
   def get_access_information(client) do
     bexio_body_handling(
       fn ->
@@ -474,7 +476,7 @@ defmodule BexioApiClient.Others do
   Fetch a list of tasks.
   """
   @spec fetch_tasks(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
-          {:ok, [Task.t()]} | {:error, any()}
+          {:ok, [Task.t()]} | tesla_error_type()
   def fetch_tasks(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -501,7 +503,7 @@ defmodule BexioApiClient.Others do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Task.t()]} | {:error, any()}
+        ) :: {:ok, [Task.t()]} | tesla_error_type()
   def search_tasks(client, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -515,7 +517,7 @@ defmodule BexioApiClient.Others do
   Fetch a  task.
   """
   @spec fetch_task(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, Task.t()} | {:error, any()}
+          {:ok, Task.t()} | tesla_error_type()
   def fetch_task(client, id) do
     bexio_body_handling(
       fn ->
@@ -529,7 +531,7 @@ defmodule BexioApiClient.Others do
   Create a  task.
   """
   @spec create_task(client :: Tesla.Client.t(), task :: Task.t()) ::
-          {:ok, Task.t()} | {:error, any()}
+          {:ok, Task.t()} | tesla_error_type()
   def create_task(client, task) do
     bexio_body_handling(
       fn ->
@@ -543,7 +545,7 @@ defmodule BexioApiClient.Others do
   Edut a  task.
   """
   @spec edit_task(client :: Tesla.Client.t(), task :: Task.t()) ::
-          {:ok, Task.t()} | {:error, any()}
+          {:ok, Task.t()} | tesla_error_type()
   def edit_task(client, task) do
     bexio_body_handling(
       fn ->
@@ -557,7 +559,7 @@ defmodule BexioApiClient.Others do
   Delete a  task.
   """
   @spec delete_task(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, Task.t()} | {:error, any()}
+          {:ok, Task.t()} | tesla_error_type()
   def delete_task(client, id) do
     bexio_body_handling(
       fn ->
@@ -641,7 +643,7 @@ defmodule BexioApiClient.Others do
   Fetch a list of task priorities.
   """
   @spec fetch_task_priorities(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
-          {:ok, map()} | {:error, any()}
+          {:ok, map()} | tesla_error_type()
   def fetch_task_priorities(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -655,7 +657,7 @@ defmodule BexioApiClient.Others do
   Fetch a list of task status.
   """
   @spec fetch_task_status(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
-          {:ok, map()} | {:error, any()}
+          {:ok, map()} | tesla_error_type()
   def fetch_task_status(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -671,7 +673,7 @@ defmodule BexioApiClient.Others do
   @spec fetch_units(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, map()} | {:error, any()}
+        ) :: {:ok, map()} | tesla_error_type()
   def fetch_units(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -692,7 +694,7 @@ defmodule BexioApiClient.Others do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, map()} | {:error, any()}
+        ) :: {:ok, map()} | tesla_error_type()
   def search_units(client, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -706,7 +708,7 @@ defmodule BexioApiClient.Others do
   Fetch a unit.
   """
   @spec fetch_unit(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+          {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
   def fetch_unit(client, id) do
     bexio_body_handling(
       fn ->
@@ -720,7 +722,7 @@ defmodule BexioApiClient.Others do
   Create a unit.
   """
   @spec create_unit(client :: Tesla.Client.t(), name :: String.t()) ::
-          {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+          {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
   def create_unit(client, name) do
     bexio_body_handling(
       fn ->
@@ -734,7 +736,7 @@ defmodule BexioApiClient.Others do
   Edit a unit.
   """
   @spec edit_unit(client :: Tesla.Client.t(), id :: integer(), name :: String.t()) ::
-          {:ok, %{id: integer(), name: String.t()}} | {:error, any()}
+          {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
   def edit_unit(client, id, name) do
     bexio_body_handling(
       fn ->
@@ -748,7 +750,7 @@ defmodule BexioApiClient.Others do
   Delete a unit.
   """
   @spec delete_unit(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, Task.t()} | {:error, any()}
+          {:ok, Task.t()} | tesla_error_type()
   def delete_unit(client, id) do
     bexio_body_handling(
       fn ->

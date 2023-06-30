@@ -11,13 +11,15 @@ defmodule BexioApiClient.Items do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
+  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+
   @doc """
   Fetch a list of items.
   """
   @spec fetch_items(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Item.t()]} | {:error, any()}
+        ) :: {:ok, [Item.t()]} | tesla_error_type()
   def fetch_items(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -38,7 +40,7 @@ defmodule BexioApiClient.Items do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Item.t()]} | {:error, any()}
+        ) :: {:ok, [Item.t()]} | tesla_error_type()
   def search_items(
         client,
         criteria,
@@ -63,7 +65,7 @@ defmodule BexioApiClient.Items do
   @spec fetch_item(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Item.t()} | {:error, any()}
+        ) :: {:ok, Item.t()} | tesla_error_type()
   def fetch_item(client, id) do
     bexio_body_handling(
       fn ->
@@ -82,7 +84,7 @@ defmodule BexioApiClient.Items do
   @spec create_item(
           client :: Tesla.Client.t(),
           item :: Item.t()
-        ) :: {:ok, Item.t()} | {:error, any()}
+        ) :: {:ok, Item.t()} | tesla_error_type()
   def create_item(client, item) do
     bexio_body_handling(
       fn ->
@@ -98,7 +100,7 @@ defmodule BexioApiClient.Items do
   @spec edit_item(
           client :: Tesla.Client.t(),
           item :: Item.t()
-        ) :: {:ok, Item.t()} | {:error, any()}
+        ) :: {:ok, Item.t()} | tesla_error_type()
   def edit_item(client, item) do
     bexio_body_handling(
       fn ->
@@ -114,7 +116,7 @@ defmodule BexioApiClient.Items do
   @spec delete_item(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type()
   def delete_item(client, id) do
     bexio_body_handling(
       fn ->
@@ -289,7 +291,7 @@ defmodule BexioApiClient.Items do
   @spec fetch_stock_locations(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def fetch_stock_locations(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -309,7 +311,7 @@ defmodule BexioApiClient.Items do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def search_stock_locations(
         client,
         criteria,
@@ -334,7 +336,7 @@ defmodule BexioApiClient.Items do
   @spec fetch_stock_areas(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def fetch_stock_areas(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -355,7 +357,7 @@ defmodule BexioApiClient.Items do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | {:error, any()}
+        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
   def search_stock_areas(
         client,
         criteria,

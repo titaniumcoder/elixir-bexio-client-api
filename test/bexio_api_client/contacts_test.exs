@@ -416,7 +416,9 @@ defmodule BexioApiClient.ContactsTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Contact does not exist"} = BexioApiClient.Contacts.fetch_contact(client, 99)
+
+      assert {:error, :not_found, "Contact does not exist"} =
+               BexioApiClient.Contacts.fetch_contact(client, 99)
     end
   end
 
@@ -543,7 +545,9 @@ defmodule BexioApiClient.ContactsTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Contact Relation does not exist"} = BexioApiClient.Contacts.fetch_contact_relation(client, 99)
+
+      assert {:error, :not_found, "Contact Relation does not exist"} =
+               BexioApiClient.Contacts.fetch_contact_relation(client, 99)
     end
   end
 
@@ -633,7 +637,9 @@ defmodule BexioApiClient.ContactsTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Contact group does not exist"} = BexioApiClient.Contacts.fetch_contact_group(client, 99)
+
+      assert {:error, :not_found, "Contact group does not exist"} =
+               BexioApiClient.Contacts.fetch_contact_group(client, 99)
     end
   end
 
@@ -841,7 +847,9 @@ defmodule BexioApiClient.ContactsTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Additional Address does not exist"} = BexioApiClient.Contacts.fetch_additional_address(client, 3, 3)
+
+      assert {:error, :not_found, "Additional Address does not exist"} =
+               BexioApiClient.Contacts.fetch_additional_address(client, 3, 3)
     end
   end
 
@@ -935,7 +943,9 @@ defmodule BexioApiClient.ContactsTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Salutation does not exist"} = BexioApiClient.Contacts.fetch_salutation(client, 2)
+
+      assert {:error, :not_found, "Salutation does not exist"} =
+               BexioApiClient.Contacts.fetch_salutation(client, 2)
     end
   end
 
@@ -1029,7 +1039,9 @@ defmodule BexioApiClient.ContactsTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Contact group does not exist"} = BexioApiClient.Contacts.fetch_title(client, 2)
+
+      assert {:error, :not_found, "Contact group does not exist"} =
+               BexioApiClient.Contacts.fetch_title(client, 2)
     end
   end
 end

@@ -10,6 +10,8 @@ defmodule BexioApiClient.Purchase do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
+  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+
   @possible_bill_status [
     :draft,
     :booked,
@@ -71,7 +73,7 @@ defmodule BexioApiClient.Purchase do
           fields :: list(String.t()) | nil,
           search_args :: bill_search_args(),
           opts :: [GlobalArguments.paging_arg()]
-        ) :: {:ok, {[Bill.t()], Paging.t()}} | {:error, any()}
+        ) :: {:ok, {[Bill.t()], Paging.t()}} | tesla_error_type()
   def fetch_bills(
         client,
         search_term \\ nil,

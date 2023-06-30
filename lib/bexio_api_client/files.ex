@@ -13,13 +13,15 @@ defmodule BexioApiClient.Files do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
+  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+
   @doc """
   Fetch a list of files.
   """
   @spec fetch_files(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [File.t()]} | {:error, any()}
+        ) :: {:ok, [File.t()]} | tesla_error_type()
   def fetch_files(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -48,7 +50,7 @@ defmodule BexioApiClient.Files do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [File.t()]} | {:error, any()}
+        ) :: {:ok, [File.t()]} | tesla_error_type()
   def search_files(
         client,
         criteria,
@@ -86,7 +88,7 @@ defmodule BexioApiClient.Files do
   @spec fetch_file(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, File.t()} | {:error, any()}
+        ) :: {:ok, File.t()} | tesla_error_type()
   def fetch_file(client, id) do
     bexio_body_handling(
       fn ->
@@ -140,7 +142,7 @@ defmodule BexioApiClient.Files do
   @spec download_file(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, {String.t(), any()}} | {:error, any()}
+        ) :: {:ok, {String.t(), any()}} | tesla_error_type()
   def download_file(client, id) do
     bexio_body_handling(
       fn ->
@@ -156,7 +158,7 @@ defmodule BexioApiClient.Files do
   @spec preview_file(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, {String.t(), any()}} | {:error, any()}
+        ) :: {:ok, {String.t(), any()}} | tesla_error_type()
   def preview_file(client, id) do
     bexio_body_handling(
       fn ->

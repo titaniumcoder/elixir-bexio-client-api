@@ -24,6 +24,8 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
+  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+
   # Quotes
 
   @doc """
@@ -32,7 +34,8 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec fetch_quotes(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Quote.t()]} | {:error, any()}
+        ) ::
+          {:ok, [Quote.t()]} | tesla_error_type
   def fetch_quotes(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -66,7 +69,9 @@ defmodule BexioApiClient.SalesOrderManagement do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Quote.t()]} | {:error, any()}
+        ) ::
+          {:ok, [Quote.t()]} | tesla_error_type
+
   def search_quotes(
         client,
         criteria,
@@ -86,7 +91,9 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec fetch_quote(
           client :: Tesla.Client.t(),
           quote_id :: pos_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) ::
+          {:ok, Quote.t()} | tesla_error_type
+
   def fetch_quote(client, quote_id) do
     bexio_body_handling(
       fn ->
@@ -103,7 +110,8 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec create_quote(
           client :: Tesla.Client.t(),
           offer :: Quote.t()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) ::
+          {:ok, Quote.t()} | tesla_error_type
   def create_quote(client, offer) do
     bexio_body_handling(
       fn ->
@@ -119,7 +127,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec edit_quote(
           client :: Tesla.Client.t(),
           offer :: Quote.t()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, Quote.t()} | tesla_error_type
   def edit_quote(client, offer) do
     bexio_body_handling(
       fn ->
@@ -135,7 +143,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec delete_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -151,7 +159,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec issue_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def issue_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -167,7 +175,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec revert_issue_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def revert_issue_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -183,7 +191,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec accept_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def accept_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -199,7 +207,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec decline_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def decline_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -215,7 +223,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec reissue_quote(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def reissue_quote(client, id) do
     bexio_body_handling(
       fn ->
@@ -247,7 +255,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec quote_pdf(
           client :: Tesla.Client.t(),
           quote_id :: pos_integer()
-        ) :: {:ok, map()} | {:error, any()}
+        ) :: {:ok, map()} | tesla_error_type
   def quote_pdf(client, quote_id) do
     bexio_body_handling(
       fn ->
@@ -511,7 +519,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec fetch_orders(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Order.t()]} | {:error, any()}
+        ) :: {:ok, [Order.t()]} | tesla_error_type
   def fetch_orders(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -543,7 +551,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Order.t()]} | {:error, any()}
+        ) :: {:ok, [Order.t()]} | tesla_error_type
   def search_orders(
         client,
         criteria,
@@ -563,7 +571,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec fetch_order(
           client :: Tesla.Client.t(),
           order_id :: pos_integer()
-        ) :: {:ok, Order.t()} | {:error, any()}
+        ) :: {:ok, Order.t()} | tesla_error_type
   def fetch_order(client, order_id) do
     bexio_body_handling(
       fn ->
@@ -580,7 +588,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec create_order(
           client :: Tesla.Client.t(),
           order :: Order.t()
-        ) :: {:ok, Order.t()} | {:error, any()}
+        ) :: {:ok, Order.t()} | tesla_error_type
   def create_order(client, order) do
     bexio_body_handling(
       fn ->
@@ -596,7 +604,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec edit_order(
           client :: Tesla.Client.t(),
           order :: Order.t()
-        ) :: {:ok, Order.t()} | {:error, any()}
+        ) :: {:ok, Order.t()} | tesla_error_type
   def edit_order(client, order) do
     bexio_body_handling(
       fn ->
@@ -612,7 +620,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec delete_order(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_order(client, id) do
     bexio_body_handling(
       fn ->
@@ -628,7 +636,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec order_pdf(
           client :: Tesla.Client.t(),
           order_id :: pos_integer()
-        ) :: {:ok, map()} | {:error, any()}
+        ) :: {:ok, map()} | tesla_error_type
   def order_pdf(client, order_id) do
     bexio_body_handling(
       fn ->
@@ -786,7 +794,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec fetch_invoices(
           client :: Tesla.Client.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Invoice.t()]} | {:error, any()}
+        ) :: {:ok, [Invoice.t()]} | tesla_error_type
   def fetch_invoices(client, opts \\ []) do
     bexio_body_handling(
       fn ->
@@ -819,7 +827,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           client :: Tesla.Client.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Invoice.t()]} | {:error, any()}
+        ) :: {:ok, [Invoice.t()]} | tesla_error_type
   def search_invoices(
         client,
         criteria,
@@ -839,7 +847,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec fetch_invoice(
           client :: Tesla.Client.t(),
           invoice_id :: pos_integer()
-        ) :: {:ok, Quote.t()} | {:error, any()}
+        ) :: {:ok, Quote.t()} | tesla_error_type
   def fetch_invoice(client, invoice_id) do
     bexio_body_handling(
       fn ->
@@ -856,7 +864,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec create_invoice(
           client :: Tesla.Client.t(),
           invoice :: Invoice.t()
-        ) :: {:ok, Invoice.t()} | {:error, any()}
+        ) :: {:ok, Invoice.t()} | tesla_error_type
   def create_invoice(client, invoice) do
     bexio_body_handling(
       fn ->
@@ -872,7 +880,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec edit_invoice(
           client :: Tesla.Client.t(),
           invoice :: Invoice.t()
-        ) :: {:ok, Invoice.t()} | {:error, any()}
+        ) :: {:ok, Invoice.t()} | tesla_error_type
   def edit_invoice(client, invoice) do
     bexio_body_handling(
       fn ->
@@ -888,7 +896,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec delete_invoice(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_invoice(client, id) do
     bexio_body_handling(
       fn ->
@@ -904,7 +912,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec issue_invoice(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def issue_invoice(client, id) do
     bexio_body_handling(
       fn ->
@@ -920,7 +928,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec revert_issue_invoice(
           client :: Tesla.Client.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def revert_issue_invoice(client, id) do
     bexio_body_handling(
       fn ->
@@ -936,7 +944,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   @spec invoice_pdf(
           client :: Tesla.Client.t(),
           invoice_id :: pos_integer()
-        ) :: {:ok, map()} | {:error, any()}
+        ) :: {:ok, map()} | tesla_error_type
   def invoice_pdf(client, invoice_id) do
     bexio_body_handling(
       fn ->
@@ -1108,7 +1116,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [Comment.t()]} | {:error, any()}
+        ) :: {:ok, [Comment.t()]} | tesla_error_type
   def fetch_comments(
         client,
         document_type,
@@ -1133,7 +1141,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           comment_id :: pos_integer()
-        ) :: {:ok, Comment.t()} | {:error, any()}
+        ) :: {:ok, Comment.t()} | tesla_error_type
   def fetch_comment(
         client,
         document_type,
@@ -1159,7 +1167,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           comment :: Comment.t()
-        ) :: {:ok, Comment.t()} | {:error, any()}
+        ) :: {:ok, Comment.t()} | tesla_error_type
   def create_comment(
         client,
         document_type,
@@ -1255,7 +1263,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionSubtotal.t()]} | {:error, any()}
+        ) :: {:ok, [PositionSubtotal.t()]} | tesla_error_type
   def fetch_subtotal_positions(
         client,
         document_type,
@@ -1280,7 +1288,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionSubtotal.t()} | {:error, any()}
+        ) :: {:ok, PositionSubtotal.t()} | tesla_error_type
   def fetch_subtotal_position(
         client,
         document_type,
@@ -1306,7 +1314,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           text :: String.t()
-        ) :: {:ok, PositionSubtotal.t()} | {:error, any()}
+        ) :: {:ok, PositionSubtotal.t()} | tesla_error_type
   def create_subtotal_position(client, document_type, document_id, text) do
     bexio_body_handling(
       fn ->
@@ -1327,7 +1335,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_id :: pos_integer(),
           position_id :: pos_integer(),
           text :: String.t()
-        ) :: {:ok, PositionSubtotal.t()} | {:error, any()}
+        ) :: {:ok, PositionSubtotal.t()} | tesla_error_type
   def edit_subtotal_position(client, document_type, document_id, position_id, text) do
     bexio_body_handling(
       fn ->
@@ -1349,7 +1357,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_subtotal_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
@@ -1393,7 +1401,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionText.t()]} | {:error, any()}
+        ) :: {:ok, [PositionText.t()]} | tesla_error_type
   def fetch_text_positions(
         client,
         document_type,
@@ -1418,7 +1426,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionText.t()} | {:error, any()}
+        ) :: {:ok, PositionText.t()} | tesla_error_type
   def fetch_text_position(
         client,
         document_type,
@@ -1445,7 +1453,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionText.t()} | {:error, any()}
+        ) :: {:ok, PositionText.t()} | tesla_error_type
   def create_text_position(client, document_type, document_id, text, show_pos_nr?) do
     bexio_body_handling(
       fn ->
@@ -1469,7 +1477,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           position_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionText.t()} | {:error, any()}
+        ) :: {:ok, PositionText.t()} | tesla_error_type
   def edit_text_position(client, document_type, document_id, position_id, text, show_pos_nr?) do
     bexio_body_handling(
       fn ->
@@ -1491,7 +1499,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_text_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
@@ -1537,7 +1545,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionDefault.t()]} | {:error, any()}
+        ) :: {:ok, [PositionDefault.t()]} | tesla_error_type
   def fetch_default_positions(
         client,
         document_type,
@@ -1562,7 +1570,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionDefault.t()} | {:error, any()}
+        ) :: {:ok, PositionDefault.t()} | tesla_error_type
   def fetch_default_position(
         client,
         document_type,
@@ -1588,7 +1596,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionDefault.t()
-        ) :: {:ok, PositionDefault.t()} | {:error, any()}
+        ) :: {:ok, PositionDefault.t()} | tesla_error_type
   def create_default_position(client, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
@@ -1610,7 +1618,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionDefault.t()
-        ) :: {:ok, PositionDefault.t()} | {:error, any()}
+        ) :: {:ok, PositionDefault.t()} | tesla_error_type
   def edit_default_position(client, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
@@ -1632,7 +1640,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_default_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
@@ -1714,7 +1722,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionItem.t()]} | {:error, any()}
+        ) :: {:ok, [PositionItem.t()]} | tesla_error_type
   def fetch_item_positions(
         client,
         document_type,
@@ -1739,7 +1747,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionItem.t()} | {:error, any()}
+        ) :: {:ok, PositionItem.t()} | tesla_error_type
   def fetch_item_position(
         client,
         document_type,
@@ -1765,7 +1773,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionItem.t()
-        ) :: {:ok, PositionItem.t()} | {:error, any()}
+        ) :: {:ok, PositionItem.t()} | tesla_error_type
   def create_item_position(client, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
@@ -1787,7 +1795,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionItem.t()
-        ) :: {:ok, PositionItem.t()} | {:error, any()}
+        ) :: {:ok, PositionItem.t()} | tesla_error_type
   def edit_item_position(client, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
@@ -1809,7 +1817,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_item_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
@@ -1895,7 +1903,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionDiscount.t()]} | {:error, any()}
+        ) :: {:ok, [PositionDiscount.t()]} | tesla_error_type
   def fetch_discount_positions(
         client,
         document_type,
@@ -1920,7 +1928,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionDiscount.t()} | {:error, any()}
+        ) :: {:ok, PositionDiscount.t()} | tesla_error_type
   def fetch_discount_position(
         client,
         document_type,
@@ -1946,7 +1954,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionDiscount.t()
-        ) :: {:ok, PositionDiscount.t()} | {:error, any()}
+        ) :: {:ok, PositionDiscount.t()} | tesla_error_type
   def create_discount_position(client, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
@@ -1968,7 +1976,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionDiscount.t()
-        ) :: {:ok, PositionDiscount.t()} | {:error, any()}
+        ) :: {:ok, PositionDiscount.t()} | tesla_error_type
   def edit_discount_position(client, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
@@ -1990,7 +1998,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_discount_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
@@ -2044,7 +2052,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionPagebreak.t()]} | {:error, any()}
+        ) :: {:ok, [PositionPagebreak.t()]} | tesla_error_type
   def fetch_pagebreak_positions(
         client,
         document_type,
@@ -2069,7 +2077,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionPagebreak.t()} | {:error, any()}
+        ) :: {:ok, PositionPagebreak.t()} | tesla_error_type
   def fetch_pagebreak_position(
         client,
         document_type,
@@ -2094,7 +2102,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           client :: Tesla.Client.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer()
-        ) :: {:ok, PositionPagebreak.t()} | {:error, any()}
+        ) :: {:ok, PositionPagebreak.t()} | tesla_error_type
   def create_pagebreak_position(client, document_type, document_id) do
     bexio_body_handling(
       fn ->
@@ -2117,7 +2125,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_id :: pos_integer(),
           position_id :: pos_integer(),
           pagebreak :: boolean()
-        ) :: {:ok, PositionPagebreak.t()} | {:error, any()}
+        ) :: {:ok, PositionPagebreak.t()} | tesla_error_type
   def edit_pagebreak_position(client, document_type, document_id, position_id, pagebreak) do
     bexio_body_handling(
       fn ->
@@ -2139,7 +2147,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_pagebreak_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
@@ -2183,7 +2191,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) ::
-          {:ok, [PositionSubposition.t()]} | {:error, any()}
+          {:ok, [PositionSubposition.t()]} | tesla_error_type
   def fetch_subposition_positions(
         client,
         document_type,
@@ -2209,7 +2217,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_id :: pos_integer(),
           position_id :: pos_integer()
         ) ::
-          {:ok, PositionSubposition.t()} | {:error, any()}
+          {:ok, PositionSubposition.t()} | tesla_error_type
   def fetch_subposition_position(
         client,
         document_type,
@@ -2236,7 +2244,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionSubposition.t()} | {:error, any()}
+        ) :: {:ok, PositionSubposition.t()} | tesla_error_type
   def create_subposition_position(client, document_type, document_id, text, show_pos_nr?) do
     bexio_body_handling(
       fn ->
@@ -2260,7 +2268,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           position_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionSubposition.t()} | {:error, any()}
+        ) :: {:ok, PositionSubposition.t()} | tesla_error_type
   def edit_subposition_position(
         client,
         document_type,
@@ -2289,7 +2297,7 @@ defmodule BexioApiClient.SalesOrderManagement do
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | {:error, any()}
+        ) :: {:ok, boolean()} | tesla_error_type
   def delete_subposition_position(client, document_type, document_id, id) do
     bexio_body_handling(
       fn ->

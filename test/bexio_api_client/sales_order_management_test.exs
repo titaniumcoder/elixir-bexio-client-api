@@ -348,7 +348,9 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Offer does not exist"} = BexioApiClient.SalesOrderManagement.fetch_quote(client, 99)
+
+      assert {:error, :not_found, "Offer does not exist"} =
+               BexioApiClient.SalesOrderManagement.fetch_quote(client, 99)
     end
   end
 
@@ -1034,7 +1036,9 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Order does not exist"} = BexioApiClient.SalesOrderManagement.fetch_order(client, 99)
+
+      assert {:error, :not_found, "Order does not exist"} =
+               BexioApiClient.SalesOrderManagement.fetch_order(client, 99)
     end
   end
 
@@ -1631,7 +1635,9 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Invoice does not exist"} = BexioApiClient.SalesOrderManagement.fetch_invoice(client, 99)
+
+      assert {:error, :not_found, "Invoice does not exist"} =
+               BexioApiClient.SalesOrderManagement.fetch_invoice(client, 99)
     end
   end
 

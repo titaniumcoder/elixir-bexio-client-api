@@ -276,7 +276,9 @@ defmodule BexioApiClient.OthersTest do
 
     test "fails on unknown id" do
       client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:error, :not_found, "Country does not exist"} = BexioApiClient.Others.fetch_country(client, 99)
+
+      assert {:error, :not_found, "Country does not exist"} =
+               BexioApiClient.Others.fetch_country(client, 99)
     end
   end
 

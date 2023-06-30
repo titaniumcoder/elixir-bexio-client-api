@@ -94,21 +94,24 @@ defmodule BexioApiClient.Helpers do
 
   @type handler_callback_result_type :: any()
   @type tesla_body_callback_type :: any()
+  @type tesla_error_type ::
+          {:error,
+           :invalid_access
+           | :unauthorized
+           | :not_found
+           | :length_required
+           | :invalid_data
+           | :could_not_be_saved
+           | :rate_limited
+           | :unexpected_api_condition
+           | :api_not_available, nil | any()}
+          | {:error, nil | any()}
+
   @spec bexio_body_handling(
           call :: (() -> tesla_body_callback_type),
           callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
         ) ::
-          {:ok, handler_callback_result_type}
-          | {:error,
-             :invalid_access
-             | :unauthorized
-             | :not_found
-             | :length_required
-             | :invalid_data
-             | :could_not_be_saved
-             | :rate_limited
-             | :unexpected_api_condition
-             | :api_not_available}
+          {:ok, handler_callback_result_type} | tesla_error_type
   def bexio_body_handling(call, callback) do
     bexio_handling(call, fn body, env ->
       {:ok, callback.(body, env)}
@@ -119,17 +122,7 @@ defmodule BexioApiClient.Helpers do
           call :: (() -> tesla_body_callback_type),
           callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
         ) ::
-          handler_callback_result_type
-          | {:error,
-             :invalid_access
-             | :unauthorized
-             | :not_found
-             | :length_required
-             | :invalid_data
-             | :could_not_be_saved
-             | :rate_limited
-             | :unexpected_api_condition
-             | :api_not_available, nil | any()}
+          handler_callback_result_type | tesla_error_type | {:error, nil | any()}
   def bexio_handling(call, callback) do
     case call.() do
       {:ok, %Tesla.Env{status: status, body: body} = env} when status in [200, 201, 301] ->
@@ -201,6 +194,9 @@ defmodule BexioApiClient.Helpers do
 
   @spec decimal_nil_as_zero(nil | integer() | binary() | float()) :: Decimal.t()
   def decimal_nil_as_zero(nil), do: Decimal.new(0)
-  def decimal_nil_as_zero(number) when is_integer(number) or is_binary(number), do: Decimal.new(number)
+
+  def decimal_nil_as_zero(number) when is_integer(number) or is_binary(number),
+    do: Decimal.new(number)
+
   def decimal_nil_as_zero(number) when is_float(number), do: Decimal.from_float(number)
 end
