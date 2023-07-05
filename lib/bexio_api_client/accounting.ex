@@ -240,7 +240,7 @@ defmodule BexioApiClient.Accounting do
           client :: Tesla.Client.t(),
           id :: integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [Currency.t()]} | tesla_error_type()
+        ) :: {:ok, [ExchangeRate.t()]} | tesla_error_type()
   def fetch_exchange_rates(client, id, opts \\ []) do
     bexio_body_handling(
       fn ->
