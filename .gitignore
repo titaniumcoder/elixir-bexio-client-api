@@ -24,3 +24,5 @@ bexio_api_client-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+/.elixir-tools/

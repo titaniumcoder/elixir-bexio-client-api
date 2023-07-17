@@ -49,7 +49,7 @@ defmodule BexioApiClient.SalesOrderManagement.Order do
           contact_address: String.t(),
           delivery_address_type: integer(),
           delivery_address: String.t(),
-          kb_item_status: :pending | :done | :partial | :canceled,
+          kb_item_status: :pending | :done | :partial | :cancelled,
           is_recurring?: boolean(),
           api_reference: String.t() | nil,
           viewed_by_client_at: NaiveDateTime.t() | nil,

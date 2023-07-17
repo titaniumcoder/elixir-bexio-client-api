@@ -785,7 +785,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp order_kb_item_status(5), do: :pending
   defp order_kb_item_status(6), do: :done
   defp order_kb_item_status(15), do: :partial
-  defp order_kb_item_status(21), do: :canceled
+  defp order_kb_item_status(21), do: :cancelled
 
   # Invoices
 
@@ -1105,7 +1105,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp invoice_kb_item_status(8), do: :pending
   defp invoice_kb_item_status(9), do: :paid
   defp invoice_kb_item_status(16), do: :partial
-  defp invoice_kb_item_status(19), do: :canceled
+  defp invoice_kb_item_status(19), do: :cancelled
   defp invoice_kb_item_status(31), do: :unpaid
 
   # Comments
