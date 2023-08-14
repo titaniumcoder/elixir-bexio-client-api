@@ -331,7 +331,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       viewed_by_client_at: to_naive_string(viewed_by_client_at),
       kb_terms_of_payment_template_id: kb_terms_of_payment_template_id,
       template_slug: template_slug
-    } |> remove_document_no_if_nil()
+    }
+    |> remove_document_no_if_nil()
   end
 
   defp map_to_post_position(%PositionDefault{
@@ -697,8 +698,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       delivery_address_type: delivery_address_type,
       api_reference: api_reference,
       template_slug: template_slug
-    }    |> remove_document_no_if_nil()
-
+    }
+    |> remove_document_no_if_nil()
   end
 
   defp map_from_orders(orders, _env), do: Enum.map(orders, &map_from_order/1)
@@ -1008,8 +1009,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       reference: reference,
       api_reference: api_reference,
       template_slug: template_slug
-    }    |> remove_document_no_if_nil()
-
+    }
+    |> remove_document_no_if_nil()
   end
 
   defp map_from_invoices(invoices, _env), do: Enum.map(invoices, &map_from_invoice/1)
