@@ -10,7 +10,7 @@ defmodule BexioApiClient.MixProject do
       deps: deps(),
       package: package(),
       description: description(),
-      dialyzer: [flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
+      dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx], flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
     ]
   end
 
@@ -50,7 +50,7 @@ defmodule BexioApiClient.MixProject do
       {:jason, ">= 1.0.0"},
 
       # Typespecs everywhere...
-      {:dialyxir, "~> 1.2", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
 
       # Decimal for the money amounts
       {:decimal, "~> 2.0"},
