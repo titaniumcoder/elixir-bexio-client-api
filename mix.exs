@@ -10,7 +10,10 @@ defmodule BexioApiClient.MixProject do
       deps: deps(),
       package: package(),
       description: description(),
-      dialyzer: [plt_add_deps: :apps_direct, plt_add_apps: [:wx], flags: ["-Wunmatched_returns", :error_handling, :underspecs]]
+      dialyzer: [
+        plt_add_deps: :apps_direct,
+        flags: ["-Wunmatched_returns", :error_handling, :underspecs]
+      ]
     ]
   end
 
