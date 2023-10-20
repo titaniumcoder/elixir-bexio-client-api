@@ -1304,7 +1304,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
               "contact_id" => 14,
               "contact_sub_id" => nil,
               "user_id" => 1,
-              "project_id" => nil,
               "logopaper_id" => 1,
               "language_id" => 1,
               "bank_account_id" => 1,
@@ -1393,7 +1392,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
             "contact_id" => 14,
             "contact_sub_id" => nil,
             "user_id" => 1,
-            "project_id" => nil,
             "logopaper_id" => 1,
             "language_id" => 1,
             "bank_account_id" => 1,
@@ -1441,7 +1439,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert record.contact_id == 14
       assert record.contact_sub_id == nil
       assert record.user_id == 1
-      assert record.project_id == nil
       assert record.language_id == 1
       assert record.bank_account_id == 1
       assert record.currency_id == 1

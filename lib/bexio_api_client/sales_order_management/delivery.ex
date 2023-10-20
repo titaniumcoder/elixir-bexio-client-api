@@ -111,7 +111,6 @@ defmodule BexioApiClient.SalesOrderManagement.Delivery do
         contact_id: nil,
         contact_sub_id: nil,
         user_id: nil,
-        project_id: nil,
         language_id: nil,
         bank_account_id: nil,
         currency_id: nil,
