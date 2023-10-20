@@ -4,7 +4,7 @@ defmodule BexioApiClient.MixProject do
   def project do
     [
       app: :bexio_api_client,
-      version: "0.2.17",
+      version: "0.2.18",
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),

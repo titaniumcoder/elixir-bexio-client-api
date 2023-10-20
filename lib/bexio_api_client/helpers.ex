@@ -108,7 +108,7 @@ defmodule BexioApiClient.Helpers do
           | {:error, nil | any()}
 
   @spec bexio_body_handling(
-          call :: (() -> tesla_body_callback_type),
+          call :: (-> tesla_body_callback_type),
           callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
         ) ::
           {:ok, handler_callback_result_type} | tesla_error_type
@@ -119,7 +119,7 @@ defmodule BexioApiClient.Helpers do
   end
 
   @spec bexio_handling(
-          call :: (() -> tesla_body_callback_type),
+          call :: (-> tesla_body_callback_type),
           callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
         ) ::
           handler_callback_result_type | tesla_error_type | {:error, nil | any()}

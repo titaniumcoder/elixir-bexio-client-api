@@ -13,6 +13,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     Order,
     Quote,
     Invoice,
+    Delivery,
     PositionSubposition,
     PositionPagebreak,
     PositionDiscount,
@@ -787,6 +788,131 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp order_kb_item_status(6), do: :done
   defp order_kb_item_status(15), do: :partial
   defp order_kb_item_status(21), do: :cancelled
+
+  # Deliveries
+
+  @doc """
+  This action fetches a list of all deliveries.
+  """
+  @spec fetch_deliveries(
+          client :: Tesla.Client.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Delivery.t()]} | tesla_error_type
+  def fetch_deliveries(client, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_delivery", query: opts_to_query(opts))
+      end,
+      &map_from_deliveries/2
+    )
+  end
+
+  @doc """
+  This action fetches a single delivery
+  """
+  @spec fetch_delivery(
+          client :: Tesla.Client.t(),
+          delivery_id :: pos_integer()
+        ) :: {:ok, Delivery.t()} | tesla_error_type
+  def fetch_delivery(client, delivery_id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.get(client, "/2.0/kb_delivery/#{delivery_id}")
+      end,
+      &map_from_delivery/2
+    )
+  end
+
+  @doc """
+  Issues a delivery (only possible if it's in draft status!). The result whether the issue was successful or not
+  """
+  @spec issue_delivery(
+          client :: Tesla.Client.t(),
+          delivery_id :: integer()
+        ) :: {:ok, boolean()} | tesla_error_type
+  def issue_delivery(client, delivery_id) do
+    bexio_body_handling(
+      fn ->
+        Tesla.post(client, "/2.0/kb_delivery/#{delivery_id}/issue", %{})
+      end,
+      &success_response/2
+    )
+  end
+
+  defp map_from_deliveries(deliveries, _env), do: Enum.map(deliveries, &map_from_delivery/1)
+
+  defp map_from_delivery(
+         %{
+           "id" => id,
+           "document_nr" => document_nr,
+           "title" => title,
+           "contact_id" => contact_id,
+           "contact_sub_id" => contact_sub_id,
+           "user_id" => user_id,
+           "project_id" => project_id,
+           "language_id" => language_id,
+           "bank_account_id" => bank_account_id,
+           "currency_id" => currency_id,
+           "header" => header,
+           "footer" => footer,
+           "total_gross" => total_gross,
+           "total_net" => total_net,
+           "total_taxes" => total_taxes,
+           "total" => total,
+           "total_rounding_difference" => total_rounding_difference,
+           "mwst_type" => mwst_type_id,
+           "mwst_is_net" => mwst_is_net?,
+           "is_valid_from" => is_valid_from,
+           "contact_address" => contact_address,
+           "delivery_address_type" => delivery_address_type,
+           "delivery_address" => delivery_address,
+           "kb_item_status_id" => kb_item_status_id,
+           "is_recurring" => is_recurring?,
+           "api_reference" => api_reference,
+           "updated_at" => updated_at,
+           "taxs" => taxs
+         } = map,
+         _env \\ nil
+       ) do
+    %Delivery{
+      id: id,
+      document_nr: document_nr,
+      title: title,
+      contact_id: contact_id,
+      contact_sub_id: contact_sub_id,
+      user_id: user_id,
+      project_id: project_id,
+      language_id: language_id,
+      bank_account_id: bank_account_id,
+      currency_id: currency_id,
+      header: header,
+      footer: footer,
+      total_gross: to_decimal(total_gross),
+      total_net: to_decimal(total_net),
+      total_taxes: to_decimal(total_taxes),
+      total: to_decimal(total),
+      total_rounding_difference: total_rounding_difference,
+      mwst_type: mwst_type(mwst_type_id),
+      mwst_is_net?: mwst_is_net?,
+      is_valid_from: to_date(is_valid_from),
+      contact_address: contact_address,
+      delivery_address_type: delivery_address_type,
+      delivery_address: delivery_address,
+      kb_item_status: delivery_kb_item_status(kb_item_status_id),
+      api_reference: api_reference,
+      is_recurring?: is_recurring?,
+      updated_at: to_datetime(updated_at),
+      taxs: Enum.map(taxs, &to_tax/1)
+    }
+    |> map_delivery_positions(Map.get(map, "positions"))
+  end
+
+  defp map_delivery_positions(q, nil), do: q
+  defp map_delivery_positions(q, positions), do: %{q | positions: remap_positions(positions)}
+
+  defp delivery_kb_item_status(10), do: :draft
+  defp delivery_kb_item_status(18), do: :done
+  defp delivery_kb_item_status(20), do: :cancelled
 
   # Invoices
 

@@ -11,7 +11,7 @@ by adding `bexio_api_client` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:bexio_api_client, "~> 0.2.17"}
+    {:bexio_api_client, "~> 0.2.18"}
   ]
 end
 ```
@@ -34,4 +34,3 @@ and can be found at <https://hexdocs.pm/bexio_api_client>.
 4. Create a git commit.
 5. Create a tag for the new version.
 6. Execute `mix hex.publish`
-
