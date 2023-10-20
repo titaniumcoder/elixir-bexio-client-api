@@ -1298,41 +1298,39 @@ defmodule BexioApiClient.SalesOrderManagementTest do
         %{method: :get, url: "https://api.bexio.com/2.0/kb_delivery"} ->
           json([
             %{
-              "id" => 4,
-              "document_nr" => "O-00001",
-              "title" => nil,
+              "api_reference" => nil,
+              "bank_account_id" => 1,
+              "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
               "contact_id" => 14,
               "contact_sub_id" => nil,
-              "user_id" => 1,
-              "logopaper_id" => 1,
-              "language_id" => 1,
-              "bank_account_id" => 1,
               "currency_id" => 1,
-              "header" =>
-                "Thank you very much for your inquiry. We would be pleased to make you the following offer:",
-              "footer" =>
-                "We hope that our offer meets your expectations and will be happy to answer your questions.",
-              "total_gross" => "17.800000",
-              "total_net" => "17.800000",
-              "total_taxes" => "1.3706",
-              "total" => "19.150000",
-              "total_rounding_difference" => -0.02,
-              "mwst_type" => 0,
-              "mwst_is_net" => true,
-              "is_valid_from" => "2019-06-24",
-              "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
-              "delivery_address_type" => 0,
               "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+              "delivery_address_type" => 0,
+              "document_nr" => "O-00001",
+              "header" => nil,
+              "footer" => nil,
+              "id" => 4,
+              "is_valid_from" => "2019-06-24",
               "kb_item_status_id" => 18,
-              "api_reference" => nil,
-              "is_recurring" => false,
-              "updated_at" => "2019-04-08 13:17:32",
+              "language_id" => 1,
+              "logopaper_id" => 1,
+              "mwst_is_net" => true,
+              "mwst_type" => 0,
               "taxs" => [
                 %{
                   "percentage" => "7.70",
                   "value" => "1.3706"
                 }
-              ]
+              ],
+              "title" => nil,
+              "total" => "19.150000",
+              "total_gross" => "17.800000",
+              "total_net" => "17.800000",
+              "total_rounding_difference" => -0.02,
+              "total_taxes" => "1.3706",
+              "updated_at" => "2019-04-08 13:17:32",
+              "user_id" => 1,
+              "viewed_by_client_at" => nil
             }
           ])
       end)
@@ -1355,11 +1353,8 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert record.bank_account_id == 1
       assert record.currency_id == 1
 
-      assert record.header ==
-               "Thank you very much for your inquiry. We would be pleased to make you the following offer:"
-
-      assert record.footer ==
-               "We hope that our offer meets your expectations and will be happy to answer your questions."
+      assert record.header == nil
+      assert record.footer == nil
 
       assert Decimal.equal?(record.total_gross, Decimal.new("17.8"))
       assert Decimal.equal?(record.total_net, Decimal.new("17.8"))
@@ -1374,7 +1369,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert record.delivery_address == "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden"
       assert record.kb_item_status == :done
       assert record.api_reference == nil
-      assert record.is_recurring? == false
       assert record.updated_at == ~N[2019-04-08 13:17:32]
       assert Decimal.equal?(hd(record.taxs).percentage, Decimal.new("7.7"))
       assert Decimal.equal?(hd(record.taxs).value, Decimal.new("1.3706"))
@@ -1413,7 +1407,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
             "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
             "kb_item_status_id" => 18,
             "api_reference" => nil,
-            "is_recurring" => false,
             "updated_at" => "2019-04-08 13:17:32",
             "taxs" => [
               %{
@@ -1462,7 +1455,6 @@ defmodule BexioApiClient.SalesOrderManagementTest do
       assert record.delivery_address == "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden"
       assert record.kb_item_status == :done
       assert record.api_reference == nil
-      assert record.is_recurring? == false
       assert record.updated_at == ~N[2019-04-08 13:17:32]
       assert Decimal.equal?(hd(record.taxs).percentage, Decimal.new("7.7"))
       assert Decimal.equal?(hd(record.taxs).value, Decimal.new("1.3706"))

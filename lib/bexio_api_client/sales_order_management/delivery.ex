@@ -92,7 +92,6 @@ defmodule BexioApiClient.SalesOrderManagement.Delivery do
     :delivery_address_type,
     :delivery_address,
     :kb_item_status,
-    :is_recurring?,
     :api_reference,
     :updated_at,
     :taxs,
@@ -129,7 +128,6 @@ defmodule BexioApiClient.SalesOrderManagement.Delivery do
         delivery_address: "",
         kb_item_status: :draft,
         updated_at: NaiveDateTime.local_now(),
-        is_recurring?: false,
         taxs: [],
         positions: []
       },

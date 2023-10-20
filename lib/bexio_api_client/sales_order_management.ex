@@ -866,7 +866,6 @@ defmodule BexioApiClient.SalesOrderManagement do
            "delivery_address_type" => delivery_address_type,
            "delivery_address" => delivery_address,
            "kb_item_status_id" => kb_item_status_id,
-           "is_recurring" => is_recurring?,
            "api_reference" => api_reference,
            "updated_at" => updated_at,
            "taxs" => taxs
@@ -898,7 +897,6 @@ defmodule BexioApiClient.SalesOrderManagement do
       delivery_address: delivery_address,
       kb_item_status: delivery_kb_item_status(kb_item_status_id),
       api_reference: api_reference,
-      is_recurring?: is_recurring?,
       updated_at: to_datetime(updated_at),
       taxs: Enum.map(taxs, &to_tax/1)
     }
