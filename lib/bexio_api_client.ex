@@ -8,25 +8,40 @@ defmodule BexioApiClient do
 
   ## Requirements:
 
+    * Http Client:
     * Tesla: the api client depends on Tesla. Every API call needs an instance of a `Tesla.Client` to be able to do the rest calls.any()
 
   """
 
   @doc """
-  Create Tesla API Client.
+  Create the Bexio API Client comes in two flavors:
 
-  This must be given a token from https://office.bexio.com/admin/apiTokens#/ which will then be used as bearer token.
-  The client can then be used everywhere where it's useful.
+  * Using an API Key (not recommended)
 
-  It also allows an optional setup for retrying to allow to limit if needed. The defaults are listed below:
+    Start the gen_server with new(access_key: 'XXXX')
+
+  * Using a regular OpenID workflow (recommended)
+
+    Start the gen_server with new(client_id: 'X', client_secret: 'X', refresh_token: 'Y')
+
+    It will automatically fetch a new access_token using this information when the old one is about to expire.
+
+  Rate Limits:
+
+  Bexio APIs are rate limited. The gen_server will read out the rate limit information and wait if needed. The status code
+  429 is also interpreted corretly.
+
+  Retries: there are automatic retries on the following status codes:
+
+  * 500, 502, 503: server errors that are seen on the Bexio API from time to time
+  * 429: rate limitation response, after waiting for some time will retry.
+
+  The application needs a preconfigured HTTP client that fulfills the protocol ...
+
+  There is a sample implementation for req under ... If no configuration is added, this will be used. Make sure the
+  dependency for `req` is added to mix.exs in such cases.
 
   ## Options:
-
-    * `:delay` - Initial Delay for Backoff (Default: 500)
-    * `:max_retries` - Maximal number of retries (Default: 10)
-    * `:max_delay` - Maximal delay between requests (Default: 4_000)
-    * `:log_level` - Log Level for Requests (Default: `:info`)
-    * `:debug` - whether to include debug information (Default: `false`)
     * `:adapter` - Which adapter to use (Defalt: `nil`, recommended one with SSL support like Hackney)
 
   """
