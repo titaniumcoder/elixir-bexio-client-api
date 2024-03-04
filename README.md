@@ -11,10 +11,25 @@ by adding `bexio_api_client` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:bexio_api_client, "~> 0.2.20"}
+    {:bexio_api_client, "~> 0.3.0"},
+    # if using the default http client:
+    {:req, "~> 0.4.11"},
   ]
 end
 ```
+
+## Configuration
+
+TBD
+
+## Changelog
+
+### 0.3.0
+
+* Removing dependency to `tesla`
+* Adding `req` as optional dependency
+* HTTP Client is abstracted using protocol
+* Adding GenServer for requests and handling the rate limit
 
 ## Requirements:
 
