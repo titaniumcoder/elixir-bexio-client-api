@@ -46,7 +46,7 @@ defmodule BexioApiClient.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # API Client, for now fixed to tesla, may change later if needed
+      # API Client
       {:req, "~> 0.4.11", optional: true},
 
       # The API is completely in JSON

@@ -1,5 +1,6 @@
 defmodule BexioApiClient.Accounting.CurrencyTest do
   use ExUnit.Case, async: true
+
   doctest BexioApiClient.Accounting.Currency
 
   alias BexioApiClient.Accounting.Currency
