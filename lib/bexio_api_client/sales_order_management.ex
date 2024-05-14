@@ -25,7 +25,7 @@ defmodule BexioApiClient.SalesOrderManagement do
 
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
-  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+  @type api_error_type :: BexioApiClient.Helpers.api_error_type()
 
   # Quotes
 
@@ -33,14 +33,14 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all quotes.
   """
   @spec fetch_quotes(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
         ) ::
-          {:ok, [Quote.t()]} | tesla_error_type
-  def fetch_quotes(client, opts \\ []) do
+          {:ok, [Quote.t()]} | api_error_type
+  def fetch_quotes(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_offer", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/kb_offer", query: opts_to_query(opts))
       end,
       &map_from_quotes/2
     )
@@ -67,20 +67,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   * updated_at
   """
   @spec search_quotes(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
         ) ::
-          {:ok, [Quote.t()]} | tesla_error_type
+          {:ok, [Quote.t()]} | api_error_type
 
   def search_quotes(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/kb_offer/search", json: criteria, query: opts_to_query(opts))
       end,
       &map_from_quotes/2
     )
@@ -90,15 +90,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single quote
   """
   @spec fetch_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           quote_id :: pos_integer()
         ) ::
-          {:ok, Quote.t()} | tesla_error_type
+          {:ok, Quote.t()} | api_error_type
 
-  def fetch_quote(client, quote_id) do
+  def fetch_quote(req, quote_id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_offer/#{quote_id}")
+        Req.get(req, url: "/2.0/kb_offer/#{quote_id}")
       end,
       &map_from_quote/2
     )
@@ -109,14 +109,14 @@ defmodule BexioApiClient.SalesOrderManagement do
   and as such will just send if it exists.
   """
   @spec create_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           offer :: Quote.t()
         ) ::
-          {:ok, Quote.t()} | tesla_error_type
-  def create_quote(client, offer) do
+          {:ok, Quote.t()} | api_error_type
+  def create_quote(req, offer) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer", remap_quote(offer))
+        Req.post(req, url: "/2.0/kb_offer", json: remap_quote(offer))
       end,
       &map_from_quote/2
     )
@@ -126,13 +126,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit a quote.
   """
   @spec edit_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           offer :: Quote.t()
-        ) :: {:ok, Quote.t()} | tesla_error_type
-  def edit_quote(client, offer) do
+        ) :: {:ok, Quote.t()} | api_error_type
+  def edit_quote(req, offer) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer/#{offer.id}", remap_edit_quote(offer))
+        Req.post(req, url: "/2.0/kb_offer/#{offer.id}", json: remap_edit_quote(offer))
       end,
       &map_from_quote/2
     )
@@ -142,13 +142,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete a quote.
   """
   @spec delete_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_quote(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_offer/#{id}")
+        Req.delete(req, url: "/2.0/kb_offer/#{id}")
       end,
       &success_response/2
     )
@@ -158,13 +158,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Issue a quote.
   """
   @spec issue_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def issue_quote(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def issue_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer/#{id}/issue", %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/issue", json: %{})
       end,
       &success_response/2
     )
@@ -174,13 +174,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Revert Issue a quote.
   """
   @spec revert_issue_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def revert_issue_quote(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def revert_issue_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer/#{id}/revertIssue", %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/revertIssue", json: %{})
       end,
       &success_response/2
     )
@@ -190,13 +190,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Accept a quote.
   """
   @spec accept_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def accept_quote(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def accept_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer/#{id}/accept", %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/accept", json: %{})
       end,
       &success_response/2
     )
@@ -206,13 +206,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Decline a quote.
   """
   @spec decline_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def decline_quote(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def decline_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer/#{id}/reject", %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/reject", json: %{})
       end,
       &success_response/2
     )
@@ -222,13 +222,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Reissue a quote.
   """
   @spec reissue_quote(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def reissue_quote(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def reissue_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer/#{id}/reissue", %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/reissue", json: %{})
       end,
       &success_response/2
     )
@@ -238,13 +238,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Mark a quote as sent.
   """
   @spec mark_quote_as_sent(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
         ) :: {:ok, boolean()} | {:error, any()}
-  def mark_quote_as_sent(client, id) do
+  def mark_quote_as_sent(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_offer/#{id}/mark_as_sent", %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/mark_as_sent", json: %{})
       end,
       &success_response/2
     )
@@ -254,13 +254,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action returns a pdf document of the quote
   """
   @spec quote_pdf(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           quote_id :: pos_integer()
-        ) :: {:ok, map()} | tesla_error_type
-  def quote_pdf(client, quote_id) do
+        ) :: {:ok, map()} | api_error_type
+  def quote_pdf(req, quote_id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_offer/#{quote_id}/pdf")
+        Req.get(req, url: "/2.0/kb_offer/#{quote_id}/pdf")
       end,
       &map_from_pdf/2
     )
@@ -519,13 +519,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all orders.
   """
   @spec fetch_orders(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Order.t()]} | tesla_error_type
-  def fetch_orders(client, opts \\ []) do
+        ) :: {:ok, [Order.t()]} | api_error_type
+  def fetch_orders(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_order", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/kb_order", query: opts_to_query(opts))
       end,
       &map_from_orders/2
     )
@@ -550,18 +550,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   * updated_at
   """
   @spec search_orders(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Order.t()]} | tesla_error_type
+        ) :: {:ok, [Order.t()]} | api_error_type
   def search_orders(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_order/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/kb_order/search", json: criteria, query: opts_to_query(opts))
       end,
       &map_from_orders/2
     )
@@ -571,13 +571,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single order
   """
   @spec fetch_order(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           order_id :: pos_integer()
-        ) :: {:ok, Order.t()} | tesla_error_type
-  def fetch_order(client, order_id) do
+        ) :: {:ok, Order.t()} | api_error_type
+  def fetch_order(req, order_id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_order/#{order_id}")
+        Req.get(req, url: "/2.0/kb_order/#{order_id}")
       end,
       &map_from_order/2
     )
@@ -588,13 +588,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   and as such will just send if it exists.
   """
   @spec create_order(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           order :: Order.t()
-        ) :: {:ok, Order.t()} | tesla_error_type
-  def create_order(client, order) do
+        ) :: {:ok, Order.t()} | api_error_type
+  def create_order(req, order) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_order", remap_order(order))
+        Req.post(req, url: "/2.0/kb_order", json: remap_order(order))
       end,
       &map_from_order/2
     )
@@ -604,13 +604,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit an order.
   """
   @spec edit_order(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           order :: Order.t()
-        ) :: {:ok, Order.t()} | tesla_error_type
-  def edit_order(client, order) do
+        ) :: {:ok, Order.t()} | api_error_type
+  def edit_order(req, order) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_order/#{order.id}", remap_edit_order(order))
+        Req.post(req, url: "/2.0/kb_order/#{order.id}", json: remap_edit_order(order))
       end,
       &map_from_order/2
     )
@@ -620,13 +620,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete an order.
   """
   @spec delete_order(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_order(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_order(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_order/#{id}")
+        Req.delete(req, url: "/2.0/kb_order/#{id}")
       end,
       &success_response/2
     )
@@ -636,13 +636,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action returns a pdf document of the order
   """
   @spec order_pdf(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           order_id :: pos_integer()
-        ) :: {:ok, map()} | tesla_error_type
-  def order_pdf(client, order_id) do
+        ) :: {:ok, map()} | api_error_type
+  def order_pdf(req, order_id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_order/#{order_id}/pdf")
+        Req.get(req, url: "/2.0/kb_order/#{order_id}/pdf")
       end,
       &map_from_pdf/2
     )
@@ -795,13 +795,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all deliveries.
   """
   @spec fetch_deliveries(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Delivery.t()]} | tesla_error_type
-  def fetch_deliveries(client, opts \\ []) do
+        ) :: {:ok, [Delivery.t()]} | api_error_type
+  def fetch_deliveries(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_delivery", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/kb_delivery", query: opts_to_query(opts))
       end,
       &map_from_deliveries/2
     )
@@ -811,13 +811,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single delivery
   """
   @spec fetch_delivery(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           delivery_id :: pos_integer()
-        ) :: {:ok, Delivery.t()} | tesla_error_type
-  def fetch_delivery(client, delivery_id) do
+        ) :: {:ok, Delivery.t()} | api_error_type
+  def fetch_delivery(req, delivery_id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_delivery/#{delivery_id}")
+        Req.get(req, url: "/2.0/kb_delivery/#{delivery_id}")
       end,
       &map_from_delivery/2
     )
@@ -827,13 +827,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Issues a delivery (only possible if it's in draft status!). The result whether the issue was successful or not
   """
   @spec issue_delivery(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           delivery_id :: integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def issue_delivery(client, delivery_id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def issue_delivery(req, delivery_id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_delivery/#{delivery_id}/issue", %{})
+        Req.post(req, url: "/2.0/kb_delivery/#{delivery_id}/issue", json: %{})
       end,
       &success_response/2
     )
@@ -916,13 +916,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all invoices.
   """
   @spec fetch_invoices(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Invoice.t()]} | tesla_error_type
-  def fetch_invoices(client, opts \\ []) do
+        ) :: {:ok, [Invoice.t()]} | api_error_type
+  def fetch_invoices(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_invoice", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/kb_invoice", query: opts_to_query(opts))
       end,
       &map_from_invoices/2
     )
@@ -948,18 +948,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   * updated_at
   """
   @spec search_invoices(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Invoice.t()]} | tesla_error_type
+        ) :: {:ok, [Invoice.t()]} | api_error_type
   def search_invoices(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_invoice/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/kb_invoice/search", json: criteria, query: opts_to_query(opts))
       end,
       &map_from_invoices/2
     )
@@ -969,13 +969,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single invoice
   """
   @spec fetch_invoice(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           invoice_id :: pos_integer()
-        ) :: {:ok, Quote.t()} | tesla_error_type
-  def fetch_invoice(client, invoice_id) do
+        ) :: {:ok, Quote.t()} | api_error_type
+  def fetch_invoice(req, invoice_id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_invoice/#{invoice_id}")
+        Req.get(req, url: "/2.0/kb_invoice/#{invoice_id}")
       end,
       &map_from_invoice/2
     )
@@ -986,13 +986,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   and as such will just send if it exists.
   """
   @spec create_invoice(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           invoice :: Invoice.t()
-        ) :: {:ok, Invoice.t()} | tesla_error_type
-  def create_invoice(client, invoice) do
+        ) :: {:ok, Invoice.t()} | api_error_type
+  def create_invoice(req, invoice) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_invoice", remap_invoice(invoice))
+        Req.post(req, url: "/2.0/kb_invoice", json: remap_invoice(invoice))
       end,
       &map_from_invoice/2
     )
@@ -1002,13 +1002,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit an invoice.
   """
   @spec edit_invoice(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           invoice :: Invoice.t()
-        ) :: {:ok, Invoice.t()} | tesla_error_type
-  def edit_invoice(client, invoice) do
+        ) :: {:ok, Invoice.t()} | api_error_type
+  def edit_invoice(req, invoice) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_invoice/#{invoice.id}", remap_edit_invoice(invoice))
+        Req.post(req, url: "/2.0/kb_invoice/#{invoice.id}", json: remap_edit_invoice(invoice))
       end,
       &map_from_invoice/2
     )
@@ -1018,13 +1018,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete an invoice.
   """
   @spec delete_invoice(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_invoice(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_invoice(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_invoice/#{id}")
+        Req.delete(req, url: "/2.0/kb_invoice/#{id}")
       end,
       &success_response/2
     )
@@ -1034,13 +1034,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Issue an invoice.
   """
   @spec issue_invoice(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def issue_invoice(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def issue_invoice(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_invoice/#{id}/issue", %{})
+        Req.post(req, url: "/2.0/kb_invoice/#{id}/issue", json: %{})
       end,
       &success_response/2
     )
@@ -1050,13 +1050,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   Revert Issue an invoice.
   """
   @spec revert_issue_invoice(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def revert_issue_invoice(client, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def revert_issue_invoice(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_invoice/#{id}/revert_issue", %{})
+        Req.post(req, url: "/2.0/kb_invoice/#{id}/revert_issue", json: %{})
       end,
       &success_response/2
     )
@@ -1066,13 +1066,13 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action returns a pdf document of the quote
   """
   @spec invoice_pdf(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           invoice_id :: pos_integer()
-        ) :: {:ok, map()} | tesla_error_type
-  def invoice_pdf(client, invoice_id) do
+        ) :: {:ok, map()} | api_error_type
+  def invoice_pdf(req, invoice_id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_invoice/#{invoice_id}/pdf")
+        Req.get(req, url: "/2.0/kb_invoice/#{invoice_id}/pdf")
       end,
       &map_from_pdf/2
     )
@@ -1237,20 +1237,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of comments.
   """
   @spec fetch_comments(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [Comment.t()]} | tesla_error_type
+        ) :: {:ok, [Comment.t()]} | api_error_type
   def fetch_comments(
-        client,
+        req,
         document_type,
         document_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/comment",
+        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/comment",
           query: opts_to_query(opts)
         )
       end,
@@ -1262,22 +1262,22 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single comment.
   """
   @spec fetch_comment(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           comment_id :: pos_integer()
-        ) :: {:ok, Comment.t()} | tesla_error_type
+        ) :: {:ok, Comment.t()} | api_error_type
   def fetch_comment(
-        client,
+        req,
         document_type,
         document_id,
         comment_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/comment/#{comment_id}"
+        Req.get(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/comment/#{comment_id}"
         )
       end,
       &map_from_comment/2
@@ -1288,23 +1288,23 @@ defmodule BexioApiClient.SalesOrderManagement do
   Create a comment
   """
   @spec create_comment(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           comment :: Comment.t()
-        ) :: {:ok, Comment.t()} | tesla_error_type
+        ) :: {:ok, Comment.t()} | api_error_type
   def create_comment(
-        client,
+        req,
         document_type,
         document_id,
         comment
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/comment",
-          mapped_comment(comment)
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/comment",
+          json: mapped_comment(comment)
         )
       end,
       &map_from_comment/2
@@ -1384,20 +1384,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all subtotal positions for a document.
   """
   @spec fetch_subtotal_positions(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionSubtotal.t()]} | tesla_error_type
+        ) :: {:ok, [PositionSubtotal.t()]} | api_error_type
   def fetch_subtotal_positions(
-        client,
+        req,
         document_type,
         document_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal",
+        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal",
           query: opts_to_query(opts)
         )
       end,
@@ -1409,22 +1409,22 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single subtotal position for a document.
   """
   @spec fetch_subtotal_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionSubtotal.t()} | tesla_error_type
+        ) :: {:ok, PositionSubtotal.t()} | api_error_type
   def fetch_subtotal_position(
-        client,
+        req,
         document_type,
         document_id,
         position_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{position_id}"
+        Req.get(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{position_id}"
         )
       end,
       &map_from_subtotal_position/2
@@ -1435,15 +1435,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   Create a subtotal position.
   """
   @spec create_subtotal_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           text :: String.t()
-        ) :: {:ok, PositionSubtotal.t()} | tesla_error_type
-  def create_subtotal_position(client, document_type, document_id, text) do
+        ) :: {:ok, PositionSubtotal.t()} | api_error_type
+  def create_subtotal_position(req, document_type, document_id, text) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal", %{
+        Req.post(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal", json: %{
           text: text
         })
       end,
@@ -1455,19 +1455,19 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit a subtotal position.
   """
   @spec edit_subtotal_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer(),
           text :: String.t()
-        ) :: {:ok, PositionSubtotal.t()} | tesla_error_type
-  def edit_subtotal_position(client, document_type, document_id, position_id, text) do
+        ) :: {:ok, PositionSubtotal.t()} | api_error_type
+  def edit_subtotal_position(req, document_type, document_id, position_id, text) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{position_id}",
-          %{text: text}
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{position_id}",
+          json: %{text: text}
         )
       end,
       &map_from_subtotal_position/2
@@ -1478,15 +1478,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete a subtotal position.
   """
   @spec delete_subtotal_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_subtotal_position(client, document_type, document_id, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_subtotal_position(req, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{id}")
+        Req.delete(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal/#{id}")
       end,
       &success_response/2
     )
@@ -1522,20 +1522,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all text positions for a document.
   """
   @spec fetch_text_positions(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionText.t()]} | tesla_error_type
+        ) :: {:ok, [PositionText.t()]} | api_error_type
   def fetch_text_positions(
-        client,
+        req,
         document_type,
         document_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
+        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
           query: opts_to_query(opts)
         )
       end,
@@ -1547,22 +1547,22 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single text position for a document.
   """
   @spec fetch_text_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionText.t()} | tesla_error_type
+        ) :: {:ok, PositionText.t()} | api_error_type
   def fetch_text_position(
-        client,
+        req,
         document_type,
         document_id,
         position_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{position_id}"
+        Req.get(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{position_id}"
         )
       end,
       &map_from_text_position/2
@@ -1573,19 +1573,19 @@ defmodule BexioApiClient.SalesOrderManagement do
   Create a text position
   """
   @spec create_text_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionText.t()} | tesla_error_type
-  def create_text_position(client, document_type, document_id, text, show_pos_nr?) do
+        ) :: {:ok, PositionText.t()} | api_error_type
+  def create_text_position(req, document_type, document_id, text, show_pos_nr?) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
-          %{text: text, show_pos_nr: show_pos_nr?}
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
+          json: %{text: text, show_pos_nr: show_pos_nr?}
         )
       end,
       &map_from_text_position/2
@@ -1596,20 +1596,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit a text position.
   """
   @spec edit_text_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionText.t()} | tesla_error_type
-  def edit_text_position(client, document_type, document_id, position_id, text, show_pos_nr?) do
+        ) :: {:ok, PositionText.t()} | api_error_type
+  def edit_text_position(req, document_type, document_id, position_id, text, show_pos_nr?) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{position_id}",
-          %{text: text, show_pos_nr: show_pos_nr?}
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{position_id}",
+          json: %{text: text, show_pos_nr: show_pos_nr?}
         )
       end,
       &map_from_text_position/2
@@ -1620,15 +1620,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete a text position.
   """
   @spec delete_text_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_text_position(client, document_type, document_id, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_text_position(req, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{id}")
+        Req.delete(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_text/#{id}")
       end,
       &success_response/2
     )
@@ -1666,20 +1666,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all default positions for a document.
   """
   @spec fetch_default_positions(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionDefault.t()]} | tesla_error_type
+        ) :: {:ok, [PositionDefault.t()]} | api_error_type
   def fetch_default_positions(
-        client,
+        req,
         document_type,
         document_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
+        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
           query: opts_to_query(opts)
         )
       end,
@@ -1691,22 +1691,22 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single default position for a document.
   """
   @spec fetch_default_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionDefault.t()} | tesla_error_type
+        ) :: {:ok, PositionDefault.t()} | api_error_type
   def fetch_default_position(
-        client,
+        req,
         document_type,
         document_id,
         position_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom/#{position_id}"
+        Req.get(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom/#{position_id}"
         )
       end,
       &map_from_default_position/2
@@ -1717,18 +1717,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   Create a default position
   """
   @spec create_default_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionDefault.t()
-        ) :: {:ok, PositionDefault.t()} | tesla_error_type
-  def create_default_position(client, document_type, document_id, position) do
+        ) :: {:ok, PositionDefault.t()} | api_error_type
+  def create_default_position(req, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
-          remap_default_position(position)
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
+          json: remap_default_position(position)
         )
       end,
       &map_from_default_position/2
@@ -1739,18 +1739,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit a default position.
   """
   @spec edit_default_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionDefault.t()
-        ) :: {:ok, PositionDefault.t()} | tesla_error_type
-  def edit_default_position(client, document_type, document_id, position) do
+        ) :: {:ok, PositionDefault.t()} | api_error_type
+  def edit_default_position(req, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom/#{position.id}",
-          remap_default_position(position)
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom/#{position.id}",
+          json: remap_default_position(position)
         )
       end,
       &map_from_default_position/2
@@ -1761,15 +1761,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete a default position.
   """
   @spec delete_default_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_default_position(client, document_type, document_id, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_default_position(req, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom/#{id}")
+        Req.delete(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom/#{id}")
       end,
       &success_response/2
     )
@@ -1843,20 +1843,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all item positions for a document.
   """
   @spec fetch_item_positions(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionItem.t()]} | tesla_error_type
+        ) :: {:ok, [PositionItem.t()]} | api_error_type
   def fetch_item_positions(
-        client,
+        req,
         document_type,
         document_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
+        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
           query: opts_to_query(opts)
         )
       end,
@@ -1868,22 +1868,22 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single item position for a document.
   """
   @spec fetch_item_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionItem.t()} | tesla_error_type
+        ) :: {:ok, PositionItem.t()} | api_error_type
   def fetch_item_position(
-        client,
+        req,
         document_type,
         document_id,
         position_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{position_id}"
+        Req.get(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{position_id}"
         )
       end,
       &map_from_item_position/2
@@ -1894,18 +1894,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   Create an item position
   """
   @spec create_item_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionItem.t()
-        ) :: {:ok, PositionItem.t()} | tesla_error_type
-  def create_item_position(client, document_type, document_id, position) do
+        ) :: {:ok, PositionItem.t()} | api_error_type
+  def create_item_position(req, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
-          remap_item_position(position)
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
+          json: remap_item_position(position)
         )
       end,
       &map_from_item_position/2
@@ -1916,18 +1916,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit an item.
   """
   @spec edit_item_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionItem.t()
-        ) :: {:ok, PositionItem.t()} | tesla_error_type
-  def edit_item_position(client, document_type, document_id, position) do
+        ) :: {:ok, PositionItem.t()} | api_error_type
+  def edit_item_position(req, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{position.id}",
-          remap_item_position(position)
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{position.id}",
+          json: remap_item_position(position)
         )
       end,
       &map_from_default_position/2
@@ -1938,15 +1938,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete a default position.
   """
   @spec delete_item_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_item_position(client, document_type, document_id, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_item_position(req, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{id}")
+        Req.delete(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_article/#{id}")
       end,
       &success_response/2
     )
@@ -2024,20 +2024,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all discount positions for a document.
   """
   @spec fetch_discount_positions(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionDiscount.t()]} | tesla_error_type
+        ) :: {:ok, [PositionDiscount.t()]} | api_error_type
   def fetch_discount_positions(
-        client,
+        req,
         document_type,
         document_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
+        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
           query: opts_to_query(opts)
         )
       end,
@@ -2049,22 +2049,22 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single discount position for a document.
   """
   @spec fetch_discount_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionDiscount.t()} | tesla_error_type
+        ) :: {:ok, PositionDiscount.t()} | api_error_type
   def fetch_discount_position(
-        client,
+        req,
         document_type,
         document_id,
         position_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{position_id}"
+        Req.get(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{position_id}"
         )
       end,
       &map_from_discount_position/2
@@ -2075,18 +2075,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   Create a discount position
   """
   @spec create_discount_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionDiscount.t()
-        ) :: {:ok, PositionDiscount.t()} | tesla_error_type
-  def create_discount_position(client, document_type, document_id, position) do
+        ) :: {:ok, PositionDiscount.t()} | api_error_type
+  def create_discount_position(req, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
-          remap_discount_position(position)
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
+          json: remap_discount_position(position)
         )
       end,
       &map_from_discount_position/2
@@ -2097,18 +2097,18 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit a discount position.
   """
   @spec edit_discount_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position :: PositionDiscount.t()
-        ) :: {:ok, PositionDiscount.t()} | tesla_error_type
-  def edit_discount_position(client, document_type, document_id, position) do
+        ) :: {:ok, PositionDiscount.t()} | api_error_type
+  def edit_discount_position(req, document_type, document_id, position) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{position.id}",
-          remap_discount_position(position)
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{position.id}",
+          json: remap_discount_position(position)
         )
       end,
       &map_from_discount_position/2
@@ -2119,15 +2119,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete a discount position.
   """
   @spec delete_discount_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_discount_position(client, document_type, document_id, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_discount_position(req, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{id}")
+        Req.delete(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount/#{id}")
       end,
       &success_response/2
     )
@@ -2173,20 +2173,20 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all pagebreak positions for a document.
   """
   @spec fetch_pagebreak_positions(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, [PositionPagebreak.t()]} | tesla_error_type
+        ) :: {:ok, [PositionPagebreak.t()]} | api_error_type
   def fetch_pagebreak_positions(
-        client,
+        req,
         document_type,
         document_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
+        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
           query: opts_to_query(opts)
         )
       end,
@@ -2198,22 +2198,22 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single pagebreak position for a document.
   """
   @spec fetch_pagebreak_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
-        ) :: {:ok, PositionPagebreak.t()} | tesla_error_type
+        ) :: {:ok, PositionPagebreak.t()} | api_error_type
   def fetch_pagebreak_position(
-        client,
+        req,
         document_type,
         document_id,
         position_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{position_id}"
+        Req.get(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{position_id}"
         )
       end,
       &map_from_pagebreak_position/2
@@ -2224,17 +2224,17 @@ defmodule BexioApiClient.SalesOrderManagement do
   Create a pagebreak position
   """
   @spec create_pagebreak_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer()
-        ) :: {:ok, PositionPagebreak.t()} | tesla_error_type
-  def create_pagebreak_position(client, document_type, document_id) do
+        ) :: {:ok, PositionPagebreak.t()} | api_error_type
+  def create_pagebreak_position(req, document_type, document_id) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
-          %{}
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
+          json: %{}
         )
       end,
       &map_from_pagebreak_position/2
@@ -2245,19 +2245,19 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit a pagebreak position.
   """
   @spec edit_pagebreak_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer(),
           pagebreak :: boolean()
-        ) :: {:ok, PositionPagebreak.t()} | tesla_error_type
-  def edit_pagebreak_position(client, document_type, document_id, position_id, pagebreak) do
+        ) :: {:ok, PositionPagebreak.t()} | api_error_type
+  def edit_pagebreak_position(req, document_type, document_id, position_id, pagebreak) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{position_id}",
-          %{papebreak: pagebreak}
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{position_id}",
+          json: %{papebreak: pagebreak}
         )
       end,
       &map_from_pagebreak_position/2
@@ -2268,17 +2268,17 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete a pagebreak position.
   """
   @spec delete_pagebreak_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_pagebreak_position(client, document_type, document_id, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_pagebreak_position(req, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{id}"
+        Req.delete(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak/#{id}"
         )
       end,
       &success_response/2
@@ -2311,21 +2311,21 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a list of all subposition positions for a document.
   """
   @spec fetch_subposition_positions(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
         ) ::
-          {:ok, [PositionSubposition.t()]} | tesla_error_type
+          {:ok, [PositionSubposition.t()]} | api_error_type
   def fetch_subposition_positions(
-        client,
+        req,
         document_type,
         document_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
+        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
           query: opts_to_query(opts)
         )
       end,
@@ -2337,23 +2337,23 @@ defmodule BexioApiClient.SalesOrderManagement do
   This action fetches a single subposition position for a document.
   """
   @spec fetch_subposition_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer()
         ) ::
-          {:ok, PositionSubposition.t()} | tesla_error_type
+          {:ok, PositionSubposition.t()} | api_error_type
   def fetch_subposition_position(
-        client,
+        req,
         document_type,
         document_id,
         position_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{position_id}"
+        Req.get(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{position_id}"
         )
       end,
       &map_from_subposition_position/2
@@ -2364,19 +2364,19 @@ defmodule BexioApiClient.SalesOrderManagement do
   Create a subposition position
   """
   @spec create_subposition_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionSubposition.t()} | tesla_error_type
-  def create_subposition_position(client, document_type, document_id, text, show_pos_nr?) do
+        ) :: {:ok, PositionSubposition.t()} | api_error_type
+  def create_subposition_position(req, document_type, document_id, text, show_pos_nr?) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
-          %{text: text, show_pos_nr: show_pos_nr?}
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
+          json: %{text: text, show_pos_nr: show_pos_nr?}
         )
       end,
       &map_from_subposition_position/2
@@ -2387,15 +2387,15 @@ defmodule BexioApiClient.SalesOrderManagement do
   Edit a subposition position.
   """
   @spec edit_subposition_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           position_id :: pos_integer(),
           text :: String.t(),
           show_pos_nr? :: boolean()
-        ) :: {:ok, PositionSubposition.t()} | tesla_error_type
+        ) :: {:ok, PositionSubposition.t()} | api_error_type
   def edit_subposition_position(
-        client,
+        req,
         document_type,
         document_id,
         position_id,
@@ -2404,10 +2404,10 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{position_id}",
-          %{text: text, show_pos_nr: show_pos_nr?}
+        Req.post(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{position_id}",
+          json: %{text: text, show_pos_nr: show_pos_nr?}
         )
       end,
       &map_from_subposition_position/2
@@ -2418,17 +2418,17 @@ defmodule BexioApiClient.SalesOrderManagement do
   Delete a subposition position.
   """
   @spec delete_subposition_position(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           document_type :: :offer | :order | :invoice,
           document_id :: pos_integer(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type
-  def delete_subposition_position(client, document_type, document_id, id) do
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_subposition_position(req, document_type, document_id, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(
-          client,
-          "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{id}"
+        Req.delete(
+          req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition/#{id}"
         )
       end,
       &success_response/2

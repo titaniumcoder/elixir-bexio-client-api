@@ -11,19 +11,19 @@ defmodule BexioApiClient.Items do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
-  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+  @type api_error_type :: BexioApiClient.Helpers.api_error_type()
 
   @doc """
   Fetch a list of items.
   """
   @spec fetch_items(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Item.t()]} | tesla_error_type()
-  def fetch_items(client, opts \\ []) do
+        ) :: {:ok, [Item.t()]} | api_error_type()
+  def fetch_items(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/article", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/article", query: opts_to_query(opts))
       end,
       &map_from_articles/2
     )
@@ -37,21 +37,21 @@ defmodule BexioApiClient.Items do
   * intern_code
   """
   @spec search_items(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Item.t()]} | tesla_error_type()
+        ) :: {:ok, [Item.t()]} | api_error_type()
   def search_items(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/article/search",
-          criteria,
+        Req.post(
+          req,
+          url: "/2.0/article/search",
+          json: criteria,
           query: opts_to_query(opts)
         )
       end,
@@ -63,15 +63,15 @@ defmodule BexioApiClient.Items do
   Fetch single item.
   """
   @spec fetch_item(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, Item.t()} | tesla_error_type()
-  def fetch_item(client, id) do
+        ) :: {:ok, Item.t()} | api_error_type()
+  def fetch_item(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/article/#{id}"
+        Req.get(
+          req,
+          url: "/2.0/article/#{id}"
         )
       end,
       &map_from_article/2
@@ -82,13 +82,13 @@ defmodule BexioApiClient.Items do
   Create an item.
   """
   @spec create_item(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           item :: Item.t()
-        ) :: {:ok, Item.t()} | tesla_error_type()
-  def create_item(client, item) do
+        ) :: {:ok, Item.t()} | api_error_type()
+  def create_item(req, item) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/article", remap_item(item))
+        Req.post(req, url: "/2.0/article", json: remap_item(item))
       end,
       &map_from_article/2
     )
@@ -98,13 +98,13 @@ defmodule BexioApiClient.Items do
   Edit an item.
   """
   @spec edit_item(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           item :: Item.t()
-        ) :: {:ok, Item.t()} | tesla_error_type()
-  def edit_item(client, item) do
+        ) :: {:ok, Item.t()} | api_error_type()
+  def edit_item(req, item) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/article/#{item.id}", remap_edit_item(item))
+        Req.post(req, url: "/2.0/article/#{item.id}", json: remap_edit_item(item))
       end,
       &map_from_article/2
     )
@@ -114,13 +114,13 @@ defmodule BexioApiClient.Items do
   Delete an order.
   """
   @spec delete_item(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, boolean()} | tesla_error_type()
-  def delete_item(client, id) do
+        ) :: {:ok, boolean()} | api_error_type()
+  def delete_item(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/article/#{id}")
+        Req.delete(req, url: "/2.0/article/#{id}")
       end,
       &success_response/2
     )
@@ -289,13 +289,13 @@ defmodule BexioApiClient.Items do
   Fetch a list of stock locations.
   """
   @spec fetch_stock_locations(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
-  def fetch_stock_locations(client, opts \\ []) do
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
+  def fetch_stock_locations(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/stock", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/stock", query: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -308,21 +308,21 @@ defmodule BexioApiClient.Items do
   * name
   """
   @spec search_stock_locations(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def search_stock_locations(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/stock/search",
-          criteria,
+        Req.post(
+          req,
+          url: "/2.0/stock/search",
+          json: criteria,
           query: opts_to_query(opts)
         )
       end,
@@ -334,13 +334,13 @@ defmodule BexioApiClient.Items do
   Fetch a list of stock areas.
   """
   @spec fetch_stock_areas(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
-  def fetch_stock_areas(client, opts \\ []) do
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
+  def fetch_stock_areas(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/stock_place", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/stock_place", query: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -354,21 +354,21 @@ defmodule BexioApiClient.Items do
   * stock_id
   """
   @spec search_stock_areas(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def search_stock_areas(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/2.0/stock_place/search",
-          criteria,
+        Req.post(
+          req,
+          url: "/2.0/stock_place/search",
+          json: criteria,
           query: opts_to_query(opts)
         )
       end,

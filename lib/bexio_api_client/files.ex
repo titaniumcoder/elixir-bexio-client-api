@@ -13,19 +13,19 @@ defmodule BexioApiClient.Files do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
-  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+  @type api_error_type :: BexioApiClient.Helpers.api_error_type()
 
   @doc """
   Fetch a list of files.
   """
   @spec fetch_files(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [File.t()]} | tesla_error_type()
-  def fetch_files(client, opts \\ []) do
+        ) :: {:ok, [File.t()]} | api_error_type()
+  def fetch_files(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/files", query: opts_to_query(opts))
+        Req.get(req, url: "/3.0/files", query: opts_to_query(opts))
       end,
       &map_from_files/2
     )
@@ -47,21 +47,21 @@ defmodule BexioApiClient.Files do
   * source_id
   """
   @spec search_files(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [File.t()]} | tesla_error_type()
+        ) :: {:ok, [File.t()]} | api_error_type()
   def search_files(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/3.0/files/search",
-          remap(criteria),
+        Req.post(
+          req,
+          url: "/3.0/files/search",
+          json: remap(criteria),
           query: opts_to_query(opts)
         )
       end,
@@ -86,15 +86,15 @@ defmodule BexioApiClient.Files do
   Fetch single file.
   """
   @spec fetch_file(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, File.t()} | tesla_error_type()
-  def fetch_file(client, id) do
+        ) :: {:ok, File.t()} | api_error_type()
+  def fetch_file(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/3.0/files/#{id}"
+        Req.get(
+          req,
+          url: "/3.0/files/#{id}"
         )
       end,
       &map_from_file/2
@@ -140,15 +140,15 @@ defmodule BexioApiClient.Files do
   Download file (original content).
   """
   @spec download_file(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, {String.t(), any()}} | tesla_error_type()
-  def download_file(client, id) do
+        ) :: {:ok, {String.t(), any()}} | api_error_type()
+  def download_file(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/files/#{id}/download")
+        Req.get(req, url: "/3.0/files/#{id}/download")
       end,
-      fn file, env -> {file, Tesla.get_header(env, "content-type")} end
+      fn file, env -> {file, Req.Response.get_header(env, :content_type)} end
     )
   end
 
@@ -156,15 +156,15 @@ defmodule BexioApiClient.Files do
   Download file (original content).
   """
   @spec preview_file(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           id :: non_neg_integer()
-        ) :: {:ok, {String.t(), any()}} | tesla_error_type()
-  def preview_file(client, id) do
+        ) :: {:ok, {String.t(), any()}} | api_error_type()
+  def preview_file(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/files/#{id}/preview")
+        Req.get(req, url: "/3.0/files/#{id}/preview")
       end,
-      fn file, env -> {file, Tesla.get_header(env, "content-type")} end
+      fn file, resp -> {file, Req.Response.get_header(resp, :content_type)} end
     )
   end
 end
