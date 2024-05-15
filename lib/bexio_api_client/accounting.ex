@@ -280,7 +280,8 @@ defmodule BexioApiClient.Accounting do
   def fetch_taxes(req, date \\ nil, types \\ nil, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/3.0/taxes",
+        Req.get(req,
+          url: "/3.0/taxes",
           query: opts |> opts_to_query() |> opts_with_date(date) |> opts_with_type(types)
         )
       end,

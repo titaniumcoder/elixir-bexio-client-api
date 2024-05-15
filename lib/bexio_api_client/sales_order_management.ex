@@ -1250,7 +1250,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/comment",
+        Req.get(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/comment",
           query: opts_to_query(opts)
         )
       end,
@@ -1397,7 +1398,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal",
+        Req.get(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal",
           query: opts_to_query(opts)
         )
       end,
@@ -1443,9 +1445,12 @@ defmodule BexioApiClient.SalesOrderManagement do
   def create_subtotal_position(req, document_type, document_id, text) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal", json: %{
-          text: text
-        })
+        Req.post(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal",
+          json: %{
+            text: text
+          }
+        )
       end,
       &map_from_subtotal_position/2
     )
@@ -1535,7 +1540,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
+        Req.get(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
           query: opts_to_query(opts)
         )
       end,
@@ -1679,7 +1685,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
+        Req.get(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
           query: opts_to_query(opts)
         )
       end,
@@ -1856,7 +1863,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
+        Req.get(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
           query: opts_to_query(opts)
         )
       end,
@@ -2037,7 +2045,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
+        Req.get(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
           query: opts_to_query(opts)
         )
       end,
@@ -2186,7 +2195,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
+        Req.get(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
           query: opts_to_query(opts)
         )
       end,
@@ -2325,7 +2335,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
+        Req.get(req,
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
           query: opts_to_query(opts)
         )
       end,

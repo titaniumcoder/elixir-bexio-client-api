@@ -4,7 +4,7 @@ defmodule BexioApiClient do
   @base_request_options [
     base_url: "https://api.bexio.com",
     headers: [accept: "application/json"],
-    retry: :transient,
+    retry: :transient
     # TODO: attach the refresh token logic. Keeping track
     #  of the refresh tokens is not part of this library,
     #  it only keeps track of the access tokens for a given refresh
