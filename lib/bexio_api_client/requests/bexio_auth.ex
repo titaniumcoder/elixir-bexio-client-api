@@ -49,7 +49,7 @@ defmodule BexioApiClient.Requests.BexioAuth do
     client_secret = Keyword.get(opts, :bexio_client_secret)
     refresh_token = Keyword.get(opts, :refresh_token)
 
-    result = Req.post!(endpoint, json: %{"grant_type" => "refresh_token", "refresh_token" => refresh_token})
+    result = Req.post!(url: "https://idp.bexio.com/token", json: %{"grant_type" => "refresh_token", "refresh_token" => refresh_token})
 
     %{
       "access_token" => access_token,

@@ -1,88 +1,27 @@
 defmodule BexioApiClient do
-  use GenServer
-
   require Logger
 
   @base_request_options [
     base_url: "https://api.bexio.com",
     headers: [accept: "application/json"],
-    retry: :transient
+    retry: :transient,
+    # TODO: attach the refresh token logic. Keeping track
+    #  of the refresh tokens is not part of this library,
+    #  it only keeps track of the access tokens for a given refresh
+    #  token.
   ]
 
   @moduledoc """
-  Base Module for the API Client. It's a GenServer that will receive normal requests and will handle the API calls while also adding some
   base functionality like refreshing the access token.
 
   The API Documentation for Bexio can be found under https://docs.bexio.com.
 
-<<<<<<< HEAD
   Fields or arguments with date time reference expect them in the time zone Europe/Zurich.
 
   ## Requirements:
 
     * Http Client:
     ** Req: the api client depends on Req.
-
-  """
-
-  alias BexioApiClient.Requests.BexioAuth
-
-  @doc """
-  Create a Req that can be used to call the Bexio API with the correct headers and everything prepared when the input is an API Token (https://office.bexio.com/index.php/admin/apiTokens)
-
-  Rate Limits:
-
-  Bexio APIs are rate limited, using 429 to indicate too many requests.
-
-  Retries: there are automatic retries on the following status codes:
-
-  * 500, 502, 503: server errors that probably will be fixed. will use an exponential backoff if possible for the retries to give the server time to recover
-  * 429 will be handled using the header ratelimit-reset if available else waiting for 1 minute
-  """
-  def create_req(api_token, opts \\ []) do
-    # TODO improve logic for 429 replies where I want to wait for 1 minute!
-    jitter_delay_function = fn n ->
-      trunc(Integer.pow(2, n) * 1000 * (1 - 0.1 * :rand.uniform()))
-    end
-
-    req =
-      Req.new(
-        base_url: "https://api.bexio.com",
-        retry_delay: jitter_delay_function,
-        auth: {:bearer, api_token},
-        headers: {"accept", "application/json"}
-      )
-=======
-  Fields or arguments with date time reference expect them in the time zone Europe/Zurich. FIXME: should probably switch to UTC or make it configurable
-  """
-
-  @impl GenServer
-  def init(args) do
-    Logger.info("Starting the Bexio API Client GenServer with #{inspect(args)}")
-
-    send(self(), :create_req)
-
-    {:ok,
-     %{
-       req: nil,
-       refresher: nil,
-       client_id: args[:client_id],
-       client_secret: args[:client_secret],
-       api_token: args[:api_token]
-     }}
-  end
-
-  @doc """
-  Create the Bexio API Client comes in two flavors:
-
-  * Using an API Key (not recommended anymore, but simpler)
-
-    You get a base Req setup using new with an api key. This is not recommended anymore, but will never expire.
-
-  * Using a regular OpenID workflow (recommended)
-
-    This is a bit more tricky. The client_id, client_secret, and refresh_token are needed. The client_id and client_secret are used to fetch a new access_token
-    using the refresh_token. The problem is that the expiration time of the access_token must be managed by the client himself.
 
   """
   @spec new(String.t()) :: Req.Request.t()
@@ -171,6 +110,5 @@ defmodule BexioApiClient do
         {:error, :unauthorized}
     end
     """
->>>>>>> a2c9912 (Continued logic, pushing before replacing the laptop ;))
   end
 end
