@@ -63,7 +63,8 @@ defmodule BexioApiClient.MixProject do
 
       # Create documentation
       {:ex_doc, "~> 0.29.4", only: :dev},
-      {:earmark, "~> 1.4", only: :dev}
+      {:earmark, "~> 1.4", only: :dev},
+      {:plug, "~> 1.0", only: :test}
     ]
   end
 end

@@ -5,8 +5,10 @@ defmodule BexioApiClient do
   # where it's different. Transient retry: also retry on posts, puts, deletes, etc.
   @base_request_options [
     base_url: "https://api.bexio.com",
-    headers: [accept: "application/json"],
-    retry: :transient
+    headers: [accept: "application/json", content_type: "application/json"],
+    retry: :transient,
+    max_retries: 100,
+    retry_log_level: :warn
   ]
 
   @moduledoc """
@@ -32,6 +34,7 @@ defmodule BexioApiClient do
     |> Keyword.put_new(:auth, {:bearer, api_token})
     |> Keyword.merge(Application.get_env(:bexio_api_client, :bexio_req_options, []))
     |> Req.new()
+    |> BexioApiClient.Req.RewriteDelay.attach()
   end
 
   @doc """
@@ -43,7 +46,11 @@ defmodule BexioApiClient do
     @base_request_options
     |> Keyword.merge(Application.get_env(:bexio_api_client, :bexio_req_options, []))
     |> Req.new()
-    |> BexioApiClient.AccessTokenRefresher.attach(refresh_token: refresh_token, client_id: client_id, client_secret: client_secret)
+    |> BexioApiClient.Req.AccessTokenRefresher.attach(
+      refresh_token: refresh_token,
+      client_id: client_id,
+      client_secret: client_secret
+    )
   end
 
   @doc """
@@ -63,21 +70,33 @@ defmodule BexioApiClient do
   """
   @spec access_token(String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, any()}
   def access_token(refresh_token, client_id, client_secret) do
-    case Req.post(
+    idp_req =
+      @base_request_options
+      |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
+      |> Req.new()
+
+    case Req.post(idp_req,
            url: "https://idp.bexio.com/token",
            form: %{
              "grant_type" => "refresh_token",
              "refresh_token" => refresh_token
            },
-           auth: {client_id, client_secret}
+           auth: {:basic, "#{client_id}:#{client_secret}"}
          ) do
+      {:ok, %Req.Response{status: 401}} ->
+        {:error, :unauthenticated}
+
       {:ok, %Req.Response{} = response} ->
-        Logger.info("Received a response: #{inspect(response)}")
+        case response.body do
+          %{
+            "access_token" => access_token,
+            "expires_in" => expires_in
+          } ->
+            {:ok, access_token, expires_in}
 
-        access_token = response.body["access_token"]
-        expires_in = response.body["expires_in"]
-
-        {:ok, access_token, expires_in}
+          _ ->
+            {:error, {:unexpected_response, response.body}}
+        end
 
       {:error, exception} ->
         Logger.error("Could not fetch a new access token: #{inspect(exception)}")
