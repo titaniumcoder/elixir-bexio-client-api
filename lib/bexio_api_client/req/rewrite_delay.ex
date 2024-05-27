@@ -13,7 +13,7 @@ defmodule BexioApiClient.Req.RewriteDelay do
   end
 
   defp rewrite_delay({request, response}) do
-    Logger.info("Rewriting delay with #{request} #{response}")
+    Logger.info("Rewriting delay with #{inspect(request)} #{inspect(response)}")
     request
   end
 end
