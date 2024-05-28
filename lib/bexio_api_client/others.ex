@@ -158,7 +158,7 @@ defmodule BexioApiClient.Others do
       ) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/country/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/country/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_countries/2
     )
@@ -230,7 +230,7 @@ defmodule BexioApiClient.Others do
       ) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/language/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/language/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_languages/2
     )
@@ -286,7 +286,7 @@ defmodule BexioApiClient.Others do
   def fetch_user(req, user_id) do
     bexio_body_handling(
       fn ->
-        Req.get(req, "/3.0/users/#{user_id}")
+        Req.get(req, url: "/3.0/users/#{user_id}")
       end,
       &map_from_user/2
     )
@@ -366,7 +366,7 @@ defmodule BexioApiClient.Others do
   def delete_fictional_user(req, id) do
     bexio_body_handling(
       fn ->
-        Req.delete(req, "/3.0/fictional_users/#{id}")
+        Req.delete(req, url: "/3.0/fictional_users/#{id}")
       end,
       &success_response/2
     )
@@ -482,7 +482,7 @@ defmodule BexioApiClient.Others do
   def fetch_tasks(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/task", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/task", params: opts_to_query(opts))
       end,
       &map_from_tasks/2
     )
@@ -509,7 +509,7 @@ defmodule BexioApiClient.Others do
   def search_tasks(req, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/task/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/task/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_tasks/2
     )
@@ -649,7 +649,7 @@ defmodule BexioApiClient.Others do
   def fetch_task_priorities(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/todo_priority", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/todo_priority", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -663,7 +663,7 @@ defmodule BexioApiClient.Others do
   def fetch_task_status(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/todo_status", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/todo_status", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -679,7 +679,7 @@ defmodule BexioApiClient.Others do
   def fetch_units(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/unit", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/unit", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -700,7 +700,7 @@ defmodule BexioApiClient.Others do
   def search_units(req, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/unit/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/unit/search", json: criteria, params: opts_to_query(opts))
       end,
       &body_to_map/2
     )

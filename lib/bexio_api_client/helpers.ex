@@ -26,7 +26,7 @@ defmodule BexioApiClient.Helpers do
       nil
 
       iex> BexioApiClient.Helpers.to_decimal("2.331")
-      #Decimal<2.331>
+      Decimal.new("2.331")
   """
   @spec to_decimal(String.t() | nil) :: Decimal.t() | nil
   def to_decimal(nil), do: nil

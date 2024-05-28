@@ -37,7 +37,7 @@ defmodule BexioApiClient.Contacts do
   def fetch_contacts(req, show_archived \\ false, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/contact", query: contact_opts_to_query(show_archived, opts))
+        Req.get(req, url: "/2.0/contact", params: contact_opts_to_query(show_archived, opts))
       end,
       &map_from_clients/2
     )
@@ -81,7 +81,7 @@ defmodule BexioApiClient.Contacts do
         Req.post(req,
           url: "/2.0/contact/search",
           json: criteria,
-          query: contact_opts_to_query(show_archived, opts)
+          params: contact_opts_to_query(show_archived, opts)
         )
       end,
       &map_from_clients/2
@@ -103,7 +103,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/contact/#{contact_id}", query: [show_archived: show_archived])
+        Req.get(req, url: "/2.0/contact/#{contact_id}", params: [show_archived: show_archived])
       end,
       &map_from_client/2
     )
@@ -196,7 +196,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/contact_relation", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/contact_relation", params: opts_to_query(opts))
       end,
       &map_from_client_relations/2
     )
@@ -225,7 +225,7 @@ defmodule BexioApiClient.Contacts do
         Req.post(req,
           url: "/2.0/contact_relation/search",
           json: criteria,
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_client_relations/2
@@ -288,7 +288,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/contact_group", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/contact_group", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -315,7 +315,7 @@ defmodule BexioApiClient.Contacts do
         Req.post(req,
           url: "/2.0/contact_group/search",
           json: criteria,
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &body_to_map/2
@@ -356,7 +356,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/contact_branch", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/contact_branch", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -383,7 +383,7 @@ defmodule BexioApiClient.Contacts do
         Req.post(req,
           url: "/2.0/contact_branch/search",
           json: criteria,
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &body_to_map/2
@@ -411,7 +411,7 @@ defmodule BexioApiClient.Contacts do
       fn ->
         Req.get(req,
           url: "/2.0/contact/#{contact_id}/additional_address",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_additional_addresses/2
@@ -446,7 +446,7 @@ defmodule BexioApiClient.Contacts do
         Req.post(req,
           url: "/2.0/contact/#{contact_id}/additional_address/search",
           json: criteria,
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_additional_addresses/2
@@ -520,7 +520,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/salutation", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/salutation", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -544,7 +544,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/salutation/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/salutation/search", json: criteria, params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -587,7 +587,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/title", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/title", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -611,7 +611,7 @@ defmodule BexioApiClient.Contacts do
       ) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/title/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/title/search", json: criteria, params: opts_to_query(opts))
       end,
       &body_to_map/2
     )

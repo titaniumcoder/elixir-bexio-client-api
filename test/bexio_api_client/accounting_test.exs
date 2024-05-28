@@ -1,16 +1,17 @@
 defmodule BexioApiClient.AccountingTest do
+  use TestHelper
+
   use ExUnit.Case, async: true
+
   doctest BexioApiClient.Accounting
 
   alias BexioApiClient.SearchCriteria
 
-  import Tesla.Mock
-
   describe "fetching a list of accounts" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/accounts"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/accounts"} = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "account_no" => "3201",
@@ -38,7 +39,7 @@ defmodule BexioApiClient.AccountingTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} = BexioApiClient.Accounting.fetch_accounts(client)
 
@@ -64,13 +65,12 @@ defmodule BexioApiClient.AccountingTest do
 
   describe "searching accounts" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/accounts/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/accounts/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "account_no" => "3201",
@@ -98,7 +98,7 @@ defmodule BexioApiClient.AccountingTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} =
                BexioApiClient.Accounting.search_accounts(
@@ -131,9 +131,9 @@ defmodule BexioApiClient.AccountingTest do
 
   describe "fetching a list of account groups" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/account_groups"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/account_groups"} = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "account_no" => "1",
@@ -149,7 +149,7 @@ defmodule BexioApiClient.AccountingTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Accounting.fetch_account_groups(client)
 
@@ -164,9 +164,9 @@ defmodule BexioApiClient.AccountingTest do
 
   describe "fetching a list of calendar years" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/3.0/accounting/calendar_years"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/3.0/accounting/calendar_years"} = conn  ->
+          json(conn, [
             %{
               "id" => 1,
               "start" => "2018-01-01",
@@ -184,7 +184,7 @@ defmodule BexioApiClient.AccountingTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Accounting.fetch_calendar_years(client)
 
@@ -201,9 +201,9 @@ defmodule BexioApiClient.AccountingTest do
 
   describe "fetching a list of currencies" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/3.0/currencies"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/3.0/currencies"} = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "CHF",
@@ -216,7 +216,7 @@ defmodule BexioApiClient.AccountingTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Accounting.fetch_currencies(client)
 
@@ -228,9 +228,9 @@ defmodule BexioApiClient.AccountingTest do
 
   describe "fetch exchange rates for currencies" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/3.0/currencies/1/exchange_rates"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/3.0/currencies/1/exchange_rates"} = conn ->
+          json(conn, [
             %{
               "factor_nr" => 1.2,
               "exchange_currency" => %{
@@ -246,7 +246,7 @@ defmodule BexioApiClient.AccountingTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Accounting.fetch_exchange_rates(client, 1)
 
@@ -259,9 +259,9 @@ defmodule BexioApiClient.AccountingTest do
 
   describe "fetch a list of taxes" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/3.0/taxes"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/3.0/taxes"} = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "uuid" => "8078b1f3-f85b-4adf-aaa8-c3eeea964927",
@@ -285,7 +285,7 @@ defmodule BexioApiClient.AccountingTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Accounting.fetch_taxes(client)
 

@@ -10,8 +10,7 @@ defmodule BexioApiClientTest do
       assert "application/json" in req.headers["accept"]
       assert "application/json" in req.headers["content-type"]
 
-      assert req.options[:retry] == :transient
-      assert Keyword.get(req.response_steps, :rewrite_delay)
+      assert req.options[:retry] == &BexioApiClient.Req.RewriteDelay.retry/2
       assert {:bearer, _} = req.options[:auth]
     end
   end

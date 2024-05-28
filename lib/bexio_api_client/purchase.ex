@@ -85,7 +85,7 @@ defmodule BexioApiClient.Purchase do
       fn ->
         Req.get(req,
           url: "/4.0/purchase/bills",
-          query:
+          params:
             Keyword.merge(
               [
                 search_term: search_term,

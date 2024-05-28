@@ -1,4 +1,6 @@
 defmodule BexioApiClient.OthersTest do
+  use TestHelper
+
   use ExUnit.Case, async: true
 
   doctest BexioApiClient.Others
@@ -6,16 +8,14 @@ defmodule BexioApiClient.OthersTest do
   alias BexioApiClient.Others.{FictionalUser, Todo}
   alias BexioApiClient.SearchCriteria
 
-  import Tesla.Mock
-
   describe "fetching a list of company profiles" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/company_profile"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/company_profile"
+        } = conn ->
+          json(conn, [
             %{
               id: 1,
               name: "bexio AG",
@@ -57,7 +57,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Others.fetch_company_profiles(client)
 
@@ -98,9 +98,9 @@ defmodule BexioApiClient.OthersTest do
 
   describe "show company profile" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/company_profile/1"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/company_profile/1"} = conn ->
+          json(conn, %{
             id: 1,
             name: "bexio AG",
             address: "Alte Jonastrasse 24",
@@ -140,7 +140,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       assert {:ok, result} = BexioApiClient.Others.fetch_company_profile(client, 1)
 
       assert result.id == 1
@@ -180,12 +180,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a list of countries" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/country"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/country"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Kiribati",
@@ -199,7 +199,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Others.fetch_countries(client)
 
@@ -212,13 +212,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "searching countries" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/country/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/country/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Kiribati",
@@ -232,7 +231,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} =
                BexioApiClient.Others.search_countries(client, [
@@ -249,24 +248,24 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a single country" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/country/1"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/country/1"} = conn ->
+          json(conn, %{
             "id" => 1,
             "name" => "Kiribati",
             "name_short" => "KI",
             "iso_3166_alpha2" => "KI"
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/country/99"} ->
-          %Tesla.Env{status: 404, body: "Country does not exist"}
+        %{method: "GET", request_path: "/2.0/country/99"} = conn ->
+          send_resp(conn, 404, "Country does not exist")
       end)
 
       :ok
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       assert {:ok, result} = BexioApiClient.Others.fetch_country(client, 1)
       assert result.id == 1
       assert result.name == "Kiribati"
@@ -275,7 +274,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "fails on unknown id" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:error, :not_found, "Country does not exist"} =
                BexioApiClient.Others.fetch_country(client, 99)
@@ -284,12 +283,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a list of languages" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/language"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/language"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "German",
@@ -306,7 +305,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Others.fetch_languages(client)
 
@@ -322,13 +321,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "searching languages" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/language/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/language/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "German",
@@ -345,7 +343,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} =
                BexioApiClient.Others.search_languages(client, [
@@ -365,12 +363,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a list of users" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/3.0/users"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/3.0/users"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 4,
               "salutation_type" => "male",
@@ -387,7 +385,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Others.fetch_users(client)
 
@@ -403,12 +401,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a user" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/3.0/users/4"
-        } ->
-          json(%{
+          method: "GET",
+          request_path: "/3.0/users/4"
+        } = conn ->
+          json(conn, %{
             "id" => 4,
             "salutation_type" => "male",
             "firstname" => "Rudolph",
@@ -423,7 +421,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.fetch_user(client, 4)
 
@@ -439,12 +437,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a list of fictional users" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/3.0/fictional_users"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/3.0/fictional_users"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 4,
               "salutation_type" => "male",
@@ -460,7 +458,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Others.fetch_fictional_users(client)
 
@@ -475,12 +473,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a fictional user" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/3.0/fictional_users/4"
-        } ->
-          json(%{
+          method: "GET",
+          request_path: "/3.0/fictional_users/4"
+        } = conn ->
+          json(conn, %{
             "id" => 4,
             "salutation_type" => "male",
             "firstname" => "Rudolph",
@@ -494,7 +492,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.fetch_fictional_user(client, 4)
 
@@ -509,19 +507,19 @@ defmodule BexioApiClient.OthersTest do
 
   describe "creating a fictional user" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/3.0/fictional_users",
-          body: body
-        } ->
+          method: "POST",
+          request_path: "/3.0/fictional_users"
+        } = conn ->
+          {:ok, body, _} = read_body(conn)
           body_json = Jason.decode!(body)
           assert body_json["email"] == "rudolph.smith@bexio.com"
           assert body_json["salutation_type"] == "male"
           assert body_json["firstname"] == "Rudolph"
           assert body_json["lastname"] == "Smith"
 
-          json(%{
+          json(conn, %{
             "id" => 4,
             "salutation_type" => "male",
             "firstname" => "Rudolph",
@@ -535,7 +533,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "creates the new user" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Others.create_fictional_user(client, %FictionalUser{
@@ -557,19 +555,19 @@ defmodule BexioApiClient.OthersTest do
 
   describe "updating a fictional user" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :patch,
-          url: "https://api.bexio.com/3.0/fictional_users/4",
-          body: body
-        } ->
+          method: "PATCH",
+          request_path: "/3.0/fictional_users/4"
+        } = conn ->
+          {:ok, body, _} = read_body(conn)
           body_json = Jason.decode!(body)
           assert body_json["email"] == "rudolph.smith@bexio.com"
           assert body_json["salutation_type"] == "male"
           assert body_json["firstname"] == "Rudolph"
           assert body_json["lastname"] == "Smith"
 
-          json(%{
+          json(conn, %{
             "id" => 4,
             "salutation_type" => "male",
             "firstname" => "Rudolph",
@@ -583,7 +581,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "creates the new user" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Others.update_fictional_user(client, %FictionalUser{
@@ -605,19 +603,19 @@ defmodule BexioApiClient.OthersTest do
 
   describe "delete a fictional user" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :delete,
-          url: "https://api.bexio.com/3.0/fictional_users/4"
-        } ->
-          json(%{"success" => true})
+          method: "DELETE",
+          request_path: "/3.0/fictional_users/4"
+        } = conn ->
+          json(conn, %{"success" => true})
       end)
 
       :ok
     end
 
     test "success" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.delete_fictional_user(client, 4)
 
@@ -627,12 +625,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "getting access information of logged in user" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/3.0/permissions"
-        } ->
-          json(%{
+          method: "GET",
+          request_path: "/3.0/permissions"
+        } = conn ->
+          json(conn, %{
             "components" => [
               "api2_access",
               "api3_access",
@@ -747,7 +745,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid permissions" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.get_access_information(client)
 
@@ -762,12 +760,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a list of tasks" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/task"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/task"
+        } = conn ->
+          json(conn, [
             %{
               "communication_kind_id" => nil,
               "contact_id" => nil,
@@ -813,7 +811,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} = BexioApiClient.Others.fetch_tasks(client)
 
@@ -835,13 +833,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "searching tasks" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/task/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/task/search"
+        } = conn ->
+          json(conn, [
             %{
               "communication_kind_id" => nil,
               "contact_id" => nil,
@@ -887,7 +884,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} =
                BexioApiClient.Others.search_tasks(client, [
@@ -913,12 +910,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a task" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/task/2"
-        } ->
-          json(%{
+          method: "GET",
+          request_path: "/2.0/task/2"
+        } = conn ->
+          json(conn, %{
             "communication_kind_id" => nil,
             "contact_id" => nil,
             "entry_id" => nil,
@@ -943,7 +940,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists found result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.fetch_task(client, 2)
 
@@ -958,19 +955,19 @@ defmodule BexioApiClient.OthersTest do
 
   describe "creating a task" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/task",
-          body: body
-        } ->
+          method: "POST",
+          request_path: "/2.0/task",
+        } = conn ->
+          {:ok, body, _} = read_body(conn)
           body_json = Jason.decode!(body)
 
           assert body_json["finish_date"] == "2023-03-13T08:00:00"
           assert body_json["subject"] == "Unterlagen versenden"
           assert body_json["have_remember"] == false
 
-          json(%{
+          json(conn, %{
             "communication_kind_id" => nil,
             "contact_id" => nil,
             "entry_id" => nil,
@@ -995,7 +992,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "creates a task" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Others.create_task(client, %Todo{
@@ -1019,19 +1016,19 @@ defmodule BexioApiClient.OthersTest do
 
   describe "updating a task" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/task/2",
-          body: body
-        } ->
+          method: "POST",
+          request_path: "/2.0/task/2",
+        } = conn ->
+          {:ok, body, _} = read_body(conn)
           body_json = Jason.decode!(body)
 
           assert body_json["finish_date"] == "2023-03-13T08:00:00"
           assert body_json["subject"] == "Unterlagen versenden"
           assert body_json["have_remember"] == false
 
-          json(%{
+          json(conn, %{
             "communication_kind_id" => nil,
             "contact_id" => nil,
             "entry_id" => nil,
@@ -1056,7 +1053,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "updates a task" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Others.edit_task(client, %Todo{
@@ -1080,19 +1077,19 @@ defmodule BexioApiClient.OthersTest do
 
   describe "deleting a task" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :delete,
-          url: "https://api.bexio.com/2.0/task/2"
-        } ->
-          json(%{"success" => true})
+          method: "DELETE",
+          request_path: "/2.0/task/2"
+        } = conn ->
+          json(conn, %{"success" => true})
       end)
 
       :ok
     end
 
     test "deletes a task" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.delete_task(client, 2)
 
@@ -1102,12 +1099,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a list of task priorities" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/todo_priority"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/todo_priority"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "High"
@@ -1119,7 +1116,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.fetch_task_priorities(client)
 
@@ -1129,12 +1126,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a list of task status" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/todo_status"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/todo_status"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Open"
@@ -1146,7 +1143,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.fetch_task_status(client)
 
@@ -1156,12 +1153,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a list of units" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/unit"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/unit"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "h"
@@ -1173,7 +1170,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.fetch_units(client)
 
@@ -1183,13 +1180,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "searching units" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/unit/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/unit/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "h"
@@ -1201,7 +1197,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Others.search_units(client, [
@@ -1214,12 +1210,12 @@ defmodule BexioApiClient.OthersTest do
 
   describe "fetching a unit" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/unit/1"
-        } ->
-          json(%{
+          method: "GET",
+          request_path: "/2.0/unit/1"
+        } = conn ->
+          json(conn, %{
             "id" => 1,
             "name" => "h"
           })
@@ -1229,7 +1225,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "lists found result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.fetch_unit(client, 1)
 
@@ -1240,17 +1236,17 @@ defmodule BexioApiClient.OthersTest do
 
   describe "creating a unit" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/unit",
-          body: body
-        } ->
+          method: "POST",
+          request_path: "/2.0/unit"
+        } = conn ->
+          {:ok, body, _} = read_body(conn)
           body_json = Jason.decode!(body)
 
           assert body_json["name"] == "minute"
 
-          json(%{
+          json(conn, %{
             "id" => 2,
             "name" => "minute"
           })
@@ -1260,7 +1256,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "creates a unit" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.create_unit(client, "minute")
 
@@ -1271,17 +1267,17 @@ defmodule BexioApiClient.OthersTest do
 
   describe "updating a unit" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/unit/1",
-          body: body
-        } ->
+          method: "POST",
+          request_path: "/2.0/unit/1"
+        } = conn ->
+          {:ok, body, _} = read_body(conn)
           body_json = Jason.decode!(body)
 
           assert body_json["name"] == "minute"
 
-          json(%{
+          json(conn, %{
             "id" => 1,
             "name" => "minute"
           })
@@ -1291,7 +1287,7 @@ defmodule BexioApiClient.OthersTest do
     end
 
     test "updates a unit" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.edit_unit(client, 1, "minute")
 
@@ -1302,19 +1298,19 @@ defmodule BexioApiClient.OthersTest do
 
   describe "deleting a unit" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :delete,
-          url: "https://api.bexio.com/2.0/unit/2"
-        } ->
-          json(%{"success" => true})
+          method: "DELETE",
+          request_path: "/2.0/unit/2"
+        } = conn ->
+          json(conn, %{"success" => true})
       end)
 
       :ok
     end
 
     test "deletes a unit" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.delete_unit(client, 2)
 

@@ -30,7 +30,7 @@ defmodule BexioApiClient.Accounting do
   def fetch_accounts(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/accounts", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/accounts", params: opts_to_query(opts))
       end,
       &map_from_accounts/2
     )
@@ -61,7 +61,7 @@ defmodule BexioApiClient.Accounting do
           req,
           url: "/2.0/accounts/search",
           json: Enum.map(criteria, &update_account_type_in_search_criteria/1),
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_accounts/2
@@ -132,7 +132,7 @@ defmodule BexioApiClient.Accounting do
   def fetch_account_groups(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/account_groups", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/account_groups", params: opts_to_query(opts))
       end,
       &map_from_account_groups/2
     )
@@ -171,7 +171,7 @@ defmodule BexioApiClient.Accounting do
   def fetch_calendar_years(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/3.0/accounting/calendar_years", query: opts_to_query(opts))
+        Req.get(req, url: "/3.0/accounting/calendar_years", params: opts_to_query(opts))
       end,
       &map_from_calendar_years/2
     )
@@ -212,7 +212,7 @@ defmodule BexioApiClient.Accounting do
   def fetch_currencies(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/3.0/currencies", query: opts_to_query(opts))
+        Req.get(req, url: "/3.0/currencies", params: opts_to_query(opts))
       end,
       &map_from_currencies/2
     )
@@ -244,7 +244,7 @@ defmodule BexioApiClient.Accounting do
   def fetch_exchange_rates(req, id, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/3.0/currencies/#{id}/exchange_rates", query: opts_to_query(opts))
+        Req.get(req, url: "/3.0/currencies/#{id}/exchange_rates", params: opts_to_query(opts))
       end,
       &map_from_exchange_rates/2
     )
@@ -282,7 +282,7 @@ defmodule BexioApiClient.Accounting do
       fn ->
         Req.get(req,
           url: "/3.0/taxes",
-          query: opts |> opts_to_query() |> opts_with_date(date) |> opts_with_type(types)
+          params: opts |> opts_to_query() |> opts_with_date(date) |> opts_with_type(types)
         )
       end,
       &map_from_taxes/2

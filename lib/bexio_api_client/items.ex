@@ -23,7 +23,7 @@ defmodule BexioApiClient.Items do
   def fetch_items(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/article", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/article", params: opts_to_query(opts))
       end,
       &map_from_articles/2
     )
@@ -52,7 +52,7 @@ defmodule BexioApiClient.Items do
           req,
           url: "/2.0/article/search",
           json: criteria,
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_articles/2
@@ -295,7 +295,7 @@ defmodule BexioApiClient.Items do
   def fetch_stock_locations(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/stock", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/stock", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -323,7 +323,7 @@ defmodule BexioApiClient.Items do
           req,
           url: "/2.0/stock/search",
           json: criteria,
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &body_to_map/2
@@ -340,7 +340,7 @@ defmodule BexioApiClient.Items do
   def fetch_stock_areas(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/stock_place", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/stock_place", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -369,7 +369,7 @@ defmodule BexioApiClient.Items do
           req,
           url: "/2.0/stock_place/search",
           json: criteria,
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &body_to_map/2
