@@ -6,9 +6,7 @@ defmodule BexioApiClient.Files do
   import BexioApiClient.Helpers
   alias BexioApiClient.SearchCriteria
 
-  alias BexioApiClient.Files.{
-    File
-  }
+  alias BexioApiClient.Files.File
 
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
@@ -25,7 +23,7 @@ defmodule BexioApiClient.Files do
   def fetch_files(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/3.0/files", query: opts_to_query(opts))
+        Req.get(req, url: "/3.0/files", params: opts_to_query(opts))
       end,
       &map_from_files/2
     )

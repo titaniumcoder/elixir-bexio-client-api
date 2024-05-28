@@ -2,18 +2,37 @@ defmodule BexioApiClient.Req.RewriteDelay do
   require Logger
 
   @moduledoc """
-  Plugin to fetch a new access token for the given refresh token.
+  This module just handles the normal Bexio API rate limit headers as well as the (observed) regular exceptions to retry.
+  With status code 429 we try to read the header "ratelimit-reset" and send back the {:delay, delay} tuple.
+  In case of 408, 500, 502, 503, 504 we fall back to the retry mechanism.
   """
 
   # RateLimit-Reset
+  @spec retry(Req.Request.t(), any()) :: Req.Request.t()
+  def retry(%Req.Request{} = request, response_or_exception) do
+    case response_or_exception do
+      %Req.Response{status: 429, headers: headers} ->
+        case headers do
+          [{"ratelimit-reset", [reset]}] ->
+            {:delay, String.to_integer(reset) * 1000}
 
-  @spec attach(Req.Request.t()) :: Req.Request.t()
-  def attach(%Req.Request{} = request, _options \\ []) do
-    Req.Request.prepend_response_steps(request, rewrite_delay: &rewrite_delay/1)
-  end
+          _ ->
+            Logger.warning(
+              "No ratelimit-reset header found in #{inspect(headers)}, falling back to default retry mechanism."
+            )
 
-  defp rewrite_delay({request, response}) do
-    Logger.info("Rewriting delay with #{inspect(request)} #{inspect(response)}")
-    request
+            true
+        end
+
+      %Req.Response{status: 401} ->
+        false
+
+      %Req.Response{status: status} when status in [408, 500, 502, 503, 504] ->
+        Logger.debug("Retrying request #{inspect(request)} due to status #{status}")
+        true
+
+      _ ->
+        true
+    end
   end
 end

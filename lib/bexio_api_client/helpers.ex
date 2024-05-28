@@ -120,13 +120,13 @@ defmodule BexioApiClient.Helpers do
 
   @spec bexio_handling(
           call :: (-> body_callback_type),
-          callback :: (body_callback_type, Req.ResponseEnv.t() -> handler_callback_result_type)
+          callback :: (body_callback_type, Req.Response.t() -> handler_callback_result_type)
         ) ::
           handler_callback_result_type | api_error_type() | {:error, nil | any()}
   def bexio_handling(call, callback) do
     case call.() do
-      {:ok, %Req.Response{status: status, body: body} = env} when status in [200, 201, 301] ->
-        callback.(body, env)
+      {:ok, %Req.Response{status: status, body: body} = response} when status in [200, 201] ->
+        callback.(body, response)
 
       {:ok, %Req.Response{status: status, body: body}} ->
         {:error, error_code(status), body}

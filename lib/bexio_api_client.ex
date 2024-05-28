@@ -8,7 +8,8 @@ defmodule BexioApiClient do
     headers: [accept: "application/json", content_type: "application/json"],
     retry: :transient,
     max_retries: 100,
-    retry_log_level: :warn
+    retry_log_level: :warn,
+    retry: &BexioApiClient.Req.RewriteDelay.retry/2
   ]
 
   @moduledoc """
@@ -34,7 +35,6 @@ defmodule BexioApiClient do
     |> Keyword.put_new(:auth, {:bearer, api_token})
     |> Keyword.merge(Application.get_env(:bexio_api_client, :bexio_req_options, []))
     |> Req.new()
-    |> BexioApiClient.Req.RewriteDelay.attach()
   end
 
   @doc """
