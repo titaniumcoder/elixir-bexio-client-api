@@ -33,7 +33,7 @@ defmodule BexioApiClient do
   def new(api_token) do
     @base_request_options
     |> Keyword.put_new(:auth, {:bearer, api_token})
-    |> Keyword.merge(Application.get_env(:bexio_api_client, :bexio_req_options, []))
+    |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
     |> Req.new()
   end
 
@@ -44,7 +44,7 @@ defmodule BexioApiClient do
   @spec new(String.t(), String.t(), String.t()) :: Req.Request.t()
   def new(client_id, client_secret, refresh_token) do
     @base_request_options
-    |> Keyword.merge(Application.get_env(:bexio_api_client, :bexio_req_options, []))
+    |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
     |> Req.new()
     |> BexioApiClient.Req.AccessTokenRefresher.attach(
       refresh_token: refresh_token,

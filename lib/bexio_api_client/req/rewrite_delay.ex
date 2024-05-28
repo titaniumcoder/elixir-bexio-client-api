@@ -24,12 +24,12 @@ defmodule BexioApiClient.Req.RewriteDelay do
             true
         end
 
-      %Req.Response{status: 401} ->
-        false
-
       %Req.Response{status: status} when status in [408, 500, 502, 503, 504] ->
         Logger.debug("Retrying request #{inspect(request)} due to status #{status}")
         true
+
+      %Req.Response{} ->
+        false
 
       _ ->
         true

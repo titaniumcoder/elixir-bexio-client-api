@@ -60,7 +60,7 @@ defmodule BexioApiClient.Files do
           req,
           url: "/3.0/files/search",
           json: remap(criteria),
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_files/2
@@ -99,7 +99,7 @@ defmodule BexioApiClient.Files do
     )
   end
 
-  defp map_from_files(files, _env), do: Enum.map(files, &map_from_file/1)
+  defp map_from_files(files, _response), do: Enum.map(files, &map_from_file/1)
 
   defp map_from_file(
          %{
@@ -116,7 +116,7 @@ defmodule BexioApiClient.Files do
            "is_referenced" => referenced?,
            "created_at" => created_at
          },
-         _env \\ nil
+         _response \\ nil
        ) do
     %File{
       id: id,
@@ -146,7 +146,7 @@ defmodule BexioApiClient.Files do
       fn ->
         Req.get(req, url: "/3.0/files/#{id}/download")
       end,
-      fn file, env -> {file, Req.Response.get_header(env, :content_type)} end
+      fn file, response -> {file, Req.Response.get_header(response, "content-type")} end
     )
   end
 
@@ -162,7 +162,7 @@ defmodule BexioApiClient.Files do
       fn ->
         Req.get(req, url: "/3.0/files/#{id}/preview")
       end,
-      fn file, resp -> {file, Req.Response.get_header(resp, :content_type)} end
+      fn file, resp -> {file, Req.Response.get_header(resp, "content-type")} end
     )
   end
 end

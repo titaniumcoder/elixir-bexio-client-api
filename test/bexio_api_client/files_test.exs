@@ -47,7 +47,6 @@ defmodule BexioApiClient.FilesTest do
     end
   end
 
-  @tag :skip
   describe "searching files" do
     setup do
       Req.Test.stub(BexioApiClient, fn conn ->
@@ -93,25 +92,30 @@ defmodule BexioApiClient.FilesTest do
     end
   end
 
-  @tag :skip
   describe "fetching a single file" do
     setup do
       Req.Test.stub(BexioApiClient, fn conn ->
-        Req.Test.json(conn, %{
-          "id" => 1,
-          "uuid" => "474cc93a-2d6f-47e9-bd3f-a5b5a1941314",
-          "name" => "screenshot",
-          "size_in_bytes" => 218_476,
-          "extension" => "png",
-          "mime_type" => "image/png",
-          "uploader_email" => "contact@example.org",
-          "user_id" => 1,
-          "is_archived" => false,
-          "source_id" => 2,
-          "source_type" => "web",
-          "is_referenced" => false,
-          "created_at" => "2018-06-09T08:52:10+00:00"
-        })
+        case List.last(conn.path_info) do
+          "1" ->
+            Req.Test.json(conn, %{
+              "id" => 1,
+              "uuid" => "474cc93a-2d6f-47e9-bd3f-a5b5a1941314",
+              "name" => "screenshot",
+              "size_in_bytes" => 218_476,
+              "extension" => "png",
+              "mime_type" => "image/png",
+              "uploader_email" => "contact@example.org",
+              "user_id" => 1,
+              "is_archived" => false,
+              "source_id" => 2,
+              "source_type" => "web",
+              "is_referenced" => false,
+              "created_at" => "2018-06-09T08:52:10+00:00"
+            })
+
+          "2" ->
+            Plug.Conn.send_resp(conn, 404, "File does not exist")
+        end
       end)
 
       :ok
@@ -142,13 +146,13 @@ defmodule BexioApiClient.FilesTest do
     end
   end
 
-  @tag :skip
   describe "downloading a single file" do
     setup do
       Req.Test.stub(BexioApiClient, fn conn ->
         # headers: [{"content-type", "application/pdf"}],
-
-        Plug.Conn.send_resp(conn, 200, "string")
+        conn
+        |> Plug.Conn.put_resp_content_type("application/pdf", nil)
+        |> Plug.Conn.send_resp(200, "string")
       end)
 
       :ok
@@ -159,17 +163,16 @@ defmodule BexioApiClient.FilesTest do
       assert {:ok, {body, content_type}} = BexioApiClient.Files.download_file(client, 1)
 
       assert body == "string"
-      assert content_type == "application/pdf"
+      assert "application/pdf" in content_type
     end
   end
 
-  @tag :skip
   describe "preview a single file" do
     setup do
       Req.Test.stub(BexioApiClient, fn conn ->
-        # headers: [{"content-type", "image/png"}],
-
-        Plug.Conn.send_resp(conn, 200, "string")
+        conn
+        |> Plug.Conn.put_resp_content_type("image/png", nil)
+        |> Plug.Conn.send_resp(200, "string")
       end)
 
       :ok
@@ -180,7 +183,7 @@ defmodule BexioApiClient.FilesTest do
       assert {:ok, {body, content_type}} = BexioApiClient.Files.preview_file(client, 1)
 
       assert body == "string"
-      assert content_type == "image/png"
+      assert "image/png" in content_type
     end
   end
 end
