@@ -40,7 +40,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def fetch_quotes(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_offer", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/kb_offer", params: opts_to_query(opts))
       end,
       &map_from_quotes/2
     )
@@ -80,7 +80,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_offer/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/kb_offer/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_quotes/2
     )
@@ -525,7 +525,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def fetch_orders(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_order", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/kb_order", params: opts_to_query(opts))
       end,
       &map_from_orders/2
     )
@@ -561,7 +561,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_order/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/kb_order/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_orders/2
     )
@@ -801,7 +801,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def fetch_deliveries(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_delivery", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/kb_delivery", params: opts_to_query(opts))
       end,
       &map_from_deliveries/2
     )
@@ -922,7 +922,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def fetch_invoices(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.get(req, url: "/2.0/kb_invoice", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/kb_invoice", params: opts_to_query(opts))
       end,
       &map_from_invoices/2
     )
@@ -959,7 +959,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       ) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_invoice/search", json: criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/kb_invoice/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_invoices/2
     )
@@ -1252,7 +1252,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.get(req,
           url: "/2.0/kb_#{document_type}/#{document_id}/comment",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_comments/2
@@ -1400,7 +1400,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.get(req,
           url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subtotal",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_subtotal_positions/2
@@ -1542,7 +1542,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.get(req,
           url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_text",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_text_positions/2
@@ -1687,7 +1687,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.get(req,
           url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_custom",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_default_positions/2
@@ -1865,7 +1865,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.get(req,
           url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_article",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_item_positions/2
@@ -2047,7 +2047,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.get(req,
           url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_discount",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_discount_positions/2
@@ -2197,7 +2197,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.get(req,
           url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_pagebreak_positions/2
@@ -2337,7 +2337,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.get(req,
           url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_subposition",
-          query: opts_to_query(opts)
+          params: opts_to_query(opts)
         )
       end,
       &map_from_subposition_positions/2
