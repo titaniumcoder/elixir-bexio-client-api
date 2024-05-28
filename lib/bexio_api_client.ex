@@ -1,6 +1,19 @@
 defmodule BexioApiClient do
+  require Logger
+
+  # Base API, always put the accept header to application/json and overwrite it for the seldom cases
+  # where it's different. Transient retry: also retry on posts, puts, deletes, etc.
+  @base_request_options [
+    base_url: "https://api.bexio.com",
+    headers: [accept: "application/json", content_type: "application/json"],
+    retry: :transient,
+    max_retries: 100,
+    retry_log_level: :warn,
+    retry: &BexioApiClient.Req.RewriteDelay.retry/2
+  ]
+
   @moduledoc """
-  Base Module for the API Client.
+  base functionality like refreshing the access token.
 
   The API Documentation for Bexio can be found under https://docs.bexio.com.
 
@@ -8,56 +21,36 @@ defmodule BexioApiClient do
 
   ## Requirements:
 
-    * Tesla: the api client depends on Tesla. Every API call needs an instance of a `Tesla.Client` to be able to do the rest calls.any()
+    * Http Client:
+    ** Req: the api client depends on Req.
 
   """
 
   @doc """
-  Create Tesla API Client.
-
-  This must be given a token from https://office.bexio.com/admin/apiTokens#/ which will then be used as bearer token.
-  The client can then be used everywhere where it's useful.
-
-  It also allows an optional setup for retrying to allow to limit if needed. The defaults are listed below:
-
-  ## Options:
-
-    * `:delay` - Initial Delay for Backoff (Default: 500)
-    * `:max_retries` - Maximal number of retries (Default: 10)
-    * `:max_delay` - Maximal delay between requests (Default: 4_000)
-    * `:log_level` - Log Level for Requests (Default: `:info`)
-    * `:debug` - whether to include debug information (Default: `false`)
-    * `:adapter` - Which adapter to use (Defalt: `nil`, recommended one with SSL support like Hackney)
-
+  Creates a new client using the never ending all powerful API Token.
   """
-  @spec new(String.t(), keyword()) :: Tesla.Client.t()
-  def new(api_token, opts \\ []) do
-    delay = Keyword.get(opts, :delay, 500)
-    max_retries = Keyword.get(opts, :max_retries, 10)
-    max_delay = Keyword.get(opts, :max_delay, 4_000)
-    log_level = Keyword.get(opts, :log_level, :info)
-    adapter = Keyword.get(opts, :adapter)
-    debug = Keyword.get(opts, :debug, false)
+  @spec new(String.t()) :: Req.Request.t()
+  def new(api_token) do
+    @base_request_options
+    |> Keyword.put_new(:auth, {:bearer, api_token})
+    |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
+    |> Req.new()
+  end
 
-    middleware = [
-      {Tesla.Middleware.BaseUrl, "https://api.bexio.com"},
-      Tesla.Middleware.JSON,
-      {Tesla.Middleware.BearerAuth, token: api_token},
-      {Tesla.Middleware.Headers, [{"accept", "application/json"}]},
-      {Tesla.Middleware.Logger,
-       log_level: log_level, filter_headers: ["authorization"], debug: debug},
-      {Tesla.Middleware.Retry,
-       delay: delay,
-       max_retries: max_retries,
-       max_delay: max_delay,
-       should_retry: fn
-         {:ok, %{status: status}} when status in [500, 502, 503, 429] -> true
-         {:ok, _} -> false
-         {:error, _} -> true
-       end}
-    ]
-
-    Tesla.client(middleware, adapter)
+  @doc """
+  Creates a new client using the client id, client secret and refresh token. Be aware that getting
+  this information is part of the OpenID flow which is not in the scope of this library.
+  """
+  @spec new(String.t(), String.t(), String.t()) :: Req.Request.t()
+  def new(client_id, client_secret, refresh_token) do
+    @base_request_options
+    |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
+    |> Req.new()
+    |> BexioApiClient.Req.AccessTokenRefresher.attach(
+      refresh_token: refresh_token,
+      client_id: client_id,
+      client_secret: client_secret
+    )
   end
 
   @doc """
@@ -75,52 +68,39 @@ defmodule BexioApiClient do
 
     {:error, :unauthorized}
   """
-  @spec access_token(String.t(), String.t(), String.t(), any()) :: {:ok, map()} | {:error, any()}
-  def access_token(refresh_token, client_id, client_secret, adapter \\ nil) do
-    tesla_response =
-      [
-        {Tesla.Middleware.BasicAuth, username: client_id, password: client_secret},
-        {Tesla.Middleware.Logger,
-         log_level: :info, filter_headers: ["authorization"], debug: false},
-        Tesla.Middleware.FormUrlencoded
-      ]
-      |> Tesla.client(adapter)
-      |> Tesla.post("https://idp.bexio.com/token", %{
-        "grant_type" => "refresh_token",
-        "refresh_token" => refresh_token
-      })
+  @spec access_token(String.t(), String.t(), String.t()) :: {:ok, String.t(), integer()} | {:error, any()}
+  def access_token(refresh_token, client_id, client_secret) do
+    idp_req =
+      @base_request_options
+      |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
+      |> Req.new()
 
-    case tesla_response do
-      {:ok, %Tesla.Env{status: 200, body: json_stringified}} ->
-        case Jason.decode(json_stringified) do
-          {:ok,
-           %{
-             "access_token" => access_token,
-             "expires_in" => expires_in,
-             "id_token" => id_token,
-             "refresh_token" => refresh_token,
-             "scope" => scope,
-             "token_type" => token_type
-           }} ->
-            {:ok,
-             %{
-               access_token: access_token,
-               expires_in: expires_in,
-               id_token: id_token,
-               refresh_token: refresh_token,
-               scope: scope,
-               token_type: token_type
-             }}
+    case Req.post(idp_req,
+           url: "https://idp.bexio.com/token",
+           form: %{
+             "grant_type" => "refresh_token",
+             "refresh_token" => refresh_token
+           },
+           auth: {:basic, "#{client_id}:#{client_secret}"}
+         ) do
+      {:ok, %Req.Response{status: 401}} ->
+        {:error, :unauthenticated}
 
-          {:ok, map} ->
-            {:error, {:unexpected_response, map}}
+      {:ok, %Req.Response{} = response} ->
+        case response.body do
+          %{
+            "access_token" => access_token,
+            "expires_in" => expires_in
+          } ->
+            {:ok, access_token, expires_in}
 
-          {:error, error} ->
-            {:error, error}
+          _ ->
+            {:error, {:unexpected_response, response.body}}
         end
 
-      {:ok, %Tesla.Env{status: 401}} ->
-        {:error, :unauthorized}
+      {:error, exception} ->
+        Logger.error("Could not fetch a new access token: #{inspect(exception)}")
+        {:error, exception}
     end
   end
 end

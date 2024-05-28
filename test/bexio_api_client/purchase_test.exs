@@ -1,14 +1,15 @@
 defmodule BexioApiClient.PurchaseTest do
-  use ExUnit.Case, async: true
-  doctest BexioApiClient.Contacts
+  use TestHelper
 
-  import Tesla.Mock
+  use ExUnit.Case, async: true
+
+  doctest BexioApiClient.Contacts
 
   describe "fetching a list of bills" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/4.0/purchase/bills"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/4.0/purchase/bills"} = conn ->
+          json(conn, %{
             "data" => [
               %{
                 "id" => "2af7df09-bf6b-4a6b-840f-142e337e692a",
@@ -78,7 +79,7 @@ defmodule BexioApiClient.PurchaseTest do
     end
 
     test "shows valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, {[result1, result2], paging}} = BexioApiClient.Purchase.fetch_bills(client)
 

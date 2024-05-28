@@ -10,7 +10,7 @@ defmodule BexioApiClient.Purchase do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
-  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+  @type api_error_type :: BexioApiClient.Helpers.api_error_type()
 
   @possible_bill_status [
     :draft,
@@ -68,14 +68,14 @@ defmodule BexioApiClient.Purchase do
     * `:status` - filter for Bill 'status' (DRAFTS: [DRAFT], TODO: [BOOKED, PARTIALLY_CREATED, CREATED, PARTIALLY_SENT, SENT, PARTIALLY_DOWNLOADED, DOWNLOADED, PARTIALLY_PAID, PARTIALLY_FAILED, FAILED], PAID: [PAID], OVERDUE: [BOOKED, PARTIALLY_CREATED, CREATED, PARTIALLY_SENT, SENT, PARTIALLY_DOWNLOADED, DOWNLOADED, PARTIALLY_PAID, PARTIALLY_FAILED, FAILED]) and for 'onlyOverdue' (DRAFTS: [FALSE], TODOS: [FALSE], PAID: [FALSE], OVERDUE: [TRUE]). Choosing OVERDUE means that only Bills with 'due_date' before now will be shown
   """
   @spec fetch_bills(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           search_term :: String.t() | nil,
           fields :: list(String.t()) | nil,
           search_args :: bill_search_args(),
           opts :: [GlobalArguments.paging_arg()]
-        ) :: {:ok, {[Bill.t()], Paging.t()}} | tesla_error_type()
+        ) :: {:ok, {[Bill.t()], Paging.t()}} | api_error_type()
   def fetch_bills(
-        client,
+        req,
         search_term \\ nil,
         fields \\ nil,
         search_args \\ [],
@@ -83,8 +83,9 @@ defmodule BexioApiClient.Purchase do
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/4.0/purchase/bills",
-          query:
+        Req.get(req,
+          url: "/4.0/purchase/bills",
+          params:
             Keyword.merge(
               [
                 search_term: search_term,
