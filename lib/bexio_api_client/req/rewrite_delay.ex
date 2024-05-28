@@ -8,7 +8,7 @@ defmodule BexioApiClient.Req.RewriteDelay do
   """
 
   # RateLimit-Reset
-  @spec retry(Req.Request.t(), any()) :: Req.Request.t()
+  @spec retry(Req.Request.t(), any()) :: boolean() | {:delay, integer()}
   def retry(%Req.Request{} = request, response_or_exception) do
     case response_or_exception do
       %Req.Response{status: 429, headers: headers} ->

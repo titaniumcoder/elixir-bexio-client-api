@@ -68,7 +68,7 @@ defmodule BexioApiClient do
 
     {:error, :unauthorized}
   """
-  @spec access_token(String.t(), String.t(), String.t()) :: {:ok, map()} | {:error, any()}
+  @spec access_token(String.t(), String.t(), String.t()) :: {:ok, String.t(), integer()} | {:error, any()}
   def access_token(refresh_token, client_id, client_secret) do
     idp_req =
       @base_request_options
