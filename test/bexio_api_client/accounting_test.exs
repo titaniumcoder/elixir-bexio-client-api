@@ -165,7 +165,7 @@ defmodule BexioApiClient.AccountingTest do
   describe "fetching a list of calendar years" do
     setup do
       mock_request(fn
-        %{method: "GET", request_path: "/3.0/accounting/calendar_years"} = conn  ->
+        %{method: "GET", request_path: "/3.0/accounting/calendar_years"} = conn ->
           json(conn, [
             %{
               "id" => 1,

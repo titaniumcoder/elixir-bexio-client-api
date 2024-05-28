@@ -958,7 +958,7 @@ defmodule BexioApiClient.OthersTest do
       mock_request(fn
         %{
           method: "POST",
-          request_path: "/2.0/task",
+          request_path: "/2.0/task"
         } = conn ->
           {:ok, body, _} = read_body(conn)
           body_json = Jason.decode!(body)
@@ -1019,7 +1019,7 @@ defmodule BexioApiClient.OthersTest do
       mock_request(fn
         %{
           method: "POST",
-          request_path: "/2.0/task/2",
+          request_path: "/2.0/task/2"
         } = conn ->
           {:ok, body, _} = read_body(conn)
           body_json = Jason.decode!(body)

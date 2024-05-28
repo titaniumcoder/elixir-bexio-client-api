@@ -775,7 +775,7 @@ defmodule BexioApiClient.ContactsTest do
       mock_request(fn
         %{
           method: "POST",
-          request_path: "/2.0/contact/3/additional_address/search",
+          request_path: "/2.0/contact/3/additional_address/search"
         } = conn ->
           json(conn, [
             %{
@@ -1030,7 +1030,7 @@ defmodule BexioApiClient.ContactsTest do
   describe "fetching a single title" do
     setup do
       mock_request(fn
-        %{method: "GET", request_path: "/2.0/title/1"}  = conn ->
+        %{method: "GET", request_path: "/2.0/title/1"} = conn ->
           json(conn, %{
             "id" => 1,
             "name" => "Dr."
