@@ -37,7 +37,7 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
           |> Req.Request.merge_options(auth: {:bearer, access_token})
           |> Req.Request.put_private(:expires_at, expires_at)
 
-        # TODO: private option for client_id, client_secret, refresh_token?
+        # how to save client_id, client_secret, refresh_token?
 
         {:error, reason} ->
           Logger.error("Failed to fetch a new access token: #{inspect(reason)}")
