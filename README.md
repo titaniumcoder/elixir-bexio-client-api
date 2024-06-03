@@ -24,6 +24,10 @@ TBD
 
 ## Changelog
 
+### 0.4.1
+
+* Added Logic fot notes needed for the search
+
 ### 0.4.0
 
 * Removing dependency to `tesla`

@@ -13,7 +13,8 @@ defmodule BexioApiClient.Others do
     Permission,
     Todo,
     User,
-    FictionalUser
+    FictionalUser,
+    Note
   }
 
   alias BexioApiClient.GlobalArguments
@@ -293,7 +294,7 @@ defmodule BexioApiClient.Others do
   end
 
   @doc """
-  Fetch a list of finctional users.
+  Fetch a list of fictional users.
   """
   @spec fetch_fictional_users(req :: Req.Request.t()) ::
           {:ok, [FictionalUser.t()]} | api_error_type()
@@ -307,7 +308,7 @@ defmodule BexioApiClient.Others do
   end
 
   @doc """
-  Fetch a finctional user.
+  Fetch a fictional user.
   """
   @spec fetch_fictional_user(req :: Req.Request.t(), id :: integer()) ::
           {:ok, FictionalUser.t()} | api_error_type()
@@ -640,6 +641,146 @@ defmodule BexioApiClient.Others do
   defp to_boolean(b) when is_boolean(b), do: b
   defp to_boolean("true"), do: true
   defp to_boolean("false"), do: false
+
+  @doc """
+  Fetch a list of notes.
+  """
+  @spec fetch_notes(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, [Note.t()]} | api_error_type()
+  def fetch_notes(req, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/note", params: opts_to_query(opts))
+      end,
+      &map_from_notes/2
+    )
+  end
+
+  @doc """
+  Search a note
+
+  Following fields are supported:
+
+  * `event_start`
+  * `contact_id`
+  * `user_id`
+  * `subject`
+  * `module_id`
+  * `entry_id`
+  """
+  @spec search_notes(
+          req :: Req.Request.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, [Note.t()]} | api_error_type()
+  def search_notes(req, criteria, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/note/search", json: criteria, params: opts_to_query(opts))
+      end,
+      &map_from_notes/2
+    )
+  end
+
+  @doc """
+  Fetch a  note.
+  """
+  @spec fetch_note(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, Note.t()} | api_error_type()
+  def fetch_note(req, id) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/note/#{id}")
+      end,
+      &map_from_note/2
+    )
+  end
+
+  @doc """
+  Create a  note.
+  """
+  @spec create_note(req :: Req.Request.t(), note :: Note.t()) ::
+          {:ok, Task.t()} | api_error_type()
+  def create_note(req, note) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/note", json: remap_note(note))
+      end,
+      &map_from_note/2
+    )
+  end
+
+  @doc """
+  Edit a  note.
+  """
+  @spec edit_note(req :: Req.Request.t(), note :: Note.t()) ::
+          {:ok, Note.t()} | api_error_type()
+  def edit_note(req, note) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/note/#{note.id}", json: remap_task(note))
+      end,
+      &map_from_note/2
+    )
+  end
+
+  @doc """
+  Delete a  note.
+  """
+  @spec delete_note(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, boolean()} | api_error_type()
+  def delete_note(req, id) do
+    bexio_body_handling(
+      fn ->
+        Req.delete(req, url: "/2.0/note/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  defp remap_note(note) do
+    note
+    |> Map.take([
+      :user_id,
+      :subject,
+      :info,
+      :contact_id,
+      :entry_id,
+      :module_id,
+      :event_start,
+    ])
+    |> Map.put(:finish_date, to_iso8601(Map.get(note, :event_start)))
+    |> Map.put(:pr_project_id, Map.get(note, :project_id))
+  end
+
+  defp map_from_notes(notes, _env), do: Enum.map(notes, &map_from_note/1)
+
+  defp map_from_note(
+         %{
+           "id" => id,
+           "user_id" => user_id,
+           "event_start_date" => event_start_date,
+           "subject" => subject,
+           "info" => info,
+           "contact_id" => contact_id,
+           "pr_project_id" => project_id,
+           "entry_id" => entry_id,
+           "module_id" => module_id,
+         },
+         _env \\ nil
+       ) do
+    %Note{
+      id: id,
+      user_id: user_id,
+      event_start_date: to_datetime(event_start_date),
+      subject: subject,
+      info: info,
+      contact_id: contact_id,
+      project_id: project_id,
+      entry_id: entry_id,
+      module_id: module_id,
+    }
+  end
 
   @doc """
   Fetch a list of task priorities.
