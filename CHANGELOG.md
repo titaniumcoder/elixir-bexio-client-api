@@ -2,6 +2,10 @@
 
 ## 0.4.2
 
+* Added Github Action to automatically publish a package version
+
+## 0.4.2
+
 * Added Logic fot notes needed for the search
 
 ## 0.4.1
