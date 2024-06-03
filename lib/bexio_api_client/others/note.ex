@@ -9,7 +9,7 @@ defmodule BexioApiClient.Others.Note do
   @type t :: %__MODULE__{
           id: integer(),
           user_id: integer(),
-          event_start_date: NaiveDateTime.t(),
+          event_start: NaiveDateTime.t(),
           subject: String.t(),
           info: String.t() | nil,
           contact_id: integer() | nil,
@@ -20,13 +20,13 @@ defmodule BexioApiClient.Others.Note do
   @enforce_keys [
     :id,
     :user_id,
-    :event_start_date,
-    :subject,
+    :event_start,
+    :subject
   ]
   defstruct [
     :id,
     :user_id,
-    :event_start_date,
+    :event_start,
     :subject,
     :info,
     :contact_id,
