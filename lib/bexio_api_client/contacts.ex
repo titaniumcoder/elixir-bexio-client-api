@@ -10,7 +10,7 @@ defmodule BexioApiClient.Contacts do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
-  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+  @type api_error_type :: BexioApiClient.Helpers.api_error_type()
 
   defp contact_opts_to_query(show_archived, opts) do
     opts = opts_to_query(opts)
@@ -30,14 +30,14 @@ defmodule BexioApiClient.Contacts do
       * `:show_archived` - Show archived elements only,
   """
   @spec fetch_contacts(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           show_archived :: boolean(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Contact.t()]} | tesla_error_type()
-  def fetch_contacts(client, show_archived \\ false, opts \\ []) do
+        ) :: {:ok, [Contact.t()]} | api_error_type()
+  def fetch_contacts(req, show_archived \\ false, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact", query: contact_opts_to_query(show_archived, opts))
+        Req.get(req, url: "/2.0/contact", params: contact_opts_to_query(show_archived, opts))
       end,
       &map_from_clients/2
     )
@@ -65,21 +65,23 @@ defmodule BexioApiClient.Contacts do
   * phone_mobile
   """
   @spec search_contacts(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           show_archived :: boolean(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Contact.t()]} | tesla_error_type()
+        ) :: {:ok, [Contact.t()]} | api_error_type()
   def search_contacts(
-        client,
+        req,
         criteria,
         show_archived \\ false,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/contact/search", criteria,
-          query: contact_opts_to_query(show_archived, opts)
+        Req.post(req,
+          url: "/2.0/contact/search",
+          json: criteria,
+          params: contact_opts_to_query(show_archived, opts)
         )
       end,
       &map_from_clients/2
@@ -90,18 +92,18 @@ defmodule BexioApiClient.Contacts do
   This action fetches a single contact
   """
   @spec fetch_contact(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           contact_id :: pos_integer(),
           show_archived :: boolean() | nil
-        ) :: {:ok, Contact.t()} | tesla_error_type()
+        ) :: {:ok, Contact.t()} | api_error_type()
   def fetch_contact(
-        client,
+        req,
         contact_id,
         show_archived \\ nil
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact/#{contact_id}", query: [show_archived: show_archived])
+        Req.get(req, url: "/2.0/contact/#{contact_id}", params: [show_archived: show_archived])
       end,
       &map_from_client/2
     )
@@ -185,16 +187,16 @@ defmodule BexioApiClient.Contacts do
   Fetch a list of contacts relations.
   """
   @spec fetch_contact_relations(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [ContactRelation.t()]} | tesla_error_type()
+        ) :: {:ok, [ContactRelation.t()]} | api_error_type()
   def fetch_contact_relations(
-        client,
+        req,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact_relation", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/contact_relation", params: opts_to_query(opts))
       end,
       &map_from_client_relations/2
     )
@@ -209,18 +211,22 @@ defmodule BexioApiClient.Contacts do
   * updated_at
   """
   @spec search_contact_relations(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [ContactRelation.t()]} | tesla_error_type()
+        ) :: {:ok, [ContactRelation.t()]} | api_error_type()
   def search_contact_relations(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/contact_relation/search", criteria, query: opts_to_query(opts))
+        Req.post(req,
+          url: "/2.0/contact_relation/search",
+          json: criteria,
+          params: opts_to_query(opts)
+        )
       end,
       &map_from_client_relations/2
     )
@@ -230,16 +236,16 @@ defmodule BexioApiClient.Contacts do
   This action fetches a single contact relation
   """
   @spec fetch_contact_relation(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           contact_relation_id :: pos_integer()
-        ) :: {:ok, ContactRelation.t()} | tesla_error_type()
+        ) :: {:ok, ContactRelation.t()} | api_error_type()
   def fetch_contact_relation(
-        client,
+        req,
         contact_relation_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact_relation/#{contact_relation_id}")
+        Req.get(req, url: "/2.0/contact_relation/#{contact_relation_id}")
       end,
       &map_from_client_relation/2
     )
@@ -273,16 +279,16 @@ defmodule BexioApiClient.Contacts do
   Fetch a list of contacts groups.
   """
   @spec fetch_contact_groups(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def fetch_contact_groups(
-        client,
+        req,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact_group", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/contact_group", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -295,18 +301,22 @@ defmodule BexioApiClient.Contacts do
   * name
   """
   @spec search_contact_groups(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def search_contact_groups(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/contact_group/search", criteria, query: opts_to_query(opts))
+        Req.post(req,
+          url: "/2.0/contact_group/search",
+          json: criteria,
+          params: opts_to_query(opts)
+        )
       end,
       &body_to_map/2
     )
@@ -316,16 +326,16 @@ defmodule BexioApiClient.Contacts do
   This action fetches a single contact group
   """
   @spec fetch_contact_group(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           contact_group_id :: pos_integer()
-        ) :: {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
+        ) :: {:ok, %{id: integer(), name: String.t()}} | api_error_type()
   def fetch_contact_group(
-        client,
+        req,
         contact_group_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact_group/#{contact_group_id}")
+        Req.get(req, url: "/2.0/contact_group/#{contact_group_id}")
       end,
       &id_name/2
     )
@@ -337,16 +347,16 @@ defmodule BexioApiClient.Contacts do
   Fetch a list of contacts sectors.
   """
   @spec fetch_contact_sectors(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def fetch_contact_sectors(
-        client,
+        req,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact_branch", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/contact_branch", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -359,18 +369,22 @@ defmodule BexioApiClient.Contacts do
   * name
   """
   @spec search_contact_sectors(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def search_contact_sectors(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/contact_branch/search", criteria, query: opts_to_query(opts))
+        Req.post(req,
+          url: "/2.0/contact_branch/search",
+          json: criteria,
+          params: opts_to_query(opts)
+        )
       end,
       &body_to_map/2
     )
@@ -384,19 +398,20 @@ defmodule BexioApiClient.Contacts do
   Fetch a list of additional addresses.
   """
   @spec fetch_additional_addresses(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           contact_id :: integer(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [AdditionalAddress.t()]} | tesla_error_type()
+        ) :: {:ok, [AdditionalAddress.t()]} | api_error_type()
   def fetch_additional_addresses(
-        client,
+        req,
         contact_id,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/contact/#{contact_id}/additional_address",
-          query: opts_to_query(opts)
+        Req.get(req,
+          url: "/2.0/contact/#{contact_id}/additional_address",
+          params: opts_to_query(opts)
         )
       end,
       &map_from_additional_addresses/2
@@ -415,21 +430,23 @@ defmodule BexioApiClient.Contacts do
   * subject
   """
   @spec search_additional_addresses(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           contact_id :: integer(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [AdditionalAddress.t()]} | tesla_error_type()
+        ) :: {:ok, [AdditionalAddress.t()]} | api_error_type()
   def search_additional_addresses(
-        client,
+        req,
         contact_id,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/contact/#{contact_id}/additional_address/search", criteria,
-          query: opts_to_query(opts)
+        Req.post(req,
+          url: "/2.0/contact/#{contact_id}/additional_address/search",
+          json: criteria,
+          params: opts_to_query(opts)
         )
       end,
       &map_from_additional_addresses/2
@@ -440,20 +457,20 @@ defmodule BexioApiClient.Contacts do
   This action fetches a single additional address
   """
   @spec fetch_additional_address(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           contact_id :: non_neg_integer(),
           additional_address_id :: non_neg_integer()
-        ) :: {:ok, AdditionalAddress.t()} | tesla_error_type()
+        ) :: {:ok, AdditionalAddress.t()} | api_error_type()
   def fetch_additional_address(
-        client,
+        req,
         contact_id,
         additional_address_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/contact/#{contact_id}/additional_address/#{additional_address_id}"
+        Req.get(
+          req,
+          url: "/2.0/contact/#{contact_id}/additional_address/#{additional_address_id}"
         )
       end,
       &map_from_additional_address/2
@@ -494,16 +511,16 @@ defmodule BexioApiClient.Contacts do
   Fetch a list of additional addresses.
   """
   @spec fetch_salutations(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def fetch_salutations(
-        client,
+        req,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/salutation", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/salutation", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -516,18 +533,18 @@ defmodule BexioApiClient.Contacts do
   * name
   """
   @spec search_salutations(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def search_salutations(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/salutation/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/salutation/search", json: criteria, params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -537,18 +554,18 @@ defmodule BexioApiClient.Contacts do
   This action fetches a single salutation
   """
   @spec fetch_salutation(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           salutation_id :: non_neg_integer()
-        ) :: {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
+        ) :: {:ok, %{id: integer(), name: String.t()}} | api_error_type()
   def fetch_salutation(
-        client,
+        req,
         salutation_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/salutation/#{salutation_id}"
+        Req.get(
+          req,
+          url: "/2.0/salutation/#{salutation_id}"
         )
       end,
       &id_name/2
@@ -561,16 +578,16 @@ defmodule BexioApiClient.Contacts do
   Fetch a list of titles.
   """
   @spec fetch_titles(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def fetch_titles(
-        client,
+        req,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/title", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/title", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -583,18 +600,18 @@ defmodule BexioApiClient.Contacts do
   * name
   """
   @spec search_titles(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, %{integer() => String.t()}} | tesla_error_type()
+        ) :: {:ok, %{integer() => String.t()}} | api_error_type()
   def search_titles(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/title/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/title/search", json: criteria, params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -604,18 +621,18 @@ defmodule BexioApiClient.Contacts do
   This action fetches a single title
   """
   @spec fetch_title(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           title_id :: non_neg_integer()
-        ) :: {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
+        ) :: {:ok, %{id: integer(), name: String.t()}} | api_error_type()
   def fetch_title(
-        client,
+        req,
         title_id
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.get(
-          client,
-          "/2.0/title/#{title_id}"
+        Req.get(
+          req,
+          url: "/2.0/title/#{title_id}"
         )
       end,
       &id_name/2

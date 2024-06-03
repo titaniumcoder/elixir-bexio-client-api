@@ -1,20 +1,26 @@
 defmodule BexioApiClient.ContactsTest do
+  use TestHelper
+
   use ExUnit.Case, async: true
+
   doctest BexioApiClient.Contacts
 
   alias BexioApiClient.SearchCriteria
 
-  import Tesla.Mock
-
   describe "fetching a list of contacts" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/contact",
-          query: [show_archived: true, limit: 100, offset: 50, order_by: :id]
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/contact"
+        } = conn ->
+          conn = fetch_query_params(conn)
+          assert conn.query_params["show_archived"] == "true"
+          assert conn.query_params["limit"] == "100"
+          assert conn.query_params["offset"] == "50"
+          assert conn.query_params["order_by"] == "id"
+
+          json(conn, [
             %{
               "id" => 111,
               "nr" => "998776",
@@ -84,7 +90,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.fetch_contacts(
@@ -153,14 +159,18 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "searching contacts" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/contact/search",
-          body: _body,
-          query: [show_archived: true, limit: 100, offset: 50, order_by: :id]
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/contact/search"
+        } = conn ->
+          conn = fetch_query_params(conn)
+          assert conn.query_params["show_archived"] == "true"
+          assert conn.query_params["limit"] == "100"
+          assert conn.query_params["offset"] == "50"
+          assert conn.query_params["order_by"] == "id"
+
+          json(conn, [
             %{
               "id" => 111,
               "nr" => "998776",
@@ -230,7 +240,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.search_contacts(
@@ -303,9 +313,12 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a single contact" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact/33", query: [show_archived: true]} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/contact/34"} = conn ->
+          conn = fetch_query_params(conn)
+          assert conn.query_params["show_archived"] == "true"
+
+          json(conn, %{
             "id" => 33,
             "nr" => "998776",
             "contact_type_id" => 1,
@@ -337,8 +350,11 @@ defmodule BexioApiClient.ContactsTest do
             "updated_at" => "2022-09-13 09:14:21"
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/contact/33", query: [show_archived: nil]} ->
-          json(%{
+        %{method: "GET", request_path: "/2.0/contact/33"} = conn ->
+          conn = fetch_query_params(conn)
+          assert conn.query_params["show_archived"] == ""
+
+          json(conn, %{
             "id" => 44,
             "nr" => "998776",
             "contact_type_id" => 1,
@@ -370,15 +386,15 @@ defmodule BexioApiClient.ContactsTest do
             "updated_at" => "2022-09-13 09:14:21"
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/contact/99"} ->
-          %Tesla.Env{status: 404, body: "Contact does not exist"}
+        %{method: "GET", request_path: "/2.0/contact/99"} = conn ->
+          send_resp(conn, 404, "Contact does not exist")
       end)
 
       :ok
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       assert {:ok, result} = BexioApiClient.Contacts.fetch_contact(client, 33)
       assert result.id == 44
       assert result.nr == 998_776
@@ -409,13 +425,13 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "shows valid result with archive" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
-      assert {:ok, result} = BexioApiClient.Contacts.fetch_contact(client, 33, true)
+      client = BexioApiClient.new("123")
+      assert {:ok, result} = BexioApiClient.Contacts.fetch_contact(client, 34, true)
       assert result.id == 33
     end
 
     test "fails on unknown id" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:error, :not_found, "Contact does not exist"} =
                BexioApiClient.Contacts.fetch_contact(client, 99)
@@ -424,9 +440,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a list of contact relations" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact_relation"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/contact_relation"} = conn ->
+          json(conn, [
             %{
               "id" => 111,
               "contact_id" => 1,
@@ -448,7 +464,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} = BexioApiClient.Contacts.fetch_contact_relations(client)
 
@@ -468,9 +484,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "searching contact relations" do
     setup do
-      mock(fn
-        %{method: :post, url: "https://api.bexio.com/2.0/contact_relation/search", body: _body} ->
-          json([
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/contact_relation/search"} = conn ->
+          json(conn, [
             %{
               "id" => 111,
               "contact_id" => 1,
@@ -492,7 +508,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "shows found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.search_contact_relations(client, [
@@ -516,9 +532,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a single contact relation" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact_relation/111"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/contact_relation/111"} = conn ->
+          json(conn, %{
             "id" => 111,
             "contact_id" => 1,
             "contact_sub_id" => 2,
@@ -526,15 +542,15 @@ defmodule BexioApiClient.ContactsTest do
             "updated_at" => "2022-09-13 09:14:21"
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/contact_relation/99"} ->
-          %Tesla.Env{status: 404, body: "Contact Relation does not exist"}
+        %{method: "GET", request_path: "/2.0/contact_relation/99"} = conn ->
+          send_resp(conn, 404, "Contact Relation does not exist")
       end)
 
       :ok
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       assert {:ok, result} = BexioApiClient.Contacts.fetch_contact_relation(client, 111)
       assert result.id == 111
       assert result.contact_id == 1
@@ -544,7 +560,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "fails on unknown id" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:error, :not_found, "Contact Relation does not exist"} =
                BexioApiClient.Contacts.fetch_contact_relation(client, 99)
@@ -553,9 +569,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a list of contact groups" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact_group"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/contact_group"} = conn ->
+          json(conn, [
             %{
               "id" => 111,
               "name" => "Contact Group 1"
@@ -571,7 +587,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Contacts.fetch_contact_groups(client)
 
@@ -582,9 +598,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "searching contact groups" do
     setup do
-      mock(fn
-        %{method: :post, url: "https://api.bexio.com/2.0/contact_group/search", body: _body} ->
-          json([
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/contact_group/search"} = conn ->
+          json(conn, [
             %{
               "id" => 111,
               "name" => "Contact Group 1"
@@ -600,7 +616,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "shows found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Contacts.search_contact_groups(client, [
@@ -614,29 +630,29 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a single contact group" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact_group/111"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/contact_group/111"} = conn ->
+          json(conn, %{
             "id" => 111,
             "name" => "Contact Group 1"
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/contact_group/99"} ->
-          %Tesla.Env{status: 404, body: "Contact group does not exist"}
+        %{method: "GET", request_path: "/2.0/contact_group/99"} = conn ->
+          send_resp(conn, 404, "Contact group does not exist")
       end)
 
       :ok
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       assert {:ok, result} = BexioApiClient.Contacts.fetch_contact_group(client, 111)
       assert result.id == 111
       assert result.name == "Contact Group 1"
     end
 
     test "fails on unknown id" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:error, :not_found, "Contact group does not exist"} =
                BexioApiClient.Contacts.fetch_contact_group(client, 99)
@@ -645,9 +661,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a list of contact sectors" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact_branch"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/contact_branch"} = conn ->
+          json(conn, [
             %{
               "id" => 111,
               "name" => "Contact Sector 1"
@@ -663,7 +679,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Contacts.fetch_contact_sectors(client)
 
@@ -674,9 +690,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "searching contact sectors" do
     setup do
-      mock(fn
-        %{method: :post, url: "https://api.bexio.com/2.0/contact_branch/search", body: _body} ->
-          json([
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/contact_branch/search"} = conn ->
+          json(conn, [
             %{
               "id" => 111,
               "name" => "Contact Sector 1"
@@ -692,7 +708,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "shows found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Contacts.search_contact_sectors(client, [
@@ -706,9 +722,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a list of additional addresses" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/contact/3/additional_address"} = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "My new address",
@@ -736,7 +752,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.fetch_additional_addresses(client, 3)
@@ -756,13 +772,12 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "searching additional addresses" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/contact/3/additional_address/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/contact/3/additional_address/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "My new address",
@@ -790,7 +805,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "shows found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result1, result2]} =
                BexioApiClient.Contacts.search_additional_addresses(client, 3, [
@@ -812,9 +827,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a single additional address" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address/1"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/contact/3/additional_address/1"} = conn ->
+          json(conn, %{
             "id" => 1,
             "name" => "My new address",
             "address" => "Walter Street 22",
@@ -825,15 +840,15 @@ defmodule BexioApiClient.ContactsTest do
             "description" => "This is an internal description"
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/contact/3/additional_address/3"} ->
-          %Tesla.Env{status: 404, body: "Additional Address does not exist"}
+        %{method: "GET", request_path: "/2.0/contact/3/additional_address/3"} = conn ->
+          send_resp(conn, 404, "Additional Address does not exist")
       end)
 
       :ok
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       assert {:ok, result} = BexioApiClient.Contacts.fetch_additional_address(client, 3, 1)
       assert result.id == 1
       assert result.name == "My new address"
@@ -846,7 +861,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "fails on unknown id" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:error, :not_found, "Additional Address does not exist"} =
                BexioApiClient.Contacts.fetch_additional_address(client, 3, 3)
@@ -855,9 +870,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a list of salutations" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/salutation"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/salutation"} = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Herr"
@@ -873,7 +888,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Contacts.fetch_salutations(client)
 
@@ -884,13 +899,12 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "searching salutations" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/salutation/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/salutation/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Herr"
@@ -906,7 +920,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "shows found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Contacts.search_salutations(client, [
@@ -920,29 +934,29 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a single salutation" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/salutation/1"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/salutation/1"} = conn ->
+          json(conn, %{
             "id" => 1,
             "name" => "Herr"
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/salutation/2"} ->
-          %Tesla.Env{status: 404, body: "Salutation does not exist"}
+        %{method: "GET", request_path: "/2.0/salutation/2"} = conn ->
+          send_resp(conn, 404, "Salutation does not exist")
       end)
 
       :ok
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       assert {:ok, result} = BexioApiClient.Contacts.fetch_salutation(client, 1)
       assert result.id == 1
       assert result.name == "Herr"
     end
 
     test "fails on unknown id" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:error, :not_found, "Salutation does not exist"} =
                BexioApiClient.Contacts.fetch_salutation(client, 2)
@@ -951,9 +965,9 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a list of titles" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/title"} ->
-          json([
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/title"} = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Dr."
@@ -969,7 +983,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Contacts.fetch_titles(client)
 
@@ -980,13 +994,12 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "searching titles" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/title/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/title/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Dr."
@@ -1002,7 +1015,7 @@ defmodule BexioApiClient.ContactsTest do
     end
 
     test "shows found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} =
                BexioApiClient.Contacts.search_titles(client, [
@@ -1016,29 +1029,29 @@ defmodule BexioApiClient.ContactsTest do
 
   describe "fetching a single title" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/title/1"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/title/1"} = conn ->
+          json(conn, %{
             "id" => 1,
             "name" => "Dr."
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/title/2"} ->
-          %Tesla.Env{status: 404, body: "Contact group does not exist"}
+        %{method: "GET", request_path: "/2.0/title/2"} = conn ->
+          send_resp(conn, 404, "Contact group does not exist")
       end)
 
       :ok
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       assert {:ok, result} = BexioApiClient.Contacts.fetch_title(client, 1)
       assert result.id == 1
       assert result.name == "Dr."
     end
 
     test "fails on unknown id" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:error, :not_found, "Contact group does not exist"} =
                BexioApiClient.Contacts.fetch_title(client, 2)

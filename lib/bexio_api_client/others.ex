@@ -19,17 +19,17 @@ defmodule BexioApiClient.Others do
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
 
-  @type tesla_error_type :: BexioApiClient.Helpers.tesla_error_type()
+  @type api_error_type :: BexioApiClient.Helpers.api_error_type()
 
   @doc """
   Fetch a list of company profiles.
   """
-  @spec fetch_company_profiles(client :: Tesla.Client.t()) ::
-          {:ok, [CompanyProfile.t()]} | tesla_error_type()
-  def fetch_company_profiles(client) do
+  @spec fetch_company_profiles(req :: Req.Request.t()) ::
+          {:ok, [CompanyProfile.t()]} | api_error_type()
+  def fetch_company_profiles(req) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/company_profile")
+        Req.get(req, url: "/2.0/company_profile")
       end,
       &map_from_company_profiles/2
     )
@@ -38,12 +38,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a single company profile
   """
-  @spec fetch_company_profile(client :: Tesla.Client.t(), id :: non_neg_integer()) ::
-          {:ok, CompanyProfile.t()} | tesla_error_type()
-  def fetch_company_profile(client, id) do
+  @spec fetch_company_profile(req :: Req.Request.t(), id :: non_neg_integer()) ::
+          {:ok, CompanyProfile.t()} | api_error_type()
+  def fetch_company_profile(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/company_profile/#{id}")
+        Req.get(req, url: "/2.0/company_profile/#{id}")
       end,
       &map_from_company_profile/2
     )
@@ -128,12 +128,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a list of countries.
   """
-  @spec fetch_countries(client :: Tesla.Client.t()) ::
-          {:ok, [Country.t()]} | tesla_error_type()
-  def fetch_countries(client) do
+  @spec fetch_countries(req :: Req.Request.t()) ::
+          {:ok, [Country.t()]} | api_error_type()
+  def fetch_countries(req) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/country")
+        Req.get(req, url: "/2.0/country")
       end,
       &map_from_countries/2
     )
@@ -147,18 +147,18 @@ defmodule BexioApiClient.Others do
   * name_short
   """
   @spec search_countries(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Country.t()]} | tesla_error_type()
+        ) :: {:ok, [Country.t()]} | api_error_type()
   def search_countries(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/country/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/country/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_countries/2
     )
@@ -167,12 +167,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a single country
   """
-  @spec fetch_country(client :: Tesla.Client.t(), id :: non_neg_integer()) ::
-          {:ok, Country.t()} | tesla_error_type()
-  def fetch_country(client, id) do
+  @spec fetch_country(req :: Req.Request.t(), id :: non_neg_integer()) ::
+          {:ok, Country.t()} | api_error_type()
+  def fetch_country(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/country/#{id}")
+        Req.get(req, url: "/2.0/country/#{id}")
       end,
       &map_from_country/2
     )
@@ -200,12 +200,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a list of languages.
   """
-  @spec fetch_languages(client :: Tesla.Client.t()) ::
-          {:ok, [Language.t()]} | tesla_error_type()
-  def fetch_languages(client) do
+  @spec fetch_languages(req :: Req.Request.t()) ::
+          {:ok, [Language.t()]} | api_error_type()
+  def fetch_languages(req) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/language")
+        Req.get(req, url: "/2.0/language")
       end,
       &map_from_languages/2
     )
@@ -219,18 +219,18 @@ defmodule BexioApiClient.Others do
   * iso_639_1
   """
   @spec search_languages(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Language.t()]} | tesla_error_type()
+        ) :: {:ok, [Language.t()]} | api_error_type()
   def search_languages(
-        client,
+        req,
         criteria,
         opts \\ []
       ) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/language/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/language/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_languages/2
     )
@@ -267,12 +267,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a list of users.
   """
-  @spec fetch_users(client :: Tesla.Client.t()) ::
-          {:ok, [User.t()]} | tesla_error_type()
-  def fetch_users(client) do
+  @spec fetch_users(req :: Req.Request.t()) ::
+          {:ok, [User.t()]} | api_error_type()
+  def fetch_users(req) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/users")
+        Req.get(req, url: "/3.0/users")
       end,
       &map_from_users/2
     )
@@ -281,12 +281,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a single user.
   """
-  @spec fetch_user(client :: Tesla.Client.t(), user_id :: non_neg_integer()) ::
-          {:ok, User.t()} | tesla_error_type()
-  def fetch_user(client, user_id) do
+  @spec fetch_user(req :: Req.Request.t(), user_id :: non_neg_integer()) ::
+          {:ok, User.t()} | api_error_type()
+  def fetch_user(req, user_id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/users/#{user_id}")
+        Req.get(req, url: "/3.0/users/#{user_id}")
       end,
       &map_from_user/2
     )
@@ -295,12 +295,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a list of finctional users.
   """
-  @spec fetch_fictional_users(client :: Tesla.Client.t()) ::
-          {:ok, [FictionalUser.t()]} | tesla_error_type()
-  def fetch_fictional_users(client) do
+  @spec fetch_fictional_users(req :: Req.Request.t()) ::
+          {:ok, [FictionalUser.t()]} | api_error_type()
+  def fetch_fictional_users(req) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/fictional_users")
+        Req.get(req, url: "/3.0/fictional_users")
       end,
       &map_from_fictional_users/2
     )
@@ -309,12 +309,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a finctional user.
   """
-  @spec fetch_fictional_user(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, FictionalUser.t()} | tesla_error_type()
-  def fetch_fictional_user(client, id) do
+  @spec fetch_fictional_user(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, FictionalUser.t()} | api_error_type()
+  def fetch_fictional_user(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/fictional_users/#{id}")
+        Req.get(req, url: "/3.0/fictional_users/#{id}")
       end,
       &map_from_fictional_user/2
     )
@@ -323,15 +323,16 @@ defmodule BexioApiClient.Others do
   @doc """
   Create a fictional user, the id of the fictional user will be ignored!
   """
-  @spec create_fictional_user(client :: Tesla.Client.t(), finctional_user :: FictionalUser.t()) ::
-          {:ok, FictionalUser.t()} | tesla_error_type()
-  def create_fictional_user(client, fictional_user) do
+  @spec create_fictional_user(req :: Req.Request.t(), finctional_user :: FictionalUser.t()) ::
+          {:ok, FictionalUser.t()} | api_error_type()
+  def create_fictional_user(req, fictional_user) do
     bexio_body_handling(
       fn ->
-        Tesla.post(
-          client,
-          "/3.0/fictional_users",
-          Map.take(fictional_user, [:salutation_type, :firstname, :lastname, :email, :title_id])
+        Req.post(
+          req,
+          url: "/3.0/fictional_users",
+          json:
+            Map.take(fictional_user, [:salutation_type, :firstname, :lastname, :email, :title_id])
         )
       end,
       &map_from_fictional_user/2
@@ -341,15 +342,16 @@ defmodule BexioApiClient.Others do
   @doc """
   Create a fictional user
   """
-  @spec update_fictional_user(client :: Tesla.Client.t(), fictional_user :: FictionalUser.t()) ::
-          {:ok, FictionalUser.t()} | tesla_error_type()
-  def update_fictional_user(client, fictional_user) do
+  @spec update_fictional_user(req :: Req.Request.t(), fictional_user :: FictionalUser.t()) ::
+          {:ok, FictionalUser.t()} | api_error_type()
+  def update_fictional_user(req, fictional_user) do
     bexio_body_handling(
       fn ->
-        Tesla.patch(
-          client,
-          "/3.0/fictional_users/#{fictional_user.id}",
-          Map.take(fictional_user, [:salutation_type, :firstname, :lastname, :email, :title_id])
+        Req.patch(
+          req,
+          url: "/3.0/fictional_users/#{fictional_user.id}",
+          json:
+            Map.take(fictional_user, [:salutation_type, :firstname, :lastname, :email, :title_id])
         )
       end,
       &map_from_fictional_user/2
@@ -359,12 +361,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Create a fictional user
   """
-  @spec delete_fictional_user(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, true | false} | tesla_error_type()
-  def delete_fictional_user(client, id) do
+  @spec delete_fictional_user(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, true | false} | api_error_type()
+  def delete_fictional_user(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/3.0/fictional_users/#{id}")
+        Req.delete(req, url: "/3.0/fictional_users/#{id}")
       end,
       &success_response/2
     )
@@ -422,12 +424,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Get access information of logged in user
   """
-  @spec get_access_information(client :: Tesla.Client.t()) ::
-          {:ok, Permission.t()} | tesla_error_type()
-  def get_access_information(client) do
+  @spec get_access_information(req :: Req.Request.t()) ::
+          {:ok, Permission.t()} | api_error_type()
+  def get_access_information(req) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/3.0/permissions")
+        Req.get(req, url: "/3.0/permissions")
       end,
       &map_from_permission_response/2
     )
@@ -475,12 +477,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a list of tasks.
   """
-  @spec fetch_tasks(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
-          {:ok, [Task.t()]} | tesla_error_type()
-  def fetch_tasks(client, opts \\ []) do
+  @spec fetch_tasks(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, [Task.t()]} | api_error_type()
+  def fetch_tasks(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/task", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/task", params: opts_to_query(opts))
       end,
       &map_from_tasks/2
     )
@@ -500,14 +502,14 @@ defmodule BexioApiClient.Others do
   * `entry_id`
   """
   @spec search_tasks(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, [Task.t()]} | tesla_error_type()
-  def search_tasks(client, criteria, opts \\ []) do
+        ) :: {:ok, [Task.t()]} | api_error_type()
+  def search_tasks(req, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/task/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/task/search", json: criteria, params: opts_to_query(opts))
       end,
       &map_from_tasks/2
     )
@@ -516,12 +518,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a  task.
   """
-  @spec fetch_task(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, Task.t()} | tesla_error_type()
-  def fetch_task(client, id) do
+  @spec fetch_task(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, Task.t()} | api_error_type()
+  def fetch_task(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/task/#{id}")
+        Req.get(req, url: "/2.0/task/#{id}")
       end,
       &map_from_task/2
     )
@@ -530,12 +532,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Create a  task.
   """
-  @spec create_task(client :: Tesla.Client.t(), task :: Task.t()) ::
-          {:ok, Task.t()} | tesla_error_type()
-  def create_task(client, task) do
+  @spec create_task(req :: Req.Request.t(), task :: Task.t()) ::
+          {:ok, Task.t()} | api_error_type()
+  def create_task(req, task) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/task", remap_task(task))
+        Req.post(req, url: "/2.0/task", json: remap_task(task))
       end,
       &map_from_task/2
     )
@@ -544,12 +546,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Edut a  task.
   """
-  @spec edit_task(client :: Tesla.Client.t(), task :: Task.t()) ::
-          {:ok, Task.t()} | tesla_error_type()
-  def edit_task(client, task) do
+  @spec edit_task(req :: Req.Request.t(), task :: Task.t()) ::
+          {:ok, Task.t()} | api_error_type()
+  def edit_task(req, task) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/task/#{task.id}", remap_task(task))
+        Req.post(req, url: "/2.0/task/#{task.id}", json: remap_task(task))
       end,
       &map_from_task/2
     )
@@ -558,12 +560,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Delete a  task.
   """
-  @spec delete_task(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, Task.t()} | tesla_error_type()
-  def delete_task(client, id) do
+  @spec delete_task(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, Task.t()} | api_error_type()
+  def delete_task(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/task/#{id}")
+        Req.delete(req, url: "/2.0/task/#{id}")
       end,
       &success_response/2
     )
@@ -642,12 +644,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a list of task priorities.
   """
-  @spec fetch_task_priorities(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
-          {:ok, map()} | tesla_error_type()
-  def fetch_task_priorities(client, opts \\ []) do
+  @spec fetch_task_priorities(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, map()} | api_error_type()
+  def fetch_task_priorities(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/todo_priority", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/todo_priority", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -656,12 +658,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a list of task status.
   """
-  @spec fetch_task_status(client :: Tesla.Client.t(), opts :: [GlobalArguments.offset_arg()]) ::
-          {:ok, map()} | tesla_error_type()
-  def fetch_task_status(client, opts \\ []) do
+  @spec fetch_task_status(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, map()} | api_error_type()
+  def fetch_task_status(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/todo_status", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/todo_status", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -671,13 +673,13 @@ defmodule BexioApiClient.Others do
   Fetch a list of units.
   """
   @spec fetch_units(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           opts :: [GlobalArguments.offset_without_order_by_arg()]
-        ) :: {:ok, map()} | tesla_error_type()
-  def fetch_units(client, opts \\ []) do
+        ) :: {:ok, map()} | api_error_type()
+  def fetch_units(req, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/unit", query: opts_to_query(opts))
+        Req.get(req, url: "/2.0/unit", params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -691,14 +693,14 @@ defmodule BexioApiClient.Others do
   * `name`
   """
   @spec search_units(
-          client :: Tesla.Client.t(),
+          req :: Req.Request.t(),
           criteria :: list(SearchCriteria.t()),
           opts :: [GlobalArguments.offset_arg()]
-        ) :: {:ok, map()} | tesla_error_type()
-  def search_units(client, criteria, opts \\ []) do
+        ) :: {:ok, map()} | api_error_type()
+  def search_units(req, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/unit/search", criteria, query: opts_to_query(opts))
+        Req.post(req, url: "/2.0/unit/search", json: criteria, params: opts_to_query(opts))
       end,
       &body_to_map/2
     )
@@ -707,12 +709,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Fetch a unit.
   """
-  @spec fetch_unit(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
-  def fetch_unit(client, id) do
+  @spec fetch_unit(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, %{id: integer(), name: String.t()}} | api_error_type()
+  def fetch_unit(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.get(client, "/2.0/unit/#{id}")
+        Req.get(req, url: "/2.0/unit/#{id}")
       end,
       &id_name/2
     )
@@ -721,12 +723,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Create a unit.
   """
-  @spec create_unit(client :: Tesla.Client.t(), name :: String.t()) ::
-          {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
-  def create_unit(client, name) do
+  @spec create_unit(req :: Req.Request.t(), name :: String.t()) ::
+          {:ok, %{id: integer(), name: String.t()}} | api_error_type()
+  def create_unit(req, name) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/unit", %{name: name})
+        Req.post(req, url: "/2.0/unit", json: %{name: name})
       end,
       &id_name/2
     )
@@ -735,12 +737,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Edit a unit.
   """
-  @spec edit_unit(client :: Tesla.Client.t(), id :: integer(), name :: String.t()) ::
-          {:ok, %{id: integer(), name: String.t()}} | tesla_error_type()
-  def edit_unit(client, id, name) do
+  @spec edit_unit(req :: Req.Request.t(), id :: integer(), name :: String.t()) ::
+          {:ok, %{id: integer(), name: String.t()}} | api_error_type()
+  def edit_unit(req, id, name) do
     bexio_body_handling(
       fn ->
-        Tesla.post(client, "/2.0/unit/#{id}", %{name: name})
+        Req.post(req, url: "/2.0/unit/#{id}", json: %{name: name})
       end,
       &id_name/2
     )
@@ -749,12 +751,12 @@ defmodule BexioApiClient.Others do
   @doc """
   Delete a unit.
   """
-  @spec delete_unit(client :: Tesla.Client.t(), id :: integer()) ::
-          {:ok, Task.t()} | tesla_error_type()
-  def delete_unit(client, id) do
+  @spec delete_unit(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, Task.t()} | api_error_type()
+  def delete_unit(req, id) do
     bexio_body_handling(
       fn ->
-        Tesla.delete(client, "/2.0/unit/#{id}")
+        Req.delete(req, url: "/2.0/unit/#{id}")
       end,
       &success_response/2
     )

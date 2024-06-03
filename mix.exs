@@ -4,8 +4,8 @@ defmodule BexioApiClient.MixProject do
   def project do
     [
       app: :bexio_api_client,
-      version: "0.2.20",
-      elixir: "~> 1.14",
+      version: "0.4.0",
+      elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
@@ -46,10 +46,10 @@ defmodule BexioApiClient.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      # API Client, for now fixed to tesla, may change later if needed
-      {:tesla, "~> 1.4"},
+      # API Client
+      {:req, "~> 0.4.11", optional: true},
 
-      # The API is completely in JSON, so need this dependency too
+      # The API is completely in JSON
       {:jason, ">= 1.0.0"},
 
       # Typespecs everywhere...
@@ -63,7 +63,8 @@ defmodule BexioApiClient.MixProject do
 
       # Create documentation
       {:ex_doc, "~> 0.29.4", only: :dev},
-      {:earmark, "~> 1.4", only: :dev}
+      {:earmark, "~> 1.4", only: :dev},
+      {:plug, "~> 1.0", only: :test}
     ]
   end
 end

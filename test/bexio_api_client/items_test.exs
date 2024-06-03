@@ -1,19 +1,20 @@
 defmodule BexioApiClient.ItemsTest do
+  use TestHelper
+
   use ExUnit.Case, async: true
+
   doctest BexioApiClient.Items
 
   alias BexioApiClient.Items.Item
 
-  import Tesla.Mock
-
   describe "fetching a list of items" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/article"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/article"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 4,
               "user_id" => 1,
@@ -60,7 +61,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Items.fetch_items(client)
 
@@ -79,13 +80,12 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "searching items" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/article/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/article/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 4,
               "user_id" => 1,
@@ -132,7 +132,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, [result]} = BexioApiClient.Items.search_items(client, [])
 
@@ -151,9 +151,9 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "fetching a single item" do
     setup do
-      mock(fn
-        %{method: :get, url: "https://api.bexio.com/2.0/article/1"} ->
-          json(%{
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/article/1"} = conn ->
+          json(conn, %{
             "id" => 4,
             "user_id" => 1,
             "article_type_id" => 1,
@@ -193,15 +193,15 @@ defmodule BexioApiClient.ItemsTest do
             "article_group_id" => nil
           })
 
-        %{method: :get, url: "https://api.bexio.com/2.0/article/2"} ->
-          %Tesla.Env{status: 404, body: "Article does not exist"}
+        %{method: "GET", request_path: "/2.0/article/2"} = conn ->
+          send_resp(conn, 404, "Article does not exist")
       end)
 
       :ok
     end
 
     test "shows valid result" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
       {:ok, result} = BexioApiClient.Items.fetch_item(client, 1)
       assert result.id == 4
       assert result.article_type == :physical
@@ -216,7 +216,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "fails on unknown id" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:error, :not_found, "Article does not exist"} =
                BexioApiClient.Items.fetch_item(client, 2)
@@ -225,9 +225,9 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "creating an item" do
     setup do
-      mock(fn
-        %{method: :post, url: "https://api.bexio.com/2.0/article", body: _body} ->
-          json(%{
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/article"} = conn ->
+          json(conn, %{
             "id" => 4,
             "user_id" => 1,
             "article_type_id" => 1,
@@ -272,7 +272,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "creates a new record" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       {:ok, _record} = BexioApiClient.Items.create_item(client, Item.new())
     end
@@ -280,9 +280,9 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "editing an item" do
     setup do
-      mock(fn
-        %{method: :post, url: "https://api.bexio.com/2.0/article/4", body: _body} ->
-          json(%{
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/article/4"} = conn ->
+          json(conn, %{
             "id" => 4,
             "user_id" => 1,
             "article_type_id" => 1,
@@ -327,7 +327,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "edits a new record" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       {:ok, _record} =
         BexioApiClient.Items.edit_item(
@@ -339,16 +339,16 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "deleting an item" do
     setup do
-      mock(fn
-        %{method: :delete, url: "https://api.bexio.com/2.0/article/4"} ->
-          json(%{"success" => true})
+      mock_request(fn
+        %{method: "DELETE", request_path: "/2.0/article/4"} = conn ->
+          json(conn, %{"success" => true})
       end)
 
       :ok
     end
 
     test "deletes the record" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       {:ok, result} = BexioApiClient.Items.delete_item(client, 4)
       assert result == true
@@ -357,12 +357,12 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "fetching a list of stock locations" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/stock"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/stock"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Stock Berlin"
@@ -374,7 +374,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Items.fetch_stock_locations(client)
 
@@ -384,13 +384,12 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "searching stock locations" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/stock/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/stock/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Stock Berlin"
@@ -402,7 +401,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Items.search_stock_locations(client, [])
 
@@ -412,12 +411,12 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "fetching a list of stock areas" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :get,
-          url: "https://api.bexio.com/2.0/stock_place"
-        } ->
-          json([
+          method: "GET",
+          request_path: "/2.0/stock_place"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Shelf A-06"
@@ -429,7 +428,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "lists valid results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Items.fetch_stock_areas(client)
 
@@ -439,13 +438,12 @@ defmodule BexioApiClient.ItemsTest do
 
   describe "searching stock areas" do
     setup do
-      mock(fn
+      mock_request(fn
         %{
-          method: :post,
-          url: "https://api.bexio.com/2.0/stock_place/search",
-          body: _body
-        } ->
-          json([
+          method: "POST",
+          request_path: "/2.0/stock_place/search"
+        } = conn ->
+          json(conn, [
             %{
               "id" => 1,
               "name" => "Shelf A-06"
@@ -457,7 +455,7 @@ defmodule BexioApiClient.ItemsTest do
     end
 
     test "lists found results" do
-      client = BexioApiClient.new("123", adapter: Tesla.Mock)
+      client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Items.search_stock_areas(client, [])
 

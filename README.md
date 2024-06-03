@@ -11,10 +11,24 @@ by adding `bexio_api_client` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:bexio_api_client, "~> 0.2.20"}
+    {:bexio_api_client, "~> 0.4.0"},
+    # if using the default http client:
+    {:req, "~> 0.4.11"},
   ]
 end
 ```
+
+## Configuration
+
+TBD
+
+## Changelog
+
+### 0.4.0
+
+* Removing dependency to `tesla`
+* Adding `req` as optional dependency
+* Adding `req` setup for automatic access_token renewal and retry delay using bexio headers
 
 ## Requirements:
 

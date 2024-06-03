@@ -26,7 +26,7 @@ defmodule BexioApiClient.Helpers do
       nil
 
       iex> BexioApiClient.Helpers.to_decimal("2.331")
-      #Decimal<2.331>
+      Decimal.new("2.331")
   """
   @spec to_decimal(String.t() | nil) :: Decimal.t() | nil
   def to_decimal(nil), do: nil
@@ -93,8 +93,8 @@ defmodule BexioApiClient.Helpers do
   end
 
   @type handler_callback_result_type :: any()
-  @type tesla_body_callback_type :: any()
-  @type tesla_error_type ::
+  @type body_callback_type :: any()
+  @type api_error_type ::
           {:error,
            :invalid_access
            | :unauthorized
@@ -108,10 +108,10 @@ defmodule BexioApiClient.Helpers do
           | {:error, nil | any()}
 
   @spec bexio_body_handling(
-          call :: (-> tesla_body_callback_type),
-          callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
+          call :: (-> body_callback_type),
+          callback :: (body_callback_type, Req.Response.t() -> handler_callback_result_type)
         ) ::
-          {:ok, handler_callback_result_type} | tesla_error_type
+          {:ok, handler_callback_result_type} | api_error_type
   def bexio_body_handling(call, callback) do
     bexio_handling(call, fn body, env ->
       {:ok, callback.(body, env)}
@@ -119,16 +119,16 @@ defmodule BexioApiClient.Helpers do
   end
 
   @spec bexio_handling(
-          call :: (-> tesla_body_callback_type),
-          callback :: (tesla_body_callback_type, Tesla.Env.t() -> handler_callback_result_type)
+          call :: (-> body_callback_type),
+          callback :: (body_callback_type, Req.Response.t() -> handler_callback_result_type)
         ) ::
-          handler_callback_result_type | tesla_error_type | {:error, nil | any()}
+          handler_callback_result_type | api_error_type() | {:error, nil | any()}
   def bexio_handling(call, callback) do
     case call.() do
-      {:ok, %Tesla.Env{status: status, body: body} = env} when status in [200, 201, 301] ->
-        callback.(body, env)
+      {:ok, %Req.Response{status: status, body: body} = response} when status in [200, 201] ->
+        callback.(body, response)
 
-      {:ok, %Tesla.Env{status: status, body: body}} ->
+      {:ok, %Req.Response{status: status, body: body}} ->
         {:error, error_code(status), body}
 
       {:error, error} ->
@@ -157,7 +157,7 @@ defmodule BexioApiClient.Helpers do
     %{1 => "hello", 2 => "world"}
 
   """
-  @spec body_to_map(list(%{String.t() => any()}), Tesla.Env.t()) :: %{integer() => String.t()}
+  @spec body_to_map(list(%{String.t() => any()}), Req.Response.t()) :: %{integer() => String.t()}
   def body_to_map(body, _env) do
     body
     |> Enum.map(fn %{"id" => id, "name" => name} -> {id, name} end)
@@ -173,7 +173,7 @@ defmodule BexioApiClient.Helpers do
     %{id: 1, name: "hello"}
 
   """
-  @spec id_name(%{String.t() => any()}, Tesla.Env.t()) :: %{id: integer(), name: String.t()}
+  @spec id_name(%{String.t() => any()}, Req.Response.t()) :: %{id: integer(), name: String.t()}
   def id_name(%{"id" => id, "name" => name}, _env), do: %{id: id, name: name}
 
   @doc """
@@ -181,14 +181,14 @@ defmodule BexioApiClient.Helpers do
 
   Example:
 
-    iex> BexioApiClient.Helpers.success_response(%{"success" => true}, %Tesla.Env{})
+    iex> BexioApiClient.Helpers.success_response(%{"success" => true}, %Req.Response{})
     true
 
-    iex> BexioApiClient.Helpers.success_response(%{"failure" => true}, %Tesla.Env{})
+    iex> BexioApiClient.Helpers.success_response(%{"failure" => true}, %Req.Response{})
     false
 
   """
-  @spec success_response(map(), Tesla.Env.t()) :: boolean()
+  @spec success_response(map(), Req.Response.t()) :: boolean()
   def success_response(%{"success" => true}, _env), do: true
   def success_response(_result, _env), do: false
 
