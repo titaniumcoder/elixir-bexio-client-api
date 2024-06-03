@@ -2164,6 +2164,60 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     end
   end
 
+  describe "fetching a list of document settings" do
+    setup do
+      json = Jason.decode! """
+      [
+        {
+          "id": 1,
+          "text": "Quote",
+          "kb_item_class": "KbOffer",
+          "enumeration_format": "AN-%nummer%",
+          "use_automatic_enumeration": true,
+          "use_yearly_enumeration": false,
+          "next_nr": 1,
+          "nr_min_length": 5,
+          "default_time_period_in_days": 14,
+          "default_logopaper_id": 1,
+          "default_language_id": 1,
+          "default_client_bank_account_new_id": 1,
+          "default_currency_id": 1,
+          "default_mwst_type": 0,
+          "default_mwst_is_net": true,
+          "default_nb_decimals_amount": 2,
+          "default_nb_decimals_price": 2,
+          "default_show_position_taxes": false,
+          "default_title": "Angebot",
+          "default_show_esr_on_same_page": false,
+          "default_payment_type_id": 1,
+          "kb_terms_of_payment_template_id": 1,
+          "default_show_total": true
+        }
+      ]
+      """
+
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/kb_item_setting"} = conn ->
+          json(conn, json)
+      end)
+
+      :ok
+    end
+
+    test "shows valid position" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, [result]} =
+               BexioApiClient.SalesOrderManagement.fetch_document_settings(client)
+
+      assert result.id == 1
+      assert result.text == "Quote"
+      assert result.kb_item_class == :KbOffer
+
+      # TODO add remaining test comparison
+    end
+  end
+
   describe "fetching a list of comments" do
     setup do
       mock_request(fn

@@ -13,6 +13,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     Order,
     Quote,
     Invoice,
+    DocumentSetting,
     Delivery,
     PositionSubposition,
     PositionPagebreak,
@@ -1230,6 +1231,82 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp invoice_kb_item_status(16), do: :partial
   defp invoice_kb_item_status(19), do: :cancelled
   defp invoice_kb_item_status(31), do: :unpaid
+
+  # Document Settings
+  @doc """
+  Fetch a list of document settings
+  """
+  @spec fetch_document_settings(
+          req :: Req.Request.t(),
+          opts :: [GlobalArguments.offset_arg()]
+        ) ::
+          {:ok, [DocumentSetting.t()]} | api_error_type
+  def fetch_document_settings(req, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/kb_item_setting", params: opts_to_query(opts))
+      end,
+      &map_from_document_settings/2
+    )
+  end
+
+  defp map_from_document_settings(document_settings, _env),
+    do: Enum.map(document_settings, &map_from_document_setting/1)
+
+  defp map_from_document_setting(
+         %{
+           "id" => id,
+           "text" => text,
+           "kb_item_class" => kb_item_class,
+           "enumeration_format" => enumeration_format,
+           "use_automatic_enumeration" => use_automatic_enumeration,
+           "use_yearly_enumeration" => use_yearly_enumeration,
+           "next_nr" => next_nr,
+           "nr_min_length" => nr_min_length,
+           "default_time_period_in_days" => default_time_period_in_days,
+           "default_logopaper_id" => default_logopaper_id,
+           "default_language_id" => default_language_id,
+           "default_client_bank_account_new_id" => default_client_bank_account_new_id,
+           "default_currency_id" => default_currency_id,
+           "default_mwst_type" => default_mwst_type,
+           "default_mwst_is_net" => default_mwst_is_net,
+           "default_nb_decimals_amount" => default_nb_decimals_amount,
+           "default_nb_decimals_price" => default_nb_decimals_price,
+           "default_show_position_taxes" => default_show_position_taxes,
+           "default_title" => default_title,
+           "default_show_esr_on_same_page" => default_show_esr_on_same_page?,
+           "default_payment_type_id" => default_payment_type_id?,
+           "kb_terms_of_payment_template_id" => kb_terms_of_payment_template_id,
+           "default_show_total" => default_show_total
+         },
+         _env \\ nil
+       ) do
+    %DocumentSetting{
+      id: id,
+      text: text,
+      kb_item_class: String.to_atom(kb_item_class),
+      enumeration_format: enumeration_format,
+      automatic_enumeration?: use_automatic_enumeration,
+      yearly_enumeration?: use_yearly_enumeration,
+      next_nr: next_nr,
+      nr_min_length: nr_min_length,
+      default_time_period_in_days: default_time_period_in_days,
+      default_logopaper_id: default_logopaper_id,
+      default_language_id: default_language_id,
+      default_client_bank_account_new_id: default_client_bank_account_new_id,
+      default_currency_id: default_currency_id,
+      default_mwst_type: default_mwst_type,
+      default_mwst_net?: default_mwst_is_net,
+      default_nb_decimals_amount: default_nb_decimals_amount,
+      default_nb_decimals_price: default_nb_decimals_price,
+      default_show_position_taxes?: default_show_position_taxes,
+      default_title: default_title,
+      default_show_esr_on_same_page?: default_show_esr_on_same_page?,
+      default_payment_type_id: default_payment_type_id?,
+      kb_terms_of_payment_template_id: kb_terms_of_payment_template_id,
+      default_show_total?: default_show_total
+    }
+  end
 
   # Comments
 
