@@ -25,7 +25,7 @@ defmodule BexioApiClient.MixProject do
 
   defp package do
     [
-      files: ["lib", "mix.exs", "README.md", "LICENSE.md", "CHANGELOG.md"],
+      files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
       maintainers: ["Rico Metzger"],
       licenses: ["MIT"],
       links: %{

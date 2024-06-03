@@ -47,7 +47,6 @@ and can be found at <https://hexdocs.pm/bexio_api_client>.
 ## Building a release
 
 1. Update the versions in README.md, and mix.exs
-2. Actualize the CHANGELOG.md (once present)
 3. Run `mix test` and `mix dialyzer`
 4. Create a git commit.
 5. Create a tag for the new version.
