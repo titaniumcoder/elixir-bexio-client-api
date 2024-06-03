@@ -5,7 +5,7 @@ defmodule BexioApiClient.OthersTest do
 
   doctest BexioApiClient.Others
 
-  alias BexioApiClient.Others.{FictionalUser, Todo}
+  alias BexioApiClient.Others.{FictionalUser, Todo, Note}
   alias BexioApiClient.SearchCriteria
 
   describe "fetching a list of company profiles" do
@@ -1148,6 +1148,247 @@ defmodule BexioApiClient.OthersTest do
       assert {:ok, result} = BexioApiClient.Others.fetch_task_status(client)
 
       assert result[1] == "Open"
+    end
+  end
+
+  describe "fetching a list of notes" do
+    setup do
+      mock_request(fn
+        %{
+          method: "GET",
+          request_path: "/2.0/note"
+        } = conn ->
+          json(conn, [
+            %{
+              "id" => 4,
+              "user_id" => 1,
+              "event_start" => "2019-01-16 14:20:00",
+              "subject" => "API conception",
+              "info" => "string",
+              "contact_id" => 14,
+              "project_id" => nil,
+              "entry_id" => nil,
+              "module_id" => nil
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, [result1]} = BexioApiClient.Others.fetch_notes(client)
+
+      assert result1.id == 4
+      assert result1.user_id == 1
+      assert result1.event_start == ~N[2019-01-16 14:20:00]
+      assert result1.subject == "API conception"
+      assert result1.info == "string"
+      assert result1.contact_id == 14
+    end
+  end
+
+  describe "searching notes" do
+    setup do
+      mock_request(fn
+        %{
+          method: "POST",
+          request_path: "/2.0/note/search"
+        } = conn ->
+          json(conn, [
+            %{
+              "id" => 4,
+              "user_id" => 1,
+              "event_start" => "2019-01-16 14:20:00",
+              "subject" => "API conception",
+              "info" => "string",
+              "contact_id" => 14,
+              "project_id" => nil,
+              "entry_id" => nil,
+              "module_id" => nil
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, [result1]} =
+               BexioApiClient.Others.search_notes(client, [
+                 SearchCriteria.nil?(:subject),
+                 SearchCriteria.less_than(:event_start, NaiveDateTime.local_now())
+               ])
+
+      assert result1.id == 4
+      assert result1.user_id == 1
+      assert result1.event_start == ~N[2019-01-16 14:20:00]
+      assert result1.subject == "API conception"
+      assert result1.info == "string"
+      assert result1.contact_id == 14
+    end
+  end
+
+  describe "fetching a note" do
+    setup do
+      mock_request(fn
+        %{
+          method: "GET",
+          request_path: "/2.0/note/2"
+        } = conn ->
+          json(conn, %{
+            "id" => 4,
+            "user_id" => 1,
+            "event_start" => "2019-01-16 14:20:00",
+            "subject" => "API conception",
+            "info" => "string",
+            "contact_id" => 14,
+            "project_id" => nil,
+            "entry_id" => nil,
+            "module_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "lists found result" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_note(client, 2)
+
+      assert result.id == 4
+      assert result.user_id == 1
+      assert result.event_start == ~N[2019-01-16 14:20:00]
+      assert result.info == "string"
+      assert result.subject == "API conception"
+      assert result.contact_id == 14
+    end
+  end
+
+  describe "creating a note" do
+    setup do
+      mock_request(fn
+        %{
+          method: "POST",
+          request_path: "/2.0/note"
+        } = conn ->
+          {:ok, body, _} = read_body(conn)
+          body_json = Jason.decode!(body)
+
+          assert body_json["event_start"] == "2019-01-16T14:20:00"
+          assert body_json["subject"] == "API conception"
+
+          json(conn, %{
+            "id" => 4,
+            "user_id" => 1,
+            "event_start" => "2019-01-16 14:20:00",
+            "subject" => "API conception",
+            "info" => "string",
+            "contact_id" => 14,
+            "project_id" => nil,
+            "entry_id" => nil,
+            "module_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "creates a note" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} =
+               BexioApiClient.Others.create_note(client, %Note{
+                 id: -1,
+                 user_id: 1,
+                 event_start: ~N[2019-01-16 14:20:00],
+                 subject: "API conception",
+                 info: "string",
+                 contact_id: 14,
+                 project_id: nil,
+                 entry_id: nil,
+                 module_id: nil
+               })
+
+      assert result.id == 4
+      assert result.event_start == ~N[2019-01-16 14:20:00]
+    end
+  end
+
+  describe "updating a note" do
+    setup do
+      mock_request(fn
+        %{
+          method: "POST",
+          request_path: "/2.0/note/2"
+        } = conn ->
+          {:ok, body, _} = read_body(conn)
+          body_json = Jason.decode!(body)
+
+          assert body_json["subject"] == "API conception"
+          assert body_json["event_start"] == "2019-01-16T14:20:00"
+
+          json(conn, %{
+            "id" => 4,
+            "user_id" => 1,
+            "event_start" => "2019-01-16 14:20:00",
+            "subject" => "API conception",
+            "info" => "string",
+            "contact_id" => 14,
+            "project_id" => nil,
+            "entry_id" => nil,
+            "module_id" => nil
+          })
+      end)
+
+      :ok
+    end
+
+    test "updates a note" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} =
+               BexioApiClient.Others.edit_note(client, %Note{
+                 id: 2,
+                 user_id: 1,
+                 event_start: ~N[2019-01-16 14:20:00],
+                 subject: "API conception",
+                 info: "string",
+                 contact_id: 14,
+                 project_id: nil,
+                 entry_id: nil,
+                 module_id: nil
+               })
+
+      assert result.id == 4
+      assert result.event_start == ~N[2019-01-16 14:20:00]
+    end
+  end
+
+  describe "deleting a note" do
+    setup do
+      mock_request(fn
+        %{
+          method: "DELETE",
+          request_path: "/2.0/note/2"
+        } = conn ->
+          json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "deletes a task" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} = BexioApiClient.Others.delete_note(client, 2)
+
+      assert result == true
     end
   end
 

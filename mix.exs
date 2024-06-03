@@ -4,8 +4,8 @@ defmodule BexioApiClient.MixProject do
   def project do
     [
       app: :bexio_api_client,
-      version: "0.4.1",
-      elixir: "~> 1.16",
+      version: "0.4.2",
+      elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       package: package(),
@@ -25,7 +25,7 @@ defmodule BexioApiClient.MixProject do
 
   defp package do
     [
-      files: ["lib", "mix.exs", "README.md", "LICENSE.md"],
+      files: ["lib", "mix.exs", "README.md", "LICENSE.md", "CHANGELOG.md"],
       maintainers: ["Rico Metzger"],
       licenses: ["MIT"],
       links: %{

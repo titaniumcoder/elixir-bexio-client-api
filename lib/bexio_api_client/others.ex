@@ -643,6 +643,34 @@ defmodule BexioApiClient.Others do
   defp to_boolean("false"), do: false
 
   @doc """
+  Fetch a list of task priorities.
+  """
+  @spec fetch_task_priorities(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, map()} | api_error_type()
+  def fetch_task_priorities(req, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/todo_priority", params: opts_to_query(opts))
+      end,
+      &body_to_map/2
+    )
+  end
+
+  @doc """
+  Fetch a list of task status.
+  """
+  @spec fetch_task_status(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
+          {:ok, map()} | api_error_type()
+  def fetch_task_status(req, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/todo_status", params: opts_to_query(opts))
+      end,
+      &body_to_map/2
+    )
+  end
+
+  @doc """
   Fetch a list of notes.
   """
   @spec fetch_notes(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
@@ -718,7 +746,7 @@ defmodule BexioApiClient.Others do
   def edit_note(req, note) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/note/#{note.id}", json: remap_task(note))
+        Req.post(req, url: "/2.0/note/#{note.id}", json: remap_note(note))
       end,
       &map_from_note/2
     )
@@ -747,9 +775,9 @@ defmodule BexioApiClient.Others do
       :contact_id,
       :entry_id,
       :module_id,
-      :event_start,
+      :event_start
     ])
-    |> Map.put(:finish_date, to_iso8601(Map.get(note, :event_start)))
+    |> Map.put(:event_start, to_iso8601(Map.get(note, :event_start)))
     |> Map.put(:pr_project_id, Map.get(note, :project_id))
   end
 
@@ -759,55 +787,27 @@ defmodule BexioApiClient.Others do
          %{
            "id" => id,
            "user_id" => user_id,
-           "event_start_date" => event_start_date,
+           "event_start" => event_start,
            "subject" => subject,
            "info" => info,
            "contact_id" => contact_id,
-           "pr_project_id" => project_id,
+           "project_id" => project_id,
            "entry_id" => entry_id,
-           "module_id" => module_id,
+           "module_id" => module_id
          },
          _env \\ nil
        ) do
     %Note{
       id: id,
       user_id: user_id,
-      event_start_date: to_datetime(event_start_date),
+      event_start: to_datetime(event_start),
       subject: subject,
       info: info,
       contact_id: contact_id,
       project_id: project_id,
       entry_id: entry_id,
-      module_id: module_id,
+      module_id: module_id
     }
-  end
-
-  @doc """
-  Fetch a list of task priorities.
-  """
-  @spec fetch_task_priorities(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
-          {:ok, map()} | api_error_type()
-  def fetch_task_priorities(req, opts \\ []) do
-    bexio_body_handling(
-      fn ->
-        Req.get(req, url: "/2.0/todo_priority", params: opts_to_query(opts))
-      end,
-      &body_to_map/2
-    )
-  end
-
-  @doc """
-  Fetch a list of task status.
-  """
-  @spec fetch_task_status(req :: Req.Request.t(), opts :: [GlobalArguments.offset_arg()]) ::
-          {:ok, map()} | api_error_type()
-  def fetch_task_status(req, opts \\ []) do
-    bexio_body_handling(
-      fn ->
-        Req.get(req, url: "/2.0/todo_status", params: opts_to_query(opts))
-      end,
-      &body_to_map/2
-    )
   end
 
   @doc """
