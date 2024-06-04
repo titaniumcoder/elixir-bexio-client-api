@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+* SearchCriteria changed to sigil ~SC with separations for reduced name lengths (old functionality is still there for now)
+* Elixir 1.15 as requirement due to ~SC
+* Payment Types added
+* Bank Accounts added
+
 ## 0.4.2
 
 * Added Github Action to automatically publish a package version

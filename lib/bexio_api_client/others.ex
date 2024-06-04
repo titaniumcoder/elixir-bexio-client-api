@@ -902,4 +902,42 @@ defmodule BexioApiClient.Others do
       &success_response/2
     )
   end
+
+  @doc """
+  Fetch a list of payment types.
+  """
+  @spec fetch_payment_types(
+          req :: Req.Request.t(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, map()} | api_error_type()
+  def fetch_payment_types(req, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/payment_type", params: opts_to_query(opts))
+      end,
+      &body_to_map/2
+    )
+  end
+
+  @doc """
+  Search a payment type
+
+  Following fields are supported:
+
+  * `name`
+  """
+  @spec search_payment_types(
+          req :: Req.Request.t(),
+          criteria :: list(SearchCriteria.t()),
+          opts :: [GlobalArguments.offset_arg()]
+        ) :: {:ok, map()} | api_error_type()
+  def search_payment_types(req, criteria, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/payment_type/search", json: criteria, params: opts_to_query(opts))
+      end,
+      &body_to_map/2
+    )
+  end
+
 end

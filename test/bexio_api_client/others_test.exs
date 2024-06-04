@@ -1558,4 +1558,63 @@ defmodule BexioApiClient.OthersTest do
       assert result == true
     end
   end
+
+  describe "fetching a list of payment types" do
+    setup do
+      mock_request(fn
+        %{
+          method: "GET",
+          request_path: "/2.0/payment_type"
+        } = conn ->
+          json(conn, [
+            %{
+              "id" => 1,
+              "name" => "Cash"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_payment_types(client)
+
+      assert Enum.count(result) == 1
+      assert result[1] == "Cash"
+    end
+  end
+
+  describe "searching payment types" do
+    setup do
+      mock_request(fn
+        %{
+          method: "POST",
+          request_path: "/2.0/payment_type/search"
+        } = conn ->
+          json(conn, [
+            %{
+              "id" => 1,
+              "name" => "Cash"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} =
+               BexioApiClient.Others.search_payment_types(client, [
+                 SearchCriteria.equal(:name, "Cash")
+               ])
+
+      assert Enum.count(result) == 1
+      assert result[1] == "Cash"
+    end
+  end
 end
