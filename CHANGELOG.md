@@ -2,10 +2,8 @@
 
 ## 0.5.0
 
-* SearchCriteria changed to sigil ~SC with separations for reduced name lengths (old functionality is still there for now)
-* Elixir 1.15 as requirement due to ~SC
+* SearchCriteria changed to sigil ~f with separations for reduced name lengths (old functionality is still there for now)
 * Payment Types added
-* Bank Accounts added
 
 ## 0.4.2
 
