@@ -47,12 +47,51 @@ defmodule BexioApiClient.SearchCriteria do
   @derive Jason.Encoder
   defstruct [:field, :criteria, :value]
 
+  @regex ~r/^(?<field>\S+)\s*(?<operator>!=|=|<=|<|>=|>|in|not in|like|not like|is nil|is not nil)\s*(?<value>.*)$/
+
   defp new(field, criteria, value) do
     %__MODULE__{
       field: field,
       criteria: criteria,
       value: value
     }
+  end
+
+  @spec sigil_f(String.t(), Keyword.t()) :: t()
+  def sigil_f(field, opts)
+
+  def sigil_f(expression, _opts) do
+    case Regex.run(@regex, expression, capture: :all_but_first) do
+      nil -> raise ArgumentError, "Invalid search criteria: #{expression}"
+      [field, operator, value] -> handle(field, operator, value)
+    end
+  end
+
+  defp handle(field, operator, value) when is_binary(field),
+    do: handle(String.to_existing_atom(field), operator, value)
+
+  defp handle(field, "=", value) when is_atom(field), do: equal(field, value)
+  defp handle(field, "!=", value) when is_atom(field), do: not_equal(field, value)
+  defp handle(field, "<", value) when is_atom(field), do: less_than(field, value)
+  defp handle(field, "<=", value) when is_atom(field), do: less_equal(field, value)
+  defp handle(field, ">", value) when is_atom(field), do: greater_than(field, value)
+  defp handle(field, ">=", value) when is_atom(field), do: greater_equal(field, value)
+  defp handle(field, "like", value) when is_atom(field), do: like(field, value)
+  defp handle(field, "not like", value) when is_atom(field), do: not_like(field, value)
+  defp handle(field, "is nil", _value) when is_atom(field), do: nil?(field)
+  defp handle(field, "is not nil", _value) when is_atom(field), do: not_nil?(field)
+  defp handle(field, "in", value) when is_atom(field), do: part_of(field, listify(value))
+  defp handle(field, "not in", value) when is_atom(field), do: not_part_of(field, listify(value))
+
+  defp handle(field, operator, value),
+    do:
+      raise(ArgumentError, "Invalid operator: #{operator} for field #{field} and value #{value}")
+
+  defp listify(value) do
+    case ~r/^\[(?<value>.*)\]$/ |> Regex.named_captures(value) do
+      %{"value" => value} -> String.split(value, ",")
+      nil -> [value]
+    end
   end
 
   @doc "Creates a = search criteria"
