@@ -101,6 +101,7 @@ defmodule BexioApiClient.SearchCriteriaTest do
       assert sc.value == nil
     end
   end
+
   describe "sigils " do
     setup do
       %{name: "fred"}
@@ -171,19 +172,35 @@ defmodule BexioApiClient.SearchCriteriaTest do
     end
 
     test "part_of will generate search criteria" do
-      sc = ~f(name in fred)
+      sc = ~f(name in fred,me)
 
       assert sc.field == :name
       assert sc.criteria == :in
-      assert sc.value == "fred"
+      assert sc.value == ["fred,me"]
+    end
+
+    test "part_of will generate search criteria in list" do
+      sc = ~f(name in [fred,me])
+
+      assert sc.field == :name
+      assert sc.criteria == :in
+      assert sc.value == ["fred", "me"]
     end
 
     test "not_part_of will generate search criteria" do
-      sc = ~f(name not in fred)
+      sc = ~f(name not in fred,me)
 
       assert sc.field == :name
       assert sc.criteria == :not_in
-      assert sc.value == "fred"
+      assert sc.value == ["fred,me"]
+    end
+
+    test "not_part_of will generate search criteria in list" do
+      sc = ~f(name not in [fred,me])
+
+      assert sc.field == :name
+      assert sc.criteria == :not_in
+      assert sc.value == ["fred", "me"]
     end
 
     test "nil? will generate search criteria" do

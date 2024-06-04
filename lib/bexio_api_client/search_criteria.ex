@@ -80,12 +80,19 @@ defmodule BexioApiClient.SearchCriteria do
   defp handle(field, "not like", value) when is_atom(field), do: not_like(field, value)
   defp handle(field, "is nil", _value) when is_atom(field), do: nil?(field)
   defp handle(field, "is not nil", _value) when is_atom(field), do: not_nil?(field)
-  defp handle(field, "in", value) when is_atom(field), do: part_of(field, value)
-  defp handle(field, "not in", value) when is_atom(field), do: not_part_of(field, value)
+  defp handle(field, "in", value) when is_atom(field), do: part_of(field, listify(value))
+  defp handle(field, "not in", value) when is_atom(field), do: not_part_of(field, listify(value))
 
   defp handle(field, operator, value),
     do:
       raise(ArgumentError, "Invalid operator: #{operator} for field #{field} and value #{value}")
+
+  defp listify(value) do
+    case ~r/^\[(?<value>.*)\]$/ |> Regex.named_captures(value) do
+      %{"value" => value} -> String.split(value, ",")
+      nil -> [value]
+    end
+  end
 
   @doc "Creates a = search criteria"
   @spec equal(atom(), any()) :: t()

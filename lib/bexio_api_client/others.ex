@@ -934,10 +934,13 @@ defmodule BexioApiClient.Others do
   def search_payment_types(req, criteria, opts \\ []) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/payment_type/search", json: criteria, params: opts_to_query(opts))
+        Req.post(req,
+          url: "/2.0/payment_type/search",
+          json: criteria,
+          params: opts_to_query(opts)
+        )
       end,
       &body_to_map/2
     )
   end
-
 end
