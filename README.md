@@ -16,13 +16,9 @@ def deps do
 end
 ```
 
-## Configuration
-
-TBD
-
 ## Requirements:
 
-The API uses [Tesla](https://github.com/elixir-tesla/tesla) for the client access to also handle the exponential back-off required in the documentation.
+The API uses [Req](https://github.com/wojtekmach/req/tree/v0.5.0) for the client access to also handle the exponential back-off required in the documentation.
 
 
 ## Documentation 
