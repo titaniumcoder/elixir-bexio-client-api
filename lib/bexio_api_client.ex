@@ -72,11 +72,11 @@ defmodule BexioApiClient do
           {:ok, String.t(), integer()} | {:error, any()}
   def access_token(refresh_token, client_id, client_secret) do
     idp_req =
-      @base_request_options
-      |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
+      Application.get_env(:bexio_api_client, :req_options, [])
       |> Req.new()
 
-    case Req.post(idp_req,
+    case Req.post(
+           idp_req,
            url: "https://idp.bexio.com/token",
            form: %{
              "grant_type" => "refresh_token",

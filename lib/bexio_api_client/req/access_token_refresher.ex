@@ -9,10 +9,10 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   def attach(%Req.Request{} = request, options \\ []) do
     request
     |> Req.Request.register_options([
-      :atr_refresh_token,
-      :atr_client_id,
-      :atr_client_secret,
-      :atr_expires_at
+      :refresh_token,
+      :client_id,
+      :client_secret,
+      :expires_at
     ])
     |> Req.Request.merge_options(options)
     |> Req.Request.append_request_steps(get_access_token: &get_access_token/1)
