@@ -43,6 +43,8 @@ defmodule BexioApiClient do
   """
   @spec new(String.t(), String.t(), String.t()) :: Req.Request.t()
   def new(client_id, client_secret, refresh_token) do
+    BexioApiClient.Req.AccessTokenRefresher.create_ets_table()
+
     @base_request_options
     |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
     |> Req.new()
@@ -51,6 +53,13 @@ defmodule BexioApiClient do
       client_id: client_id,
       client_secret: client_secret
     )
+  end
+
+  @doc """
+  Removes all expired access tokens from the ETS table.
+  """
+  def remove_expired_access_tokens do
+    BexioApiClient.Req.AccessTokenRefresher.remove_expired_tokens()
   end
 
   @doc """
