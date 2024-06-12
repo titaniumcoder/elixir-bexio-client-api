@@ -32,9 +32,9 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   def remove_expired_tokens do
     if :ets.whereis(@ets_table_name) != :undefined do
       :ets.match(@ets_table_name, {:"$0", {:_, :"$1"}})
-    |> Enum.filter(fn [_k, e] -> e < System.system_time(:second) end)
-    |> Enum.map(fn [k, _] -> k end)
-    |> Enum.each(fn k -> :ets.delete(:test, k) end)
+      |> Enum.filter(fn [_k, e] -> e < System.system_time(:second) end)
+      |> Enum.map(fn [k, _] -> k end)
+      |> Enum.each(fn k -> :ets.delete(:test, k) end)
     end
   end
 
