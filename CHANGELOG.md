@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.3
+
+* Add optional configuration to IDP_URL to enable mocking the bexio api completely with a customized mock.
+
+## 0.5.2
+
+* Just added a test for the access key refresher logic
+
+## 0.5.1
+
+* Fix forgotten Access Keys by using ETS temporary storage
+
 ## 0.5.0
 
 * SearchCriteria changed to sigil ~f with separations for reduced name lengths (old functionality is still there for now)

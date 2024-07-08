@@ -84,9 +84,11 @@ defmodule BexioApiClient do
       Application.get_env(:bexio_api_client, :req_options, [])
       |> Req.new()
 
+    idp_url = Application.get_env(:bexio_api_client, :idp_url, "https://idp.bexio.com/token")
+
     case Req.post(
            idp_req,
-           url: "https://idp.bexio.com/token",
+           url: idp_url,
            form: %{
              "grant_type" => "refresh_token",
              "refresh_token" => refresh_token

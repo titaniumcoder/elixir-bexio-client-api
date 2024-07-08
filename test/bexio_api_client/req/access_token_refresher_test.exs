@@ -45,7 +45,6 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
       result = :ets.lookup(:bexio_api_client_access_tokens, {"client_id", "refresh_token"})
       [{{"client_id", "refresh_token"}, {"access_token", x}}] = result
       assert System.system_time(:second) + 3600 > x
-
     end
 
     test "should do nothing if there is no correct answer from the server" do
