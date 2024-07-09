@@ -30,7 +30,6 @@ and can be found at <https://hexdocs.pm/bexio_api_client>.
 
 1. Update the versions in README.md, and mix.exs
 2. Update the CHANGELOG.md
-3. Run `mix test` and `mix dialyzer`
-4. Create a git commit.
+3. (optional, recommended) Run `mix test` and `mix dialyzer`
 5. Create a tag for the new version.
-6. Execute `mix hex.publish`
+6. Push it, github actions will do the release.
