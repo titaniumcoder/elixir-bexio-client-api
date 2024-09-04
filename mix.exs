@@ -47,7 +47,7 @@ defmodule BexioApiClient.MixProject do
   defp deps do
     [
       # API Client
-      {:req, "~> 0.4.11", optional: true},
+      {:req, "~> 0.5.6", optional: true},
 
       # The API is completely in JSON
       {:jason, ">= 1.0.0"},
