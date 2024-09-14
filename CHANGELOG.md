@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+
+* Reduced retries down from 100 to 3 (so rate limit can be handled, but not general network problems)
+
+## 0.6.0
+
+* Version updates of dependencies, minor update for this
+
 ## 0.5.3
 
 * Add optional configuration to IDP_URL to enable mocking the bexio api completely with a customized mock.
