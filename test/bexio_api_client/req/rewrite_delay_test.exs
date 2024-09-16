@@ -6,7 +6,7 @@ defmodule BexioApiClient.Req.RewriteDelayTest do
       assert {:delay, 15000} ==
                BexioApiClient.Req.RewriteDelay.retry(
                  %Req.Request{},
-                 %Req.Response{status: 429, headers: [{"ratelimit-reset", ["15"]}]}
+                 %Req.Response{status: 429, headers: %{"ratelimit-reset" => ["15"]}}
                )
     end
   end
@@ -16,7 +16,7 @@ defmodule BexioApiClient.Req.RewriteDelayTest do
       assert true ==
                BexioApiClient.Req.RewriteDelay.retry(
                  %Req.Request{},
-                 %Req.Response{status: 429, headers: []}
+                 %Req.Response{status: 429, headers: %{}}
                )
     end
   end

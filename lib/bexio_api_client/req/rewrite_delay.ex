@@ -13,7 +13,7 @@ defmodule BexioApiClient.Req.RewriteDelay do
     case response_or_exception do
       %Req.Response{status: 429, headers: headers} ->
         case headers do
-          [{"ratelimit-reset", [reset]}] ->
+          %{"ratelimit-reset" => [reset]} ->
             {:delay, String.to_integer(reset) * 1000}
 
           _ ->
