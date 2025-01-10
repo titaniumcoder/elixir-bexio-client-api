@@ -165,7 +165,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def issue_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_offer/#{id}/issue", json: %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/issue")
       end,
       &success_response/2
     )
@@ -181,7 +181,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def revert_issue_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_offer/#{id}/revertIssue", json: %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/revertIssue")
       end,
       &success_response/2
     )
@@ -197,7 +197,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def accept_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_offer/#{id}/accept", json: %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/accept")
       end,
       &success_response/2
     )
@@ -213,7 +213,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def decline_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_offer/#{id}/reject", json: %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/reject")
       end,
       &success_response/2
     )
@@ -229,7 +229,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def reissue_quote(req, id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_offer/#{id}/reissue", json: %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/reissue")
       end,
       &success_response/2
     )
@@ -245,7 +245,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def mark_quote_as_sent(req, id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_offer/#{id}/mark_as_sent", json: %{})
+        Req.post(req, url: "/2.0/kb_offer/#{id}/mark_as_sent")
       end,
       &success_response/2
     )
@@ -834,7 +834,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def issue_delivery(req, delivery_id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_delivery/#{delivery_id}/issue", json: %{})
+        Req.post(req, url: "/2.0/kb_delivery/#{delivery_id}/issue")
       end,
       &success_response/2
     )
@@ -1041,7 +1041,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def issue_invoice(req, id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_invoice/#{id}/issue", json: %{})
+        Req.post(req, url: "/2.0/kb_invoice/#{id}/issue")
       end,
       &success_response/2
     )
@@ -1057,7 +1057,7 @@ defmodule BexioApiClient.SalesOrderManagement do
   def revert_issue_invoice(req, id) do
     bexio_body_handling(
       fn ->
-        Req.post(req, url: "/2.0/kb_invoice/#{id}/revert_issue", json: %{})
+        Req.post(req, url: "/2.0/kb_invoice/#{id}/revert_issue")
       end,
       &success_response/2
     )
@@ -2320,8 +2320,7 @@ defmodule BexioApiClient.SalesOrderManagement do
       fn ->
         Req.post(
           req,
-          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak",
-          json: %{}
+          url: "/2.0/kb_#{document_type}/#{document_id}/kb_position_pagebreak"
         )
       end,
       &map_from_pagebreak_position/2

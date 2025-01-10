@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.6.0
+## 0.6.3
+
+* All empty bodies as JSON removed due to bug leading to error 415
+
+## 0.6.2
+
+* Placeholder version due to issue with build.
+
+## 0.6.1
 
 * Reduced retries down from 100 to 3 (so rate limit can be handled, but not general network problems)
 
