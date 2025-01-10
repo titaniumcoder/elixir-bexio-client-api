@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.4
+
+* Treat account_no as string as it seems to be allowed (and not according to API documentation)
+
 ## 0.6.3
 
 * All empty bodies as JSON removed due to bug leading to error 415

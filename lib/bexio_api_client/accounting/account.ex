@@ -9,7 +9,7 @@ defmodule BexioApiClient.Accounting.Account do
   ## Fields:
 
     * `:id` - automatic id given by bexio
-    * `:account_no` - No of the account
+    * `:account_no` - No of the account (string <int32> but this seems wrong...)
     * `:name` - Name of the account
     * `:account_group_id` - The id of the associated account group. References an account group object
     * `:account_type` - the type of the account
@@ -19,7 +19,7 @@ defmodule BexioApiClient.Accounting.Account do
   """
   @type t :: %__MODULE__{
           id: integer(),
-          account_no: integer(),
+          account_no: String.t(),
           name: String.t(),
           account_group_id: integer(),
           account_type:

@@ -106,7 +106,7 @@ defmodule BexioApiClient.Accounting do
        ) do
     %Account{
       id: id,
-      account_no: String.to_integer(account_no),
+      account_no: account_no,
       name: name,
       account_group_id: account_group_id,
       account_type: account_type(account_type_id),
@@ -153,7 +153,7 @@ defmodule BexioApiClient.Accounting do
        ) do
     %AccountGroup{
       id: id,
-      account_no: String.to_integer(account_no),
+      account_no: account_no,
       name: name,
       parent_fibu_account_group_id: parent_fibu_account_group_id,
       active?: active?,

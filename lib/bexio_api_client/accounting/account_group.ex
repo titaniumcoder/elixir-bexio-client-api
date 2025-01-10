@@ -9,7 +9,7 @@ defmodule BexioApiClient.Accounting.AccountGroup do
   ## Fields:
 
     * `:id` - automatic id given by bexio
-    * `:account_no` - No of the account group
+    * `:account_no` - No of the account group (probably also not integer)
     * `:name` - Name of the account
     * `:parent_fibu_account_group_id` - The id of the parent account group, references an account group
     * `:active?` - Whether the account group is active. If the account group is inactive, accounts in this account group can not be used for new bookings.
@@ -17,7 +17,7 @@ defmodule BexioApiClient.Accounting.AccountGroup do
   """
   @type t :: %__MODULE__{
           id: integer(),
-          account_no: integer(),
+          account_no: String.t(),
           name: String.t(),
           parent_fibu_account_group_id: integer(),
           active?: boolean(),

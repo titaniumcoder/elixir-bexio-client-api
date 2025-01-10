@@ -44,7 +44,7 @@ defmodule BexioApiClient.AccountingTest do
       assert {:ok, [result1, result2]} = BexioApiClient.Accounting.fetch_accounts(client)
 
       assert result1.id == 1
-      assert result1.account_no == 3201
+      assert result1.account_no == "3201"
       assert result1.name == "Gross proceeds credit sales"
       assert result1.account_group_id == 65
       assert result1.account_type == :earning
@@ -53,7 +53,7 @@ defmodule BexioApiClient.AccountingTest do
       assert result1.locked? == false
 
       assert result2.id == 2
-      assert result2.account_no == 3202
+      assert result2.account_no == "3202"
       assert result2.name == "Gross proceeds credit sales 2"
       assert result2.account_group_id == 66
       assert result2.account_type == :expenditure
@@ -83,7 +83,7 @@ defmodule BexioApiClient.AccountingTest do
             },
             %{
               "id" => 2,
-              "account_no" => "3202",
+              "account_no" => "3202-22",
               "name" => "Gross proceeds credit sales 2",
               "fibu_account_group_id" => 66,
               "account_type" => 2,
@@ -110,7 +110,7 @@ defmodule BexioApiClient.AccountingTest do
                )
 
       assert result1.id == 1
-      assert result1.account_no == 3201
+      assert result1.account_no == "3201"
       assert result1.name == "Gross proceeds credit sales"
       assert result1.account_group_id == 65
       assert result1.account_type == :earning
@@ -119,7 +119,7 @@ defmodule BexioApiClient.AccountingTest do
       assert result1.locked? == false
 
       assert result2.id == 2
-      assert result2.account_no == 3202
+      assert result2.account_no == "3202-22"
       assert result2.name == "Gross proceeds credit sales 2"
       assert result2.account_group_id == 66
       assert result2.account_type == :expenditure
@@ -136,7 +136,7 @@ defmodule BexioApiClient.AccountingTest do
           json(conn, [
             %{
               "id" => 1,
-              "account_no" => "1",
+              "account_no" => "1-1",
               "name" => "Assets",
               "parent_fibu_account_group_id" => 3,
               "is_active" => true,
@@ -154,7 +154,7 @@ defmodule BexioApiClient.AccountingTest do
       assert {:ok, [result]} = BexioApiClient.Accounting.fetch_account_groups(client)
 
       assert result.id == 1
-      assert result.account_no == 1
+      assert result.account_no == "1-1"
       assert result.name == "Assets"
       assert result.parent_fibu_account_group_id == 3
       assert result.active? == true
