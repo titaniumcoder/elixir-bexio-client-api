@@ -85,7 +85,7 @@ defmodule BexioApiClient do
       Application.get_env(:bexio_api_client, :req_options, [])
       |> Req.new()
 
-    idp_url = Application.get_env(:bexio_api_client, :idp_url, "https://idp.bexio.com/token")
+    idp_url = Application.get_env(:bexio_api_client, :idp_url, "https://auth.bexio.com/realms/bexio/protocol/openid-connect/token")
 
     case Req.post(
            idp_req,

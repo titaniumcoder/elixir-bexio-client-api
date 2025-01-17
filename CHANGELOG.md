@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.0
+
+* New OAuth2 Access Token endpoint
+
 ## 0.6.4
 
 * Treat account_no as string as it seems to be allowed (and not according to API documentation)
