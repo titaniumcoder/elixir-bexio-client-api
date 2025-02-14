@@ -15,7 +15,7 @@ defmodule BexioApiClient.Items.Item do
   @type t :: %__MODULE__{
           id: integer(),
           user_id: integer(),
-          article_type: :physical | :service,
+          article_type: :physical | :service | nil,
           contact_id: integer() | nil,
           deliverer_code: String.t() | nil,
           deliverer_name: String.t() | nil,
