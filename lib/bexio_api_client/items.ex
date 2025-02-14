@@ -211,6 +211,7 @@ defmodule BexioApiClient.Items do
 
   defp article_type(1), do: :physical
   defp article_type(2), do: :service
+  defp article_type(nil), do: nil
 
   defp remap_item(
          %Item{
