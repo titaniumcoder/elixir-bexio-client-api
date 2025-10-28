@@ -2,6 +2,10 @@
 
 ## 0.7.1
 
+* Transfer ownership (under my private github now)
+
+## 0.7.1
+
 * Bugfix: article_type in an article can also be nil... somehow
 
 ## 0.7.0
