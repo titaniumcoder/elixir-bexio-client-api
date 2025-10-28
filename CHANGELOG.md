@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.0
+
+* Transfer ownership (under my private github now)
+
 ## 0.7.1
 
 * Bugfix: article_type in an article can also be nil... somehow
