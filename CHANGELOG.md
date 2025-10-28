@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.1
+## 0.8.0
 
 * Transfer ownership (under my private github now)
 
