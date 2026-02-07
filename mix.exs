@@ -4,7 +4,7 @@ defmodule BexioApiClient.MixProject do
   def project do
     [
       app: :bexio_api_client,
-      version: "0.8.0",
+      version: "0.9.0",
       elixir: "~> 1.16",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -60,6 +60,9 @@ defmodule BexioApiClient.MixProject do
 
       # Credo support
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+
+      # Telemetry for metrics
+      {:telemetry, "~> 1.0"},
 
       # Create documentation
       {:ex_doc, "~> 0.29.4", only: :dev},

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0
+
+* Added comprehensive telemetry support for monitoring API usage
+  * `[:bexio_api_client, :request, :success]` - Track successful requests (status 200-399)
+  * `[:bexio_api_client, :request, :error]` - Track error responses (status 400+)
+  * `[:bexio_api_client, :rate_limit, :hit]` - Track rate limit hits with wait times
+  * `[:bexio_api_client, :request, :retry]` - Track retry attempts for server errors
+* Added `:telemetry` dependency (~> 1.0)
+
 ## 0.8.0
 
 * Transfer ownership (under my private github now)
