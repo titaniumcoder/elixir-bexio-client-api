@@ -7,8 +7,8 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
 
   @base_backoff_ms 500
   @backoff_cap_ms 30_000
-  @transient_failures_before_cooldown 5
-  @cooldown_ms 5 * 60 * 1000
+  @transient_failures_before_cooldown 15
+  @cooldown_ms 10 * 60 * 1000
 
   @moduledoc """
   Req request step that fetches and caches access tokens for Bexio OAuth2
@@ -36,7 +36,8 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
       token.
     * all other failures (including `429`) back off exponentially with jitter
       (base 500ms, cap 30s); after #{@transient_failures_before_cooldown}
-      consecutive failures requests fail fast for 5 minutes.
+      consecutive failures (roughly 4.5 minutes of probing) requests fail fast
+      for 10 minutes, with at most one further attempt per 10-minute window.
 
   On any refresh failure the request pipeline halts with
   `BexioApiClient.RefreshError`; requests are never sent unauthenticated. Retry
@@ -50,7 +51,7 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
     * a permanent failure (`:invalid_refresh_token`, `:client_blacklisted`) is
       recorded — giving up on the first occurrence,
     * #{@transient_failures_before_cooldown} consecutive transient failures
-      enter the 5-minute cooldown.
+      (roughly 4.5 minutes of probing) enter the 10-minute cooldown.
 
   At that transition the optional `:on_refresh_gave_up` callback is invoked
   **once** (not on subsequent backoff-rejected requests):

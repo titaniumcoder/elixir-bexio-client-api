@@ -227,7 +227,7 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
 
       :ets.insert(
         @refresh_failures_table,
-        {{"cid-gaveup-transient", "tok"}, {:transient, 4, System.system_time(:millisecond) - 1}}
+        {{"cid-gaveup-transient", "tok"}, {:transient, 14, System.system_time(:millisecond) - 1}}
       )
 
       req =

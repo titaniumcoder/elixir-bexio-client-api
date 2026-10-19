@@ -52,8 +52,9 @@ Refresh failures are classified and backed off automatically:
   not hit again. Call `BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1`
   once you have a new refresh token.
 - all other failures (including `429`) back off exponentially with jitter (base
-  500ms, cap 30s); after 5 consecutive failures, requests fail fast for 5
-  minutes.
+  500ms, cap 30s); after 15 consecutive failures (~4.5 minutes of probing),
+  requests fail fast for 10 minutes, with at most one further attempt per
+  10-minute window.
 
 Do not wrap client requests in your own retry loops: transient token failures
 are already backed off, and permanent ones will never succeed — hammering the

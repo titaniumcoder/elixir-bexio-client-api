@@ -18,7 +18,8 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 - Refresh failure classification with automatic backoff: `400`/`401` `invalid_grant`
   and `403` (blacklisted) responses are permanent and fail fast without further
   token endpoint calls; all other failures (including `429`) back off
-  exponentially with jitter. This prevents the retry flood (per OAuth client and
+  exponentially with jitter for ~4.5 minutes of probing before a 10-minute
+  cooldown. This prevents the retry flood (per OAuth client and
   per IP) that got production clients blacklisted by Bexio.
 - `[:bexio_api_client, :refresh, :failed]` and `[:bexio_api_client, :refresh, :backoff]`
   telemetry events.
