@@ -26,6 +26,11 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   expose the new token through `BexioApiClient.access_token/3` and host
   applications would have to persist it themselves.
 
+  The refresher has no background process: it only runs when a request flows
+  through the client. Stopping it completely means stopping the requests (see
+  the `:on_refresh_gave_up` callback below) or using the API token client
+  `BexioApiClient.new/1`, which has no refresher attached.
+
   Refresh failures are classified and stored with a backoff deadline in
   `:bexio_api_client_refresh_failures`:
 

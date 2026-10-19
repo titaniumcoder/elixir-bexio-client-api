@@ -96,6 +96,15 @@ silently stops working until they are recreated. Concurrent creation is safe.
 Every non-success response returns `{:error, {:unexpected_response, status, body}}`
 and logs the full `Req.Response` for diagnostics.
 
+### Stopping it
+
+The refresher has no background process — it only runs when a request flows
+through a client built with `BexioApiClient.new/3`. To stop it completely,
+stop making requests through that client (e.g. disable the jobs that use it —
+`:on_refresh_gave_up` is the hook that tells you when to do that), or switch
+to the static API token client `BexioApiClient.new/1`, which has no refresher
+attached.
+
 ## Telemetry
 
 The client emits telemetry events that you can use to monitor API usage, rate limiting, and performance. All events are emitted from the request/retry layer, providing comprehensive visibility into all HTTP interactions.
