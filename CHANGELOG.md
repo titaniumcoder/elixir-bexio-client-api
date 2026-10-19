@@ -1,77 +1,200 @@
 # Changelog
 
-## 0.9.0
+All notable changes to this project will be documented in this file.
 
-* Added comprehensive telemetry support for monitoring API usage
-  * `[:bexio_api_client, :request, :success]` - Track successful requests (status 200-399)
-  * `[:bexio_api_client, :request, :error]` - Track error responses (status 400+)
-  * `[:bexio_api_client, :rate_limit, :hit]` - Track rate limit hits with wait times
-  * `[:bexio_api_client, :request, :retry]` - Track retry attempts for server errors
-* Added `:telemetry` dependency (~> 1.0)
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.8.0
+## [Unreleased]
 
-* Transfer ownership (under my private github now)
+## [1.0.0] - 2026-10-19
 
-## 0.7.1
+First stable release. The library has been actively maintained and used in
+production long enough as pre-1.0; from here on the API is considered stable
+and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 
-* Bugfix: article_type in an article can also be nil... somehow
+### Added
 
-## 0.7.0
+- Refresh token rotation support: Bexio's token endpoint (a Keycloak realm) rotates
+  refresh tokens — every token response may contain a NEW `refresh_token` and the
+  previously used one becomes invalid. The access token refresher now stores the
+  rotated token, re-keys the cache under the new token and keeps serving requests
+  that still carry the rotated-away token.
+- `:on_refresh_token_rotated` option (`{module, function, args}` MFA, invoked as
+  `apply(m, f, args ++ [client_id, new_refresh_token])`) so host applications can
+  persist rotated refresh tokens. Host applications MUST persist rotated tokens or
+  the refresh flow breaks after one rotation.
+- `[:bexio_api_client, :refresh_token_rotated]` telemetry event (metadata contains
+  only short SHA-256 token hashes, never the token values).
+- Refresh failure classification with automatic backoff: `400`/`401` `invalid_grant`
+  and `403` (blacklisted) responses are permanent and fail fast without further
+  token endpoint calls; `429` and transient errors back off exponentially with
+  jitter; concurrent refreshes are single-flighted. This prevents the retry flood
+  that gets OAuth clients blacklisted by Bexio.
+- `[:bexio_api_client, :refresh, :failed]` and `[:bexio_api_client, :refresh, :backoff]`
+  telemetry events.
+- `BexioApiClient.RefreshError` — refresh failures halt the request instead of
+  sending it unauthenticated.
+- `BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1` to re-enable
+  refresh after a permanent failure (e.g. after persisting a new refresh token).
+- `BexioApiClient.new/4` accepting extra refresher options (e.g. the rotation hook).
 
-* New OAuth2 Access Token endpoint
+### Changed
 
-## 0.6.4
+- **BREAKING**: `BexioApiClient.access_token/3` now returns the full token map
+  `{:ok, %{access_token: ..., expires_in: ..., refresh_token: ..., id_token: ..., scope: ..., token_type: ...}}`
+  instead of `{:ok, access_token, expires_in}`.
+- `access_token/3` error returns are enriched with the HTTP status:
+  `{:error, {:unexpected_response, status, body}}`, and the full `Req.Response`
+  is logged on failure for diagnostics.
+- The token endpoint is never retried by Req itself; retry policy belongs to the
+  refresher. Arbitrary exceptions are no longer retried.
 
-* Treat account_no as string as it seems to be allowed (and not according to API documentation)
+### Fixed
 
-## 0.6.3
+- Rotated refresh tokens were dropped by `access_token/3` and by the access token
+  refresher, breaking refresh after one rotation cycle.
+- `remove_expired_tokens/0` deleted from the wrong ETS table and never removed
+  expired entries.
+- Requests proceeded unauthenticated after a failed refresh.
 
-* All empty bodies as JSON removed due to bug leading to error 415
+## [0.9.0] - 2026-02-07
 
-## 0.6.2
+### Added
 
-* Placeholder version due to issue with build.
+- Comprehensive telemetry support for monitoring API usage:
+  - `[:bexio_api_client, :request, :success]` - track successful requests (status 200-399)
+  - `[:bexio_api_client, :request, :error]` - track error responses (status 400+)
+  - `[:bexio_api_client, :rate_limit, :hit]` - track rate limit hits with wait times
+  - `[:bexio_api_client, :request, :retry]` - track retry attempts for server errors
+- `:telemetry` dependency (~> 1.0)
 
-## 0.6.1
+## [0.8.0] - 2025-10-28
 
-* Reduced retries down from 100 to 3 (so rate limit can be handled, but not general network problems)
+### Changed
 
-## 0.6.0
+- Project transferred to a private GitHub repository
 
-* Version updates of dependencies, minor update for this
+## [0.7.1] - 2025-02-14
 
-## 0.5.3
+### Fixed
 
-* Add optional configuration to IDP_URL to enable mocking the bexio api completely with a customized mock.
+- `article_type` in an article can also be `nil`
 
-## 0.5.2
+## [0.7.0] - 2025-01-17
 
-* Just added a test for the access key refresher logic
+### Added
 
-## 0.5.1
+- New OAuth2 access token endpoint
 
-* Fix forgotten Access Keys by using ETS temporary storage
+## [0.6.4] - 2025-01-10
 
-## 0.5.0
+### Fixed
 
-* SearchCriteria changed to sigil ~f with separations for reduced name lengths (old functionality is still there for now)
-* Payment Types added
+- Treat `account_no` as string, as it seems to be allowed (although not according
+  to the API documentation)
 
-## 0.4.2
+## [0.6.3] - 2025-01-10
 
-* Added Github Action to automatically publish a package version
+### Fixed
 
-## 0.4.2
+- All empty bodies sent as JSON removed, fixing error 415
 
-* Added Logic fot notes needed for the search
+## [0.6.2] - 2024-09-16
 
-## 0.4.1
+### Fixed
 
-* Added Logic fot notes needed for the search
+- Placeholder version due to an issue with the build
 
-## 0.4.0
+## [0.6.1] - 2024-09-14
 
-* Removing dependency to `tesla`
-* Adding `req` as optional dependency
-* Adding `req` setup for automatic access_token renewal and retry delay using bexio headers
+### Changed
+
+- Reduced retries from 100 to 3, so rate limits can be handled but general network
+  problems are not retried
+
+## [0.6.0] - 2024-09-04
+
+### Changed
+
+- Dependency version updates
+
+## [0.5.3] - 2024-07-08
+
+### Added
+
+- Optional configuration of the IDP URL to enable mocking the Bexio API completely
+  with a customized mock
+
+## [0.5.2] - 2024-06-12
+
+### Added
+
+- Test for the access token refresher logic
+
+## [0.5.1] - 2024-06-12
+
+### Fixed
+
+- Forgotten access keys are now cached using temporary ETS storage
+
+## [0.5.0] - 2024-06-04
+
+### Added
+
+- Payment types
+
+### Changed
+
+- `SearchCriteria` changed to the `~f` sigil with separators for reduced name
+  lengths (old functionality is still available)
+
+## [0.4.3] - 2024-06-03
+
+### Added
+
+- Logic for notes needed for the search
+
+## [0.4.2] - 2024-06-03
+
+### Added
+
+- GitHub Action to automatically publish a package version
+
+## [0.4.1] - 2024-06-03
+
+### Added
+
+- Logic for notes needed for the search
+
+## [0.4.0] - 2024-05-28
+
+### Added
+
+- `req` as optional dependency
+- `req` setup for automatic access token renewal and retry delay using Bexio
+  headers
+
+### Changed
+
+- Removed dependency on `tesla`
+
+[Unreleased]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/1.0.0...HEAD
+[1.0.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.9.0...1.0.0
+[0.9.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.8.0...0.9.0
+[0.8.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.7.1...0.8.0
+[0.7.1]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.7.0...0.7.1
+[0.7.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.6.4...0.7.0
+[0.6.4]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.6.3...0.6.4
+[0.6.3]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.6.2...0.6.3
+[0.6.2]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.6.1...0.6.2
+[0.6.1]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.6.0...0.6.1
+[0.6.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.5.3...0.6.0
+[0.5.3]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.5.2...0.5.3
+[0.5.2]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.5.1...0.5.2
+[0.5.1]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.5.0...0.5.1
+[0.5.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.4.3...0.5.0
+[0.4.3]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.4.2...0.4.3
+[0.4.2]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.4.1...0.4.2
+[0.4.1]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.4.0...0.4.1
+[0.4.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.3.0...0.4.0
