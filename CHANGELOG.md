@@ -27,6 +27,11 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 - `BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1` to re-enable
   refresh after a permanent failure (e.g. after the host obtained a new refresh
   token).
+- `:on_refresh_gave_up` option (`{module, function, args}` MFA, invoked as
+  `apply(m, f, args ++ [client_id, error_class])`): invoked once when the
+  refresher gives up on a refresh token (first permanent failure, or entering
+  the transient-failure cooldown), so host applications can re-authenticate,
+  disable sync jobs or alert.
 
 ### Changed
 

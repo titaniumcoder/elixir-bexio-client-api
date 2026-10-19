@@ -52,18 +52,19 @@ defmodule BexioApiClient do
   @doc """
   Creates a new client using the client id, client secret and refresh token. Be aware that getting
   this information is part of the OpenID flow which is not in the scope of this library.
+
+  Additional `opts` are passed to `BexioApiClient.Req.AccessTokenRefresher.attach/2`,
+  e.g. `on_refresh_gave_up: {module, function, args}`.
   """
-  @spec new(String.t(), String.t(), String.t()) :: Req.Request.t()
-  def new(client_id, client_secret, refresh_token) do
+  @spec new(String.t(), String.t(), String.t(), keyword()) :: Req.Request.t()
+  def new(client_id, client_secret, refresh_token, opts \\ []) do
     _ = BexioApiClient.Req.AccessTokenRefresher.create_ets_table()
 
     @base_request_options
     |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
     |> Req.new()
     |> BexioApiClient.Req.AccessTokenRefresher.attach(
-      refresh_token: refresh_token,
-      client_id: client_id,
-      client_secret: client_secret
+      [refresh_token: refresh_token, client_id: client_id, client_secret: client_secret] ++ opts
     )
   end
 

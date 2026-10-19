@@ -236,6 +236,51 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
       assert calls(counter) == 2
     end
 
+    test "calls on_refresh_gave_up once when a permanent failure occurs" do
+      counter = new_counter()
+
+      stub_token_endpoint(counter, fn conn, _call ->
+        json_response(conn, 400, %{"error" => "invalid_grant"})
+      end)
+
+      req =
+        new_client("cid-gaveup-permanent", "dead",
+          on_refresh_gave_up: {__MODULE__, :record_gave_up, [self()]}
+        )
+
+      assert {:error, %BexioApiClient.RefreshError{}} = Req.get(req, url: "/test")
+      assert_received {:refresh_gave_up, "cid-gaveup-permanent", :invalid_refresh_token}
+
+      assert {:error, %BexioApiClient.RefreshError{}} = Req.get(req, url: "/test")
+      refute_received {:refresh_gave_up, _, _}
+    end
+
+    test "calls on_refresh_gave_up once when transient failures reach the cooldown" do
+      counter = new_counter()
+
+      stub_token_endpoint(counter, fn conn, _call ->
+        json_response(conn, 500, %{"oops" => true})
+      end)
+
+      AccessTokenRefresher.create_ets_table()
+
+      :ets.insert(
+        @refresh_failures_table,
+        {{"cid-gaveup-transient", "tok"}, {:transient, 4, System.system_time(:millisecond) - 1}}
+      )
+
+      req =
+        new_client("cid-gaveup-transient", "tok",
+          on_refresh_gave_up: {__MODULE__, :record_gave_up, [self()]}
+        )
+
+      assert {:error, %BexioApiClient.RefreshError{}} = Req.get(req, url: "/test")
+      assert_received {:refresh_gave_up, "cid-gaveup-transient", :transient}
+
+      assert {:error, %BexioApiClient.RefreshError{}} = Req.get(req, url: "/test")
+      refute_received {:refresh_gave_up, _, _}
+    end
+
     test "emits a failure telemetry event with the error class and failure count" do
       counter = new_counter()
 
@@ -266,6 +311,10 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
       assert :ets.lookup(@access_tokens_table, {"cid-exp", "expired"}) == []
       assert :ets.lookup(@access_tokens_table, {"cid-exp", "live"}) != []
     end
+  end
+
+  def record_gave_up(pid, client_id, error_class) do
+    send(pid, {:refresh_gave_up, client_id, error_class})
   end
 
   defp new_counter do
@@ -312,8 +361,8 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
     end
   end
 
-  defp new_client(client_id, refresh_token) do
-    BexioApiClient.new(client_id, "secret", refresh_token)
+  defp new_client(client_id, refresh_token, opts \\ []) do
+    BexioApiClient.new(client_id, "secret", refresh_token, opts)
   end
 
   defp token_response(conn, refresh_token) do

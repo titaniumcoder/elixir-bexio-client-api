@@ -48,6 +48,25 @@ are already backed off, and permanent ones will never succeed — hammering the
 token endpoint with failing refreshes is exactly what gets an OAuth client
 blacklisted.
 
+When the refresher gives up on a refresh token — immediately on a permanent
+failure (`invalid_grant`, blacklisted) or after 5 consecutive transient
+failures (5-minute cooldown) — it invokes the optional `:on_refresh_gave_up`
+callback once:
+
+```elixir
+req =
+  BexioApiClient.new(client_id, client_secret, refresh_token,
+    on_refresh_gave_up: {MyApp.Auth, :refresh_gave_up, [user_id]}
+  )
+```
+
+The MFA is called as `MyApp.Auth.refresh_gave_up(user_id, client_id, error_class)`
+so the host application can react (re-authenticate the user, disable sync jobs,
+alert) and re-enable the token afterwards with
+`BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1`. The callback
+runs synchronously while the refresh lock is held: keep it fast and do not make
+requests with the same client from it.
+
 Concurrent requests on the same token are refreshed once (single flight); the
 access token cache lives in the `:bexio_api_client_access_tokens` ETS table
 keyed by `{client_id, refresh_token}`.

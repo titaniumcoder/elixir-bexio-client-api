@@ -53,6 +53,29 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   policy for the token endpoint belongs to this module, so host applications
   should not wrap requests in their own retry loops.
 
+  ## Giving up and the `:on_refresh_gave_up` callback
+
+  The refresher gives up on a refresh token in two cases:
+
+    * a permanent failure (`:invalid_refresh_token`, `:client_blacklisted`) is
+      recorded — giving up on the first occurrence,
+    * #{@transient_failures_before_cooldown} consecutive transient failures
+      enter the 5-minute cooldown.
+
+  At that transition the optional `:on_refresh_gave_up` callback is invoked
+  **once** (not on subsequent backoff-rejected requests):
+
+      BexioApiClient.new(client_id, client_secret, refresh_token,
+        on_refresh_gave_up: {MyApp.Auth, :refresh_gave_up, [user_id]}
+      )
+
+  called as `apply(module, function, args ++ [client_id, error_class])`. Host
+  applications can react by re-authenticating the user, disabling sync jobs or
+  alerting, and re-enable the token afterwards with `clear_refresh_failure/1`.
+  The callback runs synchronously in the failing request's process while the
+  refresh lock is held: keep it fast and do not make requests with the same
+  client from it.
+
   ## ETS table ownership
 
   The tables are owned by the process that created them: when that process
@@ -86,7 +109,8 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
     |> Req.Request.register_options([
       :refresh_token,
       :client_id,
-      :client_secret
+      :client_secret,
+      :on_refresh_gave_up
     ])
     |> Req.Request.merge_options(options)
     |> Req.Request.prepend_request_steps(get_access_token: &get_access_token/1)
@@ -332,7 +356,30 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
 
     Logger.error("Access token refresh failed (#{error_class}): #{inspect(reason)}")
 
+    if gave_up?(error_class, failure_count) do
+      request
+      |> Req.Request.get_option(:on_refresh_gave_up)
+      |> call_gave_up_hook(client_id, error_class)
+    end
+
     Req.Request.halt(request, %BexioApiClient.RefreshError{reason: {error_class, reason}})
+  end
+
+  defp gave_up?(:rate_limited, _failure_count), do: false
+
+  defp gave_up?(:transient, failure_count),
+    do: failure_count == @transient_failures_before_cooldown
+
+  defp gave_up?(_permanent_class, 1), do: true
+  defp gave_up?(_permanent_class, _failure_count), do: false
+
+  defp call_gave_up_hook(nil, _client_id, _error_class), do: :ok
+
+  defp call_gave_up_hook({module, function, args}, client_id, error_class) do
+    apply(module, function, args ++ [client_id, error_class])
+  rescue
+    exception ->
+      Logger.error("on_refresh_gave_up hook failed: #{Exception.format(:error, exception)}")
   end
 
   defp classify({:unexpected_response, status, body}), do: classify_response(status, body)
