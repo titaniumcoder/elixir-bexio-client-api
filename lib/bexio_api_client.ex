@@ -27,12 +27,15 @@ defmodule BexioApiClient do
 
   ## Refresh token rotation
 
-  Bexio's token endpoint (a Keycloak realm) rotates refresh tokens: every token
-  response may contain a NEW `refresh_token` and the previously used one becomes
-  invalid. Host applications MUST persist the rotated refresh token (see
-  `access_token/3` and the `:on_refresh_token_rotated` option of
-  `BexioApiClient.Req.AccessTokenRefresher`) or the refresh flow breaks after one
-  rotation. Reusing a stale token can get the OAuth client blacklisted by Bexio.
+  Bexio's token endpoint (a Keycloak realm) MAY rotate refresh tokens: a token
+  response can contain a NEW `refresh_token` which invalidates the previously
+  used one. Rotation has not been observed so far — the same refresh token keeps
+  working — but Keycloak realms can enable it at any time, so the client handles
+  it defensively: the refresher propagates any rotated token and host
+  applications SHOULD persist it when present (see `access_token/3` and the
+  `:on_refresh_token_rotated` option of `BexioApiClient.Req.AccessTokenRefresher`).
+  Reusing an invalid refresh token can get the OAuth client blacklisted by Bexio,
+  which is why failed refreshes are backed off instead of retried.
 
   """
 
@@ -84,10 +87,10 @@ defmodule BexioApiClient do
 
   ## Response
 
-  On success, the full token map is returned. Bexio rotates refresh tokens, so
-  the returned `refresh_token` (when not `nil`) is NEW and the previously used
-  one becomes invalid. Host applications MUST persist it, otherwise the refresh
-  flow breaks after one rotation.
+  On success, the full token map is returned. Bexio may rotate refresh tokens
+  (not observed so far, but possible at any time), so the returned
+  `refresh_token` (when not `nil`) SHOULD be persisted by the host application:
+  a rotated token invalidates the previously used one.
 
       {:ok, %{access_token: "", expires_in: 3600, id_token: nil, refresh_token: nil, scope: nil, token_type: nil}}
 

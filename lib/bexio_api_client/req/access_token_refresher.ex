@@ -23,26 +23,28 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   The access token cache lives in the ETS table `:bexio_api_client_access_tokens`
   and is keyed by `{client_id, refresh_token}`. Each entry stores
   `{access_token, expires_at, current_refresh_token}`, because Bexio (Keycloak)
-  rotates refresh tokens: every token response may contain a NEW `refresh_token`
-  and the previously used one becomes invalid. When a rotation is observed, the
-  entry under the previously requested key is updated in place (so requests that
-  still carry the old refresh token keep working) and an additional entry under
-  the new refresh token is written.
+  MAY rotate refresh tokens: a token response can contain a NEW `refresh_token`
+  which invalidates the previously used one. Rotation has not been observed so
+  far, but Keycloak realms can enable it at any time, so it is handled
+  defensively: when a rotation is observed, the entry under the previously
+  requested key is updated in place (so requests that still carry the old
+  refresh token keep working) and an additional entry under the new refresh
+  token is written.
 
-  Host applications MUST persist rotated refresh tokens, otherwise the refresh
-  flow breaks after the first rotation. Use the `:on_refresh_token_rotated`
-  option (`{module, function, args}`, invoked as
-  `apply(module, function, args ++ [client_id, new_refresh_token])`) or hook the
-  `[:bexio_api_client, :refresh_token_rotated]` telemetry event. Telemetry
+  Host applications SHOULD persist a rotated refresh token when they receive one.
+  Use the `:on_refresh_token_rotated` option (`{module, function, args}`, invoked
+  as `apply(module, function, args ++ [client_id, new_refresh_token])`) or hook
+  the `[:bexio_api_client, :refresh_token_rotated]` telemetry event. Telemetry
   metadata contains only short token hashes, never the token values.
 
   Refresh failures are classified and stored with a backoff deadline in
   `:bexio_api_client_refresh_failures`:
 
     * `400`/`401` `invalid_grant` responses and `403` responses (Bexio blocks
-      misbehaving OAuth clients, e.g. after a retry flood on rotated tokens) are
-      permanent: requests fail fast without touching the token endpoint again.
-      Call `clear_refresh_failure/1` once the host supplies a new refresh token.
+      misbehaving OAuth clients, e.g. after a retry flood on failing refreshes)
+      are permanent: requests fail fast without touching the token endpoint
+      again. Call `clear_refresh_failure/1` once the host supplies a new refresh
+      token.
     * `429` backs off exponentially (1s, 2s, 4s ... capped at 60s).
     * transport errors and other statuses back off exponentially with jitter
       (base 500ms, cap 30s); after #{@transient_failures_before_cooldown}

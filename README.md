@@ -20,17 +20,19 @@ end
 
 The API uses [Req](https://github.com/wojtekmach/req/tree/v0.5.0) for the client access to also handle the exponential back-off required in the documentation.
 
-## Refresh token rotation (important)
+## Refresh token rotation (defensive support)
 
-Bexio's token endpoint (a Keycloak realm) rotates refresh tokens: every token
-response may contain a NEW `refresh_token`, and the previously used one becomes
-invalid. Reusing a stale token can get your OAuth client **blacklisted** by
-Bexio (`403` with `{"reason": "blacklisted", "status": "blocked"}`).
+Bexio's token endpoint (a Keycloak realm) MAY rotate refresh tokens: a token
+response can contain a NEW `refresh_token` which invalidates the previously used
+one. Rotation has **not** been observed so far (the same refresh token keeps
+working), but Keycloak realms can enable it at any time, so the client handles
+it defensively. Separately, reusing an invalid refresh token — or hammering the
+endpoint after failures — can get your OAuth client **blacklisted** by Bexio
+(`403` with `{"reason": "blacklisted", "status": "blocked"}`, enforced per IP).
 
 When you use the OAuth client (`BexioApiClient.new/3,4`), the access token
-refresher handles this for you and propagates the rotated token. You still MUST
-persist the rotated refresh token, otherwise the refresh flow breaks after one
-rotation. Either:
+refresher propagates any rotated token for you. Persist the new refresh token
+whenever you receive one — either:
 
 ```elixir
 req =
@@ -104,7 +106,7 @@ Emitted when a request will be retried due to server errors (408, 500, 502, 503,
 #### `[:bexio_api_client, :refresh_token_rotated]`
 
 Emitted when the token endpoint returned a new refresh token (rotation). The host
-application MUST persist the rotated token (see [Refresh token rotation](#refresh-token-rotation-important)).
+application SHOULD persist the rotated token when one is received (see [Refresh token rotation](#refresh-token-rotation-defensive-support)).
 
 - **Measurements**: `%{count: 1}`
 - **Metadata**: `%{client_id: binary(), old_refresh_token_hash: binary(), new_refresh_token_hash: binary()}` - short SHA-256 prefixes of the tokens, never the token values

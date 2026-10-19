@@ -1,5 +1,15 @@
 # Plan: Persist OAuth refresh token rotation from Bexio (Keycloak)
 
+# Plan: Persist OAuth refresh token rotation from Bexio (Keycloak)
+
+> **Correction (post-incident review):** the rotation assumption was wrong. The
+> old refresh token still worked from a different IP, so Bexio does NOT currently
+> rotate refresh tokens (Keycloak rotates only when the realm enables
+> "Revoke Refresh Token"). The actual incident cause was the retry flood getting
+> the OAuth client blacklisted per IP (403). Rotation support in this plan stays
+> as **defensive handling** (Keycloak can enable rotation anytime); the anti-
+> retry-storm guards (R1-R5) are the actual fix for the incident.
+
 > Status: plan (not yet implemented). Spec originated from another agent; reviewed
 > against the actual code in `lib/bexio_api_client.ex` and
 > `lib/bexio_api_client/req/access_token_refresher.ex` on 2026-02-19.

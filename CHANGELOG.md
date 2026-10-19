@@ -15,22 +15,23 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 
 ### Added
 
-- Refresh token rotation support: Bexio's token endpoint (a Keycloak realm) rotates
-  refresh tokens — every token response may contain a NEW `refresh_token` and the
-  previously used one becomes invalid. The access token refresher now stores the
-  rotated token, re-keys the cache under the new token and keeps serving requests
-  that still carry the rotated-away token.
+- Defensive refresh token rotation support: Bexio's token endpoint (a Keycloak
+  realm) MAY rotate refresh tokens — a token response can contain a NEW
+  `refresh_token` which invalidates the previously used one. Rotation has not been
+  observed so far (the same refresh token keeps working), but Keycloak realms can
+  enable it at any time, so the client handles it: the access token refresher
+  stores the rotated token, re-keys the cache under the new token and keeps
+  serving requests that still carry the rotated-away token.
 - `:on_refresh_token_rotated` option (`{module, function, args}` MFA, invoked as
   `apply(m, f, args ++ [client_id, new_refresh_token])`) so host applications can
-  persist rotated refresh tokens. Host applications MUST persist rotated tokens or
-  the refresh flow breaks after one rotation.
+  persist rotated refresh tokens when they receive one.
 - `[:bexio_api_client, :refresh_token_rotated]` telemetry event (metadata contains
   only short SHA-256 token hashes, never the token values).
 - Refresh failure classification with automatic backoff: `400`/`401` `invalid_grant`
   and `403` (blacklisted) responses are permanent and fail fast without further
   token endpoint calls; `429` and transient errors back off exponentially with
   jitter; concurrent refreshes are single-flighted. This prevents the retry flood
-  that gets OAuth clients blacklisted by Bexio.
+  (per OAuth client and per IP) that got production clients blacklisted by Bexio.
 - `[:bexio_api_client, :refresh, :failed]` and `[:bexio_api_client, :refresh, :backoff]`
   telemetry events.
 - `BexioApiClient.RefreshError` — refresh failures halt the request instead of
@@ -52,11 +53,14 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 
 ### Fixed
 
-- Rotated refresh tokens were dropped by `access_token/3` and by the access token
-  refresher, breaking refresh after one rotation cycle.
+- A rotated `refresh_token` in the token response (should Bexio ever enable
+  rotation) was silently dropped by `access_token/3` and by the access token
+  refresher, so it could never be persisted and would have broken refresh after
+  one rotation cycle.
 - `remove_expired_tokens/0` deleted from the wrong ETS table and never removed
   expired entries.
-- Requests proceeded unauthenticated after a failed refresh.
+- Requests proceeded unauthenticated after a failed refresh, inviting the retry
+  flood that got OAuth clients blacklisted by Bexio.
 
 ## [0.9.0] - 2026-02-07
 
