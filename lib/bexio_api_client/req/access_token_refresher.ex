@@ -117,10 +117,6 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   """
   @spec create_ets_table() :: :ok
   def create_ets_table do
-    create_tables()
-  end
-
-  defp create_tables do
     Enum.each([@access_tokens_table, @refresh_failures_table], &ensure_table/1)
   end
 
@@ -148,7 +144,7 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   """
   @spec clear_refresh_failure(String.t()) :: :ok
   def clear_refresh_failure(client_id) do
-    create_tables()
+    create_ets_table()
     :ets.match_delete(@refresh_failures_table, {{client_id, :_}, :_})
     :ok
   end
@@ -177,7 +173,7 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   end
 
   defp get_access_token(%Req.Request{} = request) do
-    create_tables()
+    create_ets_table()
 
     client_id = Req.Request.get_option(request, :client_id)
     refresh_token = Req.Request.get_option(request, :refresh_token)
