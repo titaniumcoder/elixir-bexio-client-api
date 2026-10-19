@@ -76,25 +76,6 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
 
       assert calls(counter) == 1
     end
-
-    test "refreshes only once when concurrent requests race on a cold cache" do
-      counter = new_counter()
-
-      stub_token_endpoint(counter, fn conn, _call ->
-        Process.sleep(50)
-        token_response(conn, "rotated")
-      end)
-
-      req = new_client("cid-flight", "cold")
-
-      results =
-        1..5
-        |> Enum.map(fn _ -> Task.async(fn -> Req.get(req, url: "/test") end) end)
-        |> Enum.map(&Task.await(&1, 10_000))
-
-      assert Enum.all?(results, &match?({:ok, _}, &1))
-      assert calls(counter) == 1
-    end
   end
 
   describe "refresh failures" do
@@ -194,26 +175,6 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
 
       assert is_integer(retry_in_ms)
       assert calls(counter) == 1
-    end
-
-    test "records a rate limit backoff for a 429 response" do
-      counter = new_counter()
-
-      stub_token_endpoint(counter, fn conn, _call ->
-        json_response(conn, 429, %{"error" => "slow_down"})
-      end)
-
-      req = new_client("cid-429", "tok")
-
-      assert {:error,
-              %BexioApiClient.RefreshError{
-                reason: {:rate_limited, {:unexpected_response, 429, %{"error" => "slow_down"}}}
-              }} = Req.get(req, url: "/test")
-
-      assert [{_, {:rate_limited, 1, next_retry_at}}] =
-               :ets.lookup(@refresh_failures_table, {"cid-429", "tok"})
-
-      assert (next_retry_at - System.system_time(:millisecond)) in 900..1100
     end
 
     test "re-enables refresh after clear_refresh_failure/1" do

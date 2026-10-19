@@ -51,9 +51,9 @@ Refresh failures are classified and backed off automatically:
   requests fail fast with `BexioApiClient.RefreshError` and the token endpoint is
   not hit again. Call `BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1`
   once you have a new refresh token.
-- `429` responses back off exponentially (cap 60s).
-- transport errors and other statuses back off exponentially with jitter (cap
-  30s); after 5 consecutive failures, requests fail fast for 5 minutes.
+- all other failures (including `429`) back off exponentially with jitter (base
+  500ms, cap 30s); after 5 consecutive failures, requests fail fast for 5
+  minutes.
 
 Do not wrap client requests in your own retry loops: transient token failures
 are already backed off, and permanent ones will never succeed — hammering the
@@ -79,9 +79,8 @@ alert) and re-enable the token afterwards with
 runs synchronously while the refresh lock is held: keep it fast and do not make
 requests with the same client from it.
 
-Concurrent requests on the same token are refreshed once (single flight); the
-access token cache lives in the `:bexio_api_client_access_tokens` ETS table
-keyed by `{client_id, refresh_token}`.
+The access token cache lives in the `:bexio_api_client_access_tokens` ETS
+table keyed by `{client_id, refresh_token}`.
 
 The ETS tables are owned by the process that created them and are deleted when
 that process exits. Call
@@ -135,7 +134,7 @@ Emitted when a request will be retried due to server errors (408, 500, 502, 503,
 Emitted when a refresh attempt failed.
 
 - **Measurements**: `%{count: 1}`
-- **Metadata**: `%{error_class: :invalid_refresh_token | :client_blacklisted | :rate_limited | :transient, failure_count: integer()}`
+- **Metadata**: `%{error_class: :invalid_refresh_token | :client_blacklisted | :transient, failure_count: integer()}`
 
 #### `[:bexio_api_client, :refresh, :backoff]`
 
