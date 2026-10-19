@@ -32,8 +32,9 @@ defmodule BexioApiClient do
   responses expose the `refresh_token` through `access_token/3` anyway, so if
   Bexio ever enables rotation (a Keycloak realm option), host applications can
   persist the new token from the map and pass it to `new/3` themselves.
-  Reusing an invalid refresh token can get the OAuth client blacklisted by Bexio,
-  which is why failed refreshes are backed off instead of retried.
+  Hammering the token endpoint with failing refreshes can get the OAuth client
+  blacklisted by Bexio (per IP), which is why failed refreshes are backed off
+  instead of retried.
 
   """
 

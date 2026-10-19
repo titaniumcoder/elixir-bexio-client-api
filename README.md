@@ -44,8 +44,9 @@ Refresh failures are classified and backed off automatically:
   30s); after 5 consecutive failures, requests fail fast for 5 minutes.
 
 Do not wrap client requests in your own retry loops: transient token failures
-are already backed off, and permanent ones will never succeed — retrying them
-is exactly what gets an OAuth client blacklisted.
+are already backed off, and permanent ones will never succeed — hammering the
+token endpoint with failing refreshes is exactly what gets an OAuth client
+blacklisted.
 
 Concurrent requests on the same token are refreshed once (single flight); the
 access token cache lives in the `:bexio_api_client_access_tokens` ETS table
