@@ -33,7 +33,8 @@ defmodule BexioApiClient.Req.RewriteDelay do
 
   # RateLimit-Reset
   @impl BexioApiClient.Req.RetryPolicy
-  @spec retry(Req.Request.t(), any()) :: boolean() | {:delay, integer()}
+  @spec retry(Req.Request.t(), Req.Response.t() | Exception.t()) ::
+          boolean() | {:delay, integer()}
   def retry(_request, %Req.Response{status: 429, headers: headers}) do
     retry_rate_limit(headers)
   end
@@ -44,7 +45,6 @@ defmodule BexioApiClient.Req.RewriteDelay do
 
   def retry(_request, %Req.TransportError{}), do: true
   def retry(_request, %_{__exception__: true}), do: false
-  def retry(_request, _other), do: true
 
   defp retry_response(status) when status in [408, 500, 502, 503, 504] do
     Logger.debug("Retrying request due to status #{status}")
