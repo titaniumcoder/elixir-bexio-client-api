@@ -2,9 +2,11 @@ defmodule BexioApiClient.Req.RewriteDelay do
   require Logger
 
   @moduledoc """
-  This module just handles the normal Bexio API rate limit headers as well as the (observed) regular exceptions to retry.
-  With status code 429 we try to read the header "ratelimit-reset" and send back the {:delay, delay} tuple.
-  In case of 408, 500, 502, 503, 504 we fall back to the retry mechanism.
+  This module implements the `BexioApiClient.Req.RetryPolicy` behaviour: it
+  handles the normal Bexio API rate limit headers as well as the (observed)
+  regular exceptions to retry. With status code 429 we try to read the header
+  "ratelimit-reset" and send back the {:delay, delay} tuple. In case of 408,
+  500, 502, 503, 504 we fall back to the retry mechanism.
 
   ## Telemetry Events
 
@@ -27,7 +29,10 @@ defmodule BexioApiClient.Req.RewriteDelay do
       Metadata: `%{status: integer()}`
   """
 
+  @behaviour BexioApiClient.Req.RetryPolicy
+
   # RateLimit-Reset
+  @impl BexioApiClient.Req.RetryPolicy
   @spec retry(Req.Request.t(), any()) :: boolean() | {:delay, integer()}
   def retry(_request, %Req.Response{status: 429, headers: headers}) do
     retry_rate_limit(headers)

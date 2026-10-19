@@ -20,6 +20,18 @@ end
 
 The API uses [Req](https://github.com/wojtekmach/req/tree/v0.5.0) for the client access to also handle the exponential back-off required in the documentation.
 
+The retry policy for API requests is the `BexioApiClient.Req.RetryPolicy`
+behaviour, implemented by `BexioApiClient.Req.RewriteDelay` (honors Bexio's
+`ratelimit-reset` header, retries transient server errors and transport errors,
+emits retry telemetry). Provide your own policy via:
+
+```elixir
+config :bexio_api_client, :req_options, retry: &MyApp.RetryPolicy.retry/2
+```
+
+The token endpoint never uses this policy — refresh backoff belongs to
+`BexioApiClient.Req.AccessTokenRefresher`.
+
 ## Refresh tokens
 
 Bexio does not currently rotate refresh tokens — the same refresh token keeps

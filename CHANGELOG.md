@@ -32,6 +32,9 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
   refresher gives up on a refresh token (first permanent failure, or entering
   the transient-failure cooldown), so host applications can re-authenticate,
   disable sync jobs or alert.
+- `BexioApiClient.Req.RetryPolicy` behaviour documenting the API request retry
+  contract, implemented by `BexioApiClient.Req.RewriteDelay`. Host applications
+  can provide their own policy via Req's `:retry` option.
 
 ### Changed
 

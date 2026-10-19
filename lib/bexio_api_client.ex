@@ -6,9 +6,6 @@ defmodule BexioApiClient do
   @base_request_options [
     base_url: "https://api.bexio.com",
     headers: [accept: "application/json", content_type: "application/json"],
-    retry: :transient,
-    # try twice, because after the first, the rate may be wrong, but after the second, the retry should wait correctly
-    max_retries: 3,
     retry_log_level: :warn,
     retry: &BexioApiClient.Req.RewriteDelay.retry/2
   ]
