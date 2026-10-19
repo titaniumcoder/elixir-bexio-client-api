@@ -25,15 +25,13 @@ defmodule BexioApiClient do
     * Http Client:
     ** Req: the api client depends on Req.
 
-  ## Refresh token rotation
+  ## Refresh tokens
 
-  Bexio's token endpoint (a Keycloak realm) MAY rotate refresh tokens: a token
-  response can contain a NEW `refresh_token` which invalidates the previously
-  used one. Rotation has not been observed so far — the same refresh token keeps
-  working — but Keycloak realms can enable it at any time, so the client handles
-  it defensively: the refresher propagates any rotated token and host
-  applications SHOULD persist it when present (see `access_token/3` and the
-  `:on_refresh_token_rotated` option of `BexioApiClient.Req.AccessTokenRefresher`).
+  Bexio does not currently rotate refresh tokens — the same refresh token keeps
+  working — and the access token refresher does not manage rotation. Token
+  responses expose the `refresh_token` through `access_token/3` anyway, so if
+  Bexio ever enables rotation (a Keycloak realm option), host applications can
+  persist the new token from the map and pass it to `new/3` themselves.
   Reusing an invalid refresh token can get the OAuth client blacklisted by Bexio,
   which is why failed refreshes are backed off instead of retried.
 
@@ -53,19 +51,18 @@ defmodule BexioApiClient do
   @doc """
   Creates a new client using the client id, client secret and refresh token. Be aware that getting
   this information is part of the OpenID flow which is not in the scope of this library.
-
-  Additional `opts` are passed to `BexioApiClient.Req.AccessTokenRefresher.attach/2`,
-  e.g. `on_refresh_token_rotated: {module, function, args}`.
   """
-  @spec new(String.t(), String.t(), String.t(), keyword()) :: Req.Request.t()
-  def new(client_id, client_secret, refresh_token, opts \\ []) do
+  @spec new(String.t(), String.t(), String.t()) :: Req.Request.t()
+  def new(client_id, client_secret, refresh_token) do
     _ = BexioApiClient.Req.AccessTokenRefresher.create_ets_table()
 
     @base_request_options
     |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
     |> Req.new()
     |> BexioApiClient.Req.AccessTokenRefresher.attach(
-      [refresh_token: refresh_token, client_id: client_id, client_secret: client_secret] ++ opts
+      refresh_token: refresh_token,
+      client_id: client_id,
+      client_secret: client_secret
     )
   end
 
@@ -87,10 +84,9 @@ defmodule BexioApiClient do
 
   ## Response
 
-  On success, the full token map is returned. Bexio may rotate refresh tokens
-  (not observed so far, but possible at any time), so the returned
-  `refresh_token` (when not `nil`) SHOULD be persisted by the host application:
-  a rotated token invalidates the previously used one.
+  On success, the full token map is returned, including the `refresh_token` the
+  response contains (Bexio currently keeps refresh tokens stable — the same
+  token comes back).
 
       {:ok, %{access_token: "", expires_in: 3600, id_token: nil, refresh_token: nil, scope: nil, token_type: nil}}
 

@@ -27,7 +27,7 @@ An Elixir API client library for the [Bexio business management platform API](ht
 ## OAuth / token handling notes
 
 - Bexio auth lives at `https://auth.bexio.com/realms/bexio/protocol/openid-connect/token` (a Keycloak realm); the IDP URL can be overridden in config to mock it.
-- Bexio MAY rotate refresh tokens (a token response can contain a NEW `refresh_token` invalidating the old one). Rotation has not been observed so far, but Keycloak realms can enable it at any time — handle it defensively: any code touching tokens must propagate a rotated token (see `access_token/3` and `AccessTokenRefresher`) and never log or leak token values.
+- Bexio does not currently rotate refresh tokens (the same refresh token keeps working); the refresher does not manage rotation. Token responses expose the `refresh_token` via `access_token/3`; should Bexio ever enable rotation (a Keycloak realm option), host applications persist the new token themselves. Never log or leak token values.
 - Bexio blacklists misbehaving OAuth clients per IP (`403` `{"reason": "blacklisted", "status": "blocked"}`), typically after retry floods on failing refreshes. Never retry permanent refresh failures; backoff lives in `AccessTokenRefresher`.
 - Access tokens are cached in the `:bexio_api_client_access_tokens` ETS table with an expiry reserve of 60s.
 

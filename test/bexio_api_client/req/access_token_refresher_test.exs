@@ -26,37 +26,54 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
   end
 
   describe "token caching" do
-    test "stores the access token under the requested and the rotated refresh token" do
+    test "stores the access token with its expiry" do
       counter = new_counter()
 
       stub_token_endpoint(counter, fn conn, _call ->
-        token_response(conn, "rotated")
+        token_response(conn, "initial")
       end)
 
       req = new_client("cid-store", "initial")
       assert {:ok, _} = Req.get(req, url: "/test")
 
-      assert [{{"cid-store", "initial"}, {"access_token_rotated", expires_at, "rotated"}}] =
+      assert [{{"cid-store", "initial"}, {"access_token_initial", expires_at}}] =
                :ets.lookup(@access_tokens_table, {"cid-store", "initial"})
 
-      assert [{{"cid-store", "rotated"}, {"access_token_rotated", ^expires_at, "rotated"}}] =
-               :ets.lookup(@access_tokens_table, {"cid-store", "rotated"})
-
+      assert expires_at > System.system_time(:second)
       assert calls(counter) == 1
     end
 
-    test "reuses the cached token when the host replays the rotated-away refresh token" do
+    test "reuses the cached token on subsequent requests" do
       counter = new_counter()
 
       stub_token_endpoint(counter, fn conn, _call ->
-        token_response(conn, "rotated")
+        token_response(conn, "initial")
       end)
 
       req = new_client("cid-replay", "initial")
       assert {:ok, _} = Req.get(req, url: "/test")
       assert {:ok, _} = Req.get(req, url: "/test")
 
-      assert last_resource_auth(counter) == ["Bearer access_token_rotated"]
+      assert last_resource_auth(counter) == ["Bearer access_token_initial"]
+      assert calls(counter) == 1
+    end
+
+    test "does not treat a changed refresh token in the response as rotation" do
+      counter = new_counter()
+
+      stub_token_endpoint(counter, fn conn, _call ->
+        token_response(conn, "different")
+      end)
+
+      req = new_client("cid-norotate", "initial")
+      assert {:ok, _} = Req.get(req, url: "/test")
+      assert {:ok, _} = Req.get(req, url: "/test")
+
+      assert :ets.lookup(@access_tokens_table, {"cid-norotate", "different"}) == []
+
+      assert [{{"cid-norotate", "initial"}, {"access_token_different", _expires_at}}] =
+               :ets.lookup(@access_tokens_table, {"cid-norotate", "initial"})
+
       assert calls(counter) == 1
     end
 
@@ -77,49 +94,6 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
 
       assert Enum.all?(results, &match?({:ok, _}, &1))
       assert calls(counter) == 1
-    end
-  end
-
-  describe "rotation propagation" do
-    test "calls the on_refresh_token_rotated hook with the new refresh token" do
-      counter = new_counter()
-
-      stub_token_endpoint(counter, fn conn, _call ->
-        token_response(conn, "rotated")
-      end)
-
-      req =
-        BexioApiClient.new("cid-hook", "secret", "initial",
-          on_refresh_token_rotated: {__MODULE__, :record_hook, [self()]}
-        )
-
-      assert {:ok, _} = Req.get(req, url: "/test")
-      assert_received {:refresh_token_rotated, "cid-hook", "rotated"}
-    end
-
-    test "emits a rotation telemetry event with hashed tokens only" do
-      counter = new_counter()
-
-      stub_token_endpoint(counter, fn conn, _call ->
-        token_response(conn, "rotated")
-      end)
-
-      attach_telemetry([:bexio_api_client, :refresh_token_rotated])
-
-      req = new_client("cid-tele", "initial")
-      assert {:ok, _} = Req.get(req, url: "/test")
-
-      assert_receive {:telemetry, [:bexio_api_client, :refresh_token_rotated], %{count: 1},
-                      %{
-                        client_id: "cid-tele",
-                        old_refresh_token_hash: old_hash,
-                        new_refresh_token_hash: new_hash
-                      }}
-
-      assert old_hash != "initial"
-      assert new_hash != "rotated"
-      assert byte_size(old_hash) == 12
-      assert byte_size(new_hash) == 12
     end
   end
 
@@ -284,18 +258,14 @@ defmodule BexioApiClient.Req.AccessTokenRefresherTest do
       AccessTokenRefresher.create_ets_table()
       now = System.system_time(:second)
 
-      :ets.insert(@access_tokens_table, {{"cid-exp", "expired"}, {"at", now - 1, "rt"}})
-      :ets.insert(@access_tokens_table, {{"cid-exp", "live"}, {"at", now + 3600, "rt"}})
+      :ets.insert(@access_tokens_table, {{"cid-exp", "expired"}, {"at", now - 1}})
+      :ets.insert(@access_tokens_table, {{"cid-exp", "live"}, {"at", now + 3600}})
 
       :ok = BexioApiClient.remove_expired_access_tokens()
 
       assert :ets.lookup(@access_tokens_table, {"cid-exp", "expired"}) == []
       assert :ets.lookup(@access_tokens_table, {"cid-exp", "live"}) != []
     end
-  end
-
-  def record_hook(pid, client_id, new_refresh_token) do
-    send(pid, {:refresh_token_rotated, client_id, new_refresh_token})
   end
 
   defp new_counter do

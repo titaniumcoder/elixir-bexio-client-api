@@ -15,18 +15,6 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 
 ### Added
 
-- Defensive refresh token rotation support: Bexio's token endpoint (a Keycloak
-  realm) MAY rotate refresh tokens — a token response can contain a NEW
-  `refresh_token` which invalidates the previously used one. Rotation has not been
-  observed so far (the same refresh token keeps working), but Keycloak realms can
-  enable it at any time, so the client handles it: the access token refresher
-  stores the rotated token, re-keys the cache under the new token and keeps
-  serving requests that still carry the rotated-away token.
-- `:on_refresh_token_rotated` option (`{module, function, args}` MFA, invoked as
-  `apply(m, f, args ++ [client_id, new_refresh_token])`) so host applications can
-  persist rotated refresh tokens when they receive one.
-- `[:bexio_api_client, :refresh_token_rotated]` telemetry event (metadata contains
-  only short SHA-256 token hashes, never the token values).
 - Refresh failure classification with automatic backoff: `400`/`401` `invalid_grant`
   and `403` (blacklisted) responses are permanent and fail fast without further
   token endpoint calls; `429` and transient errors back off exponentially with
@@ -37,14 +25,19 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 - `BexioApiClient.RefreshError` — refresh failures halt the request instead of
   sending it unauthenticated.
 - `BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1` to re-enable
-  refresh after a permanent failure (e.g. after persisting a new refresh token).
-- `BexioApiClient.new/4` accepting extra refresher options (e.g. the rotation hook).
+  refresh after a permanent failure (e.g. after the host obtained a new refresh
+  token).
 
 ### Changed
 
 - **BREAKING**: `BexioApiClient.access_token/3` now returns the full token map
   `{:ok, %{access_token: ..., expires_in: ..., refresh_token: ..., id_token: ..., scope: ..., token_type: ...}}`
   instead of `{:ok, access_token, expires_in}`.
+- `access_token/3` returns the full token map, including the `refresh_token` the
+  response contains. Bexio does not currently rotate refresh tokens and the
+  refresher does not manage rotation; should Bexio ever enable it (a Keycloak
+  realm option), host applications can persist the new token from the map and
+  pass it to `new/3` themselves.
 - `access_token/3` error returns are enriched with the HTTP status:
   `{:error, {:unexpected_response, status, body}}`, and the full `Req.Response`
   is logged on failure for diagnostics.
@@ -53,10 +46,8 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 
 ### Fixed
 
-- A rotated `refresh_token` in the token response (should Bexio ever enable
-  rotation) was silently dropped by `access_token/3` and by the access token
-  refresher, so it could never be persisted and would have broken refresh after
-  one rotation cycle.
+- The `refresh_token` in the token response was silently dropped by
+  `access_token/3`, so it was never visible to host applications.
 - `remove_expired_tokens/0` deleted from the wrong ETS table and never removed
   expired entries.
 - Requests proceeded unauthenticated after a failed refresh, inviting the retry

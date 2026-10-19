@@ -17,25 +17,20 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   @max_wait_ms 5_000
 
   @moduledoc """
-  Req request step that fetches, caches and rotates access tokens for Bexio
-  OAuth2 clients.
+  Req request step that fetches and caches access tokens for Bexio OAuth2
+  clients.
 
   The access token cache lives in the ETS table `:bexio_api_client_access_tokens`
   and is keyed by `{client_id, refresh_token}`. Each entry stores
-  `{access_token, expires_at, current_refresh_token}`, because Bexio (Keycloak)
-  MAY rotate refresh tokens: a token response can contain a NEW `refresh_token`
-  which invalidates the previously used one. Rotation has not been observed so
-  far, but Keycloak realms can enable it at any time, so it is handled
-  defensively: when a rotation is observed, the entry under the previously
-  requested key is updated in place (so requests that still carry the old
-  refresh token keep working) and an additional entry under the new refresh
-  token is written.
+  `{access_token, expires_at}` with an expiry reserve of #{@expires_in_reserve}
+  seconds.
 
-  Host applications SHOULD persist a rotated refresh token when they receive one.
-  Use the `:on_refresh_token_rotated` option (`{module, function, args}`, invoked
-  as `apply(module, function, args ++ [client_id, new_refresh_token])`) or hook
-  the `[:bexio_api_client, :refresh_token_rotated]` telemetry event. Telemetry
-  metadata contains only short token hashes, never the token values.
+  Bexio does not currently rotate refresh tokens (the same refresh token keeps
+  working), so the refresher does not manage rotation: it always refreshes with
+  the refresh token the host application passed to `BexioApiClient.new/3`. Should
+  Bexio ever enable rotation (a Keycloak realm option), token responses would
+  expose the new token through `BexioApiClient.access_token/3` and host
+  applications would have to persist it themselves.
 
   Refresh failures are classified and stored with a backoff deadline in
   `:bexio_api_client_refresh_failures`:
@@ -60,9 +55,6 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
 
   ## Telemetry events
 
-    * `[:bexio_api_client, :refresh_token_rotated]` - a refresh token was rotated.
-      Measurements: `%{count: 1}`. Metadata:
-      `%{client_id: client_id, old_refresh_token_hash: hash, new_refresh_token_hash: hash}`
     * `[:bexio_api_client, :refresh, :failed]` - a refresh attempt failed.
       Measurements: `%{count: 1}`. Metadata:
       `%{error_class: class, failure_count: count}`
@@ -77,8 +69,7 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
     |> Req.Request.register_options([
       :refresh_token,
       :client_id,
-      :client_secret,
-      :on_refresh_token_rotated
+      :client_secret
     ])
     |> Req.Request.merge_options(options)
     |> Req.Request.prepend_request_steps(get_access_token: &get_access_token/1)
@@ -130,7 +121,7 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   def remove_expired_tokens do
     if :ets.whereis(@access_tokens_table) != :undefined do
       @access_tokens_table
-      |> :ets.match({:"$0", {:_, :"$1", :_}})
+      |> :ets.match({:"$0", {:_, :"$1"}})
       |> expired_keys()
       |> Enum.each(&:ets.delete(@access_tokens_table, &1))
     end
@@ -153,14 +144,11 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
     refresh_token = Req.Request.get_option(request, :refresh_token)
 
     case lookup_entry(client_id, refresh_token) do
-      {:fresh, access_token, current} ->
-        continue_with_token(request, current, access_token)
+      {:fresh, access_token} ->
+        use_access_token(request, access_token)
 
-      {:stale, current} ->
-        refresh(request, client_id, refresh_token, current)
-
-      :miss ->
-        refresh(request, client_id, refresh_token, refresh_token)
+      :stale_or_miss ->
+        refresh(request, client_id, refresh_token)
     end
   end
 
@@ -168,32 +156,23 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
     now = System.system_time(:second)
 
     case :ets.lookup(@access_tokens_table, {client_id, refresh_token}) do
-      [{_key, {access_token, expires_at, current}}] when expires_at > now ->
-        {:fresh, access_token, current}
+      [{_key, {access_token, expires_at}}] when expires_at > now ->
+        {:fresh, access_token}
 
-      [{_key, {_access_token, _expires_at, current}}] ->
-        {:stale, current}
-
-      [] ->
-        :miss
+      _ ->
+        :stale_or_miss
     end
-  end
-
-  defp continue_with_token(request, current_refresh_token, access_token) do
-    request
-    |> Req.Request.merge_options(refresh_token: current_refresh_token)
-    |> use_access_token(access_token)
   end
 
   defp use_access_token(request, access_token) do
     Req.Request.merge_options(request, auth: {:bearer, access_token})
   end
 
-  defp refresh(request, client_id, requested_token, effective_token) do
-    if backoff_active?(client_id, effective_token) do
-      fail_fast(request, client_id, effective_token)
+  defp refresh(request, client_id, refresh_token) do
+    if backoff_active?(client_id, refresh_token) do
+      fail_fast(request, client_id, refresh_token)
     else
-      locked_refresh(request, client_id, requested_token, effective_token)
+      locked_refresh(request, client_id, refresh_token)
     end
   end
 
@@ -227,15 +206,15 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   defp remaining_backoff(next_retry_at),
     do: max(next_retry_at - System.system_time(:millisecond), 0)
 
-  defp locked_refresh(request, client_id, requested_token, effective_token) do
-    if acquire_lock(client_id, effective_token) do
+  defp locked_refresh(request, client_id, refresh_token) do
+    if acquire_lock(client_id, refresh_token) do
       try do
-        fetch_and_apply(request, client_id, requested_token, effective_token)
+        fetch_and_apply(request, client_id, refresh_token)
       after
-        release_lock(client_id, effective_token)
+        release_lock(client_id, refresh_token)
       end
     else
-      wait_or_refresh(request, client_id, requested_token, effective_token)
+      wait_or_refresh(request, client_id, refresh_token)
     end
   end
 
@@ -265,13 +244,13 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
     :ets.delete(@refresh_locks_table, {client_id, refresh_token})
   end
 
-  defp wait_or_refresh(request, client_id, requested_token, effective_token) do
-    case wait_for_fresh_entry(client_id, effective_token) do
-      {access_token, current} ->
-        continue_with_token(request, current, access_token)
+  defp wait_or_refresh(request, client_id, refresh_token) do
+    case wait_for_fresh_entry(client_id, refresh_token) do
+      {:fresh, access_token} ->
+        use_access_token(request, access_token)
 
       :timeout ->
-        locked_refresh(request, client_id, requested_token, effective_token)
+        locked_refresh(request, client_id, refresh_token)
     end
   end
 
@@ -282,10 +261,10 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
 
   defp do_wait_for_fresh_entry(client_id, refresh_token, deadline) do
     case lookup_entry(client_id, refresh_token) do
-      {:fresh, access_token, current} ->
-        {access_token, current}
+      {:fresh, access_token} ->
+        {:fresh, access_token}
 
-      _ ->
+      :stale_or_miss ->
         if System.system_time(:millisecond) >= deadline do
           :timeout
         else
@@ -295,85 +274,32 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
     end
   end
 
-  defp fetch_and_apply(request, client_id, requested_token, effective_token) do
+  defp fetch_and_apply(request, client_id, refresh_token) do
     client_secret = Req.Request.get_option(request, :client_secret)
 
-    case BexioApiClient.access_token(effective_token, client_id, client_secret) do
+    case BexioApiClient.access_token(refresh_token, client_id, client_secret) do
       {:ok, token} ->
-        apply_success(request, client_id, requested_token, effective_token, token)
+        apply_success(request, client_id, refresh_token, token)
 
       {:error, reason} ->
-        apply_failure(request, client_id, effective_token, reason)
+        apply_failure(request, client_id, refresh_token, reason)
     end
   end
 
-  defp apply_success(request, client_id, requested_token, effective_token, token) do
+  defp apply_success(request, client_id, refresh_token, token) do
     expires_at = System.system_time(:second) + token.expires_in - @expires_in_reserve
-    new_current = token.refresh_token || effective_token
 
-    store_tokens(client_id, requested_token, new_current, token.access_token, expires_at)
+    :ets.insert(
+      @access_tokens_table,
+      {{client_id, refresh_token}, {token.access_token, expires_at}}
+    )
 
-    propagate_rotation(client_id, effective_token, new_current, token.access_token, expires_at)
-    notify_rotation(request, client_id, effective_token, new_current)
-
-    request
-    |> Req.Request.merge_options(refresh_token: new_current)
-    |> use_access_token(token.access_token)
+    use_access_token(request, token.access_token)
   end
 
-  defp store_tokens(client_id, requested_token, current, access_token, expires_at) do
-    entry = {access_token, expires_at, current}
-    :ets.insert(@access_tokens_table, {{client_id, requested_token}, entry})
-
-    if current != requested_token do
-      :ets.insert(@access_tokens_table, {{client_id, current}, entry})
-    end
-  end
-
-  defp propagate_rotation(client_id, old_current, new_current, access_token, expires_at) do
-    entry = {access_token, expires_at, new_current}
-
-    @access_tokens_table
-    |> :ets.match_object({{client_id, :_}, {access_token, expires_at, old_current}})
-    |> Enum.each(fn {key, _stale_entry} -> :ets.insert(@access_tokens_table, {key, entry}) end)
-  end
-
-  defp notify_rotation(request, client_id, old_current, new_current) do
-    if new_current != old_current do
-      :telemetry.execute(
-        [:bexio_api_client, :refresh_token_rotated],
-        %{count: 1},
-        %{
-          client_id: client_id,
-          old_refresh_token_hash: hash_token(old_current),
-          new_refresh_token_hash: hash_token(new_current)
-        }
-      )
-
-      request
-      |> Req.Request.get_option(:on_refresh_token_rotated)
-      |> call_rotation_hook(client_id, new_current)
-    end
-  end
-
-  defp hash_token(token) do
-    :crypto.hash(:sha256, token)
-    |> Base.encode16(case: :lower)
-    |> binary_part(0, 12)
-  end
-
-  defp call_rotation_hook(nil, _client_id, _new_refresh_token), do: :ok
-
-  defp call_rotation_hook({module, function, args}, client_id, new_refresh_token) do
-    apply(module, function, args ++ [client_id, new_refresh_token])
-  rescue
-    exception ->
-      Logger.error("on_refresh_token_rotated hook failed: #{Exception.format(:error, exception)}")
-  end
-
-  defp apply_failure(request, client_id, effective_token, reason) do
+  defp apply_failure(request, client_id, refresh_token, reason) do
     error_class = classify(reason)
-    failure_count = record_failure(client_id, effective_token, error_class)
+    failure_count = record_failure(client_id, refresh_token, error_class)
 
     :telemetry.execute(
       [:bexio_api_client, :refresh, :failed],

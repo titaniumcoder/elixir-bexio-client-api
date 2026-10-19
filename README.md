@@ -20,37 +20,25 @@ end
 
 The API uses [Req](https://github.com/wojtekmach/req/tree/v0.5.0) for the client access to also handle the exponential back-off required in the documentation.
 
-## Refresh token rotation (defensive support)
+## Refresh tokens
 
-Bexio's token endpoint (a Keycloak realm) MAY rotate refresh tokens: a token
-response can contain a NEW `refresh_token` which invalidates the previously used
-one. Rotation has **not** been observed so far (the same refresh token keeps
-working), but Keycloak realms can enable it at any time, so the client handles
-it defensively. Separately, reusing an invalid refresh token — or hammering the
-endpoint after failures — can get your OAuth client **blacklisted** by Bexio
-(`403` with `{"reason": "blacklisted", "status": "blocked"}`, enforced per IP).
+Bexio does not currently rotate refresh tokens — the same refresh token keeps
+working — and the access token refresher does not manage rotation: it always
+refreshes with the refresh token you passed to `BexioApiClient.new/3`. Should
+Bexio ever enable rotation (a Keycloak realm option), token responses would
+expose the new token through `BexioApiClient.access_token/3`; host applications
+would have to persist it themselves.
 
-When you use the OAuth client (`BexioApiClient.new/3,4`), the access token
-refresher propagates any rotated token for you. Persist the new refresh token
-whenever you receive one — either:
-
-```elixir
-req =
-  BexioApiClient.new(client_id, client_secret, refresh_token,
-    on_refresh_token_rotated: {MyApp.Tokens, :store, [user_id]}
-  )
-```
-
-The MFA is called as `MyApp.Tokens.store(user_id, client_id, new_refresh_token)`,
-or hook the `[:bexio_api_client, :refresh_token_rotated]` telemetry event
-(metadata contains only short token hashes, never the token values).
+Separately, hammering the token endpoint after failing refreshes gets your
+OAuth client **blacklisted** by Bexio (`403` with
+`{"reason": "blacklisted", "status": "blocked"}`, enforced per IP).
 
 Refresh failures are classified and backed off automatically:
 
 - `400`/`401` `invalid_grant` and `403` (blacklisted) responses are **permanent**:
   requests fail fast with `BexioApiClient.RefreshError` and the token endpoint is
   not hit again. Call `BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1`
-  once you have persisted a new refresh token.
+  once you have a new refresh token.
 - `429` responses back off exponentially (cap 60s).
 - transport errors and other statuses back off exponentially with jitter (cap
   30s); after 5 consecutive failures, requests fail fast for 5 minutes.
@@ -64,10 +52,9 @@ access token cache lives in the `:bexio_api_client_access_tokens` ETS table
 keyed by `{client_id, refresh_token}`.
 
 `BexioApiClient.access_token/3` returns the full token map
-(`%{access_token: ..., expires_in: ..., refresh_token: ..., id_token: ..., scope: ..., token_type: ...}`)
-— persist the returned `refresh_token` when it is not `nil`. Every non-success
-response returns `{:error, {:unexpected_response, status, body}}` and logs the
-full `Req.Response` for diagnostics.
+(`%{access_token: ..., expires_in: ..., refresh_token: ..., id_token: ..., scope: ..., token_type: ...}`).
+Every non-success response returns `{:error, {:unexpected_response, status, body}}`
+and logs the full `Req.Response` for diagnostics.
 
 ## Telemetry
 
@@ -102,14 +89,6 @@ Emitted when a request will be retried due to server errors (408, 500, 502, 503,
 
 - **Measurements**: `%{count: 1}`
 - **Metadata**: `%{status: integer()}` - HTTP status code that triggered the retry
-
-#### `[:bexio_api_client, :refresh_token_rotated]`
-
-Emitted when the token endpoint returned a new refresh token (rotation). The host
-application SHOULD persist the rotated token when one is received (see [Refresh token rotation](#refresh-token-rotation-defensive-support)).
-
-- **Measurements**: `%{count: 1}`
-- **Metadata**: `%{client_id: binary(), old_refresh_token_hash: binary(), new_refresh_token_hash: binary()}` - short SHA-256 prefixes of the tokens, never the token values
 
 #### `[:bexio_api_client, :refresh, :failed]`
 
