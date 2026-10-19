@@ -53,6 +53,23 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   policy for the token endpoint belongs to this module, so host applications
   should not wrap requests in their own retry loops.
 
+  ## ETS table ownership
+
+  The tables are owned by the process that created them: when that process
+  exits, the tables are deleted together with it. Losing the tables is always
+  safe (tokens are a cache and backoff state resets), but the cache silently
+  stops working until the tables are recreated.
+
+  Call `create_ets_table/0` once from a long-lived process at application
+  startup, e.g. in your application's `start/2`:
+
+      BexioApiClient.Req.AccessTokenRefresher.create_ets_table()
+
+  Then the tables live as long as your application. When they are created
+  lazily by request processes instead, any of those processes may end up owning
+  the tables, and the cache disappears whenever that process exits. Concurrent
+  creation is safe: the losing process ignores the already-exists error.
+
   ## Telemetry events
 
     * `[:bexio_api_client, :refresh, :failed]` - a refresh attempt failed.
@@ -94,12 +111,18 @@ defmodule BexioApiClient.Req.AccessTokenRefresher do
   defp ensure_table(name) do
     case :ets.whereis(name) do
       :undefined ->
-        _ = :ets.new(name, [:named_table, :set, :public])
-        :ok
+        create_table(name)
 
       _table ->
         :ok
     end
+  end
+
+  defp create_table(name) do
+    _table = :ets.new(name, [:named_table, :set, :public])
+    :ok
+  rescue
+    ArgumentError -> :ok
   end
 
   @doc """

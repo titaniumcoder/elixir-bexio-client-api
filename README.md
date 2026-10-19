@@ -51,6 +51,14 @@ Concurrent requests on the same token are refreshed once (single flight); the
 access token cache lives in the `:bexio_api_client_access_tokens` ETS table
 keyed by `{client_id, refresh_token}`.
 
+The ETS tables are owned by the process that created them and are deleted when
+that process exits. Call
+`BexioApiClient.Req.AccessTokenRefresher.create_ets_table/0` once from a
+long-lived process (e.g. in your application's `start/2`) so the cache and the
+refresh backoff state live as long as your application. Losing the tables is
+always safe — tokens are re-fetched and backoff state resets — but the cache
+silently stops working until they are recreated. Concurrent creation is safe.
+
 `BexioApiClient.access_token/3` returns the full token map
 (`%{access_token: ..., expires_in: ..., refresh_token: ..., id_token: ..., scope: ..., token_type: ...}`).
 Every non-success response returns `{:error, {:unexpected_response, status, body}}`
