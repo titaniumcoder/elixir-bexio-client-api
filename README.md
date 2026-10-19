@@ -11,7 +11,7 @@ by adding `bexio_api_client` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:bexio_api_client, "~> 0.9.0"}
+    {:bexio_api_client, "~> 1.0"}
   ]
 end
 ```
@@ -19,6 +19,91 @@ end
 ## Requirements:
 
 The API uses [Req](https://github.com/wojtekmach/req/tree/v0.5.0) for the client access to also handle the exponential back-off required in the documentation.
+
+The retry policy for API requests is the `BexioApiClient.Req.RetryPolicy`
+behaviour, implemented by `BexioApiClient.Req.RewriteDelay` (honors Bexio's
+`ratelimit-reset` header, retries transient server errors and transport errors,
+emits retry telemetry). Provide your own policy via:
+
+```elixir
+config :bexio_api_client, :req_options, retry: &MyApp.RetryPolicy.retry/2
+```
+
+The token endpoint never uses this policy — refresh backoff belongs to
+`BexioApiClient.Req.AccessTokenRefresher`.
+
+## Refresh tokens
+
+Bexio does not currently rotate refresh tokens — the same refresh token keeps
+working — and the access token refresher does not manage rotation: it always
+refreshes with the refresh token you passed to `BexioApiClient.new/3`. Should
+Bexio ever enable rotation (a Keycloak realm option), token responses would
+expose the new token through `BexioApiClient.access_token/3`; host applications
+would have to persist it themselves.
+
+Separately, hammering the token endpoint after failing refreshes gets your
+OAuth client **blacklisted** by Bexio (`403` with
+`{"reason": "blacklisted", "status": "blocked"}`, enforced per IP).
+
+Refresh failures are classified and backed off automatically:
+
+- `400`/`401` `invalid_grant` and `403` (blacklisted) responses are **permanent**:
+  requests fail fast with `BexioApiClient.RefreshError` and the token endpoint is
+  not hit again. Call `BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1`
+  once you have a new refresh token.
+- all other failures (including `429`) back off exponentially with jitter (base
+  500ms, cap 30s); after 15 consecutive failures (~4.5 minutes of probing),
+  requests fail fast for 10 minutes, with at most one further attempt per
+  10-minute window.
+
+Do not wrap client requests in your own retry loops: transient token failures
+are already backed off, and permanent ones will never succeed — hammering the
+token endpoint with failing refreshes is exactly what gets an OAuth client
+blacklisted.
+
+When the refresher gives up on a refresh token — immediately on a permanent
+failure (`invalid_grant`, blacklisted) or after 5 consecutive transient
+failures (5-minute cooldown) — it invokes the optional `:on_refresh_gave_up`
+callback once:
+
+```elixir
+req =
+  BexioApiClient.new(client_id, client_secret, refresh_token,
+    on_refresh_gave_up: {MyApp.Auth, :refresh_gave_up, [user_id]}
+  )
+```
+
+The MFA is called as `MyApp.Auth.refresh_gave_up(user_id, client_id, error_class)`
+so the host application can react (re-authenticate the user, disable sync jobs,
+alert) and re-enable the token afterwards with
+`BexioApiClient.Req.AccessTokenRefresher.clear_refresh_failure/1`. The callback
+runs synchronously while the refresh lock is held: keep it fast and do not make
+requests with the same client from it.
+
+The access token cache lives in the `:bexio_api_client_access_tokens` ETS
+table keyed by `{client_id, refresh_token}`.
+
+The ETS tables are owned by the process that created them and are deleted when
+that process exits. Call
+`BexioApiClient.Req.AccessTokenRefresher.create_ets_table/0` once from a
+long-lived process (e.g. in your application's `start/2`) so the cache and the
+refresh backoff state live as long as your application. Losing the tables is
+always safe — tokens are re-fetched and backoff state resets — but the cache
+silently stops working until they are recreated. Concurrent creation is safe.
+
+`BexioApiClient.access_token/3` returns the full token map
+(`%{access_token: ..., expires_in: ..., refresh_token: ..., id_token: ..., scope: ..., token_type: ...}`).
+Every non-success response returns `{:error, {:unexpected_response, status, body}}`
+and logs the full `Req.Response` for diagnostics.
+
+### Stopping it
+
+The refresher has no background process — it only runs when a request flows
+through a client built with `BexioApiClient.new/3`. To stop it completely,
+stop making requests through that client (e.g. disable the jobs that use it —
+`:on_refresh_gave_up` is the hook that tells you when to do that), or switch
+to the static API token client `BexioApiClient.new/1`, which has no refresher
+attached.
 
 ## Telemetry
 
@@ -53,6 +138,21 @@ Emitted when a request will be retried due to server errors (408, 500, 502, 503,
 
 - **Measurements**: `%{count: 1}`
 - **Metadata**: `%{status: integer()}` - HTTP status code that triggered the retry
+
+#### `[:bexio_api_client, :refresh, :failed]`
+
+Emitted when a refresh attempt failed.
+
+- **Measurements**: `%{count: 1}`
+- **Metadata**: `%{error_class: :invalid_refresh_token | :client_blacklisted | :transient, failure_count: integer()}`
+
+#### `[:bexio_api_client, :refresh, :backoff]`
+
+Emitted when a request was rejected while a refresh backoff was active (the token
+endpoint was not contacted).
+
+- **Measurements**: `%{count: 1}`
+- **Metadata**: `%{error_class: atom(), retry_in_ms: integer() | :infinity}`
 
 ### Usage Example
 

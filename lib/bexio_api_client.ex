@@ -6,9 +6,6 @@ defmodule BexioApiClient do
   @base_request_options [
     base_url: "https://api.bexio.com",
     headers: [accept: "application/json", content_type: "application/json"],
-    retry: :transient,
-    # try twice, because after the first, the rate may be wrong, but after the second, the retry should wait correctly
-    max_retries: 3,
     retry_log_level: :warn,
     retry: &BexioApiClient.Req.RewriteDelay.retry/2
   ]
@@ -20,10 +17,21 @@ defmodule BexioApiClient do
 
   Fields or arguments with date time reference expect them in the time zone Europe/Zurich.
 
-  ## Requirements:
+  ## Requirements:
 
     * Http Client:
     ** Req: the api client depends on Req.
+
+  ## Refresh tokens
+
+  Bexio does not currently rotate refresh tokens — the same refresh token keeps
+  working — and the access token refresher does not manage rotation. Token
+  responses expose the `refresh_token` through `access_token/3` anyway, so if
+  Bexio ever enables rotation (a Keycloak realm option), host applications can
+  persist the new token from the map and pass it to `new/3` themselves.
+  Hammering the token endpoint with failing refreshes can get the OAuth client
+  blacklisted by Bexio (per IP), which is why failed refreshes are backed off
+  instead of retried.
 
   """
 
@@ -41,18 +49,19 @@ defmodule BexioApiClient do
   @doc """
   Creates a new client using the client id, client secret and refresh token. Be aware that getting
   this information is part of the OpenID flow which is not in the scope of this library.
+
+  Additional `opts` are passed to `BexioApiClient.Req.AccessTokenRefresher.attach/2`,
+  e.g. `on_refresh_gave_up: {module, function, args}`.
   """
-  @spec new(String.t(), String.t(), String.t()) :: Req.Request.t()
-  def new(client_id, client_secret, refresh_token) do
+  @spec new(String.t(), String.t(), String.t(), keyword()) :: Req.Request.t()
+  def new(client_id, client_secret, refresh_token, opts \\ []) do
     _ = BexioApiClient.Req.AccessTokenRefresher.create_ets_table()
 
     @base_request_options
     |> Keyword.merge(Application.get_env(:bexio_api_client, :req_options, []))
     |> Req.new()
     |> BexioApiClient.Req.AccessTokenRefresher.attach(
-      refresh_token: refresh_token,
-      client_id: client_id,
-      client_secret: client_secret
+      [refresh_token: refresh_token, client_id: client_id, client_secret: client_secret] ++ opts
     )
   end
 
@@ -64,56 +73,99 @@ defmodule BexioApiClient do
   end
 
   @doc """
-  Fetch a new access token for the given refresh token.
+  Fetches a token response from the Bexio (Keycloak) token endpoint.
 
   ## Arguments:
 
-    * `refresh_token` -> the refresh token we need the access key for
+    * `refresh_token` -> the refresh token we need the access token for
     * `client_id` -> the client id of our application that also got the refresh token
     * `client_secret` -> the client secret of our application
 
   ## Response
 
-    {:ok, %{access_token: "", expires_in: 3600, id_token: "", refresh_token: "", scope: "openid profile email", token_type: "Bearer}}
+  On success, the full token map is returned, including the `refresh_token` the
+  response contains (Bexio currently keeps refresh tokens stable — the same
+  token comes back).
 
-    {:error, :unauthorized}
+      {:ok, %{access_token: "", expires_in: 3600, id_token: nil, refresh_token: nil, scope: nil, token_type: nil}}
+
+  Every non-success response (including 2xx with an unexpected body) returns the
+  status and body and logs the full `Req.Response`, so failures can be
+  classified afterwards:
+
+      {:error, {:unexpected_response, 403, %{"reason" => "blacklisted", "status" => "blocked"}}}
+
+  Transport failures return:
+
+      {:error, {:request_failed, exception}}
+
+  This function never retries on its own; retry policy belongs to
+  `BexioApiClient.Req.AccessTokenRefresher`.
   """
   @spec access_token(String.t(), String.t(), String.t()) ::
-          {:ok, String.t(), integer()} | {:error, any()}
+          {:ok,
+           %{
+             required(:access_token) => String.t(),
+             required(:expires_in) => integer(),
+             optional(:refresh_token) => String.t() | nil,
+             optional(:id_token) => String.t() | nil,
+             optional(:scope) => String.t() | nil,
+             optional(:token_type) => String.t() | nil
+           }}
+          | {:error, {:unexpected_response, integer(), any()}}
+          | {:error, {:request_failed, any()}}
   def access_token(refresh_token, client_id, client_secret) do
-    idp_req =
-      Application.get_env(:bexio_api_client, :req_options, [])
-      |> Req.new()
+    idp_url =
+      Application.get_env(
+        :bexio_api_client,
+        :idp_url,
+        "https://auth.bexio.com/realms/bexio/protocol/openid-connect/token"
+      )
 
-    idp_url = Application.get_env(:bexio_api_client, :idp_url, "https://auth.bexio.com/realms/bexio/protocol/openid-connect/token")
+    idp_request()
+    |> Req.post(
+      url: idp_url,
+      form: %{
+        "grant_type" => "refresh_token",
+        "refresh_token" => refresh_token
+      },
+      auth: {:basic, "#{client_id}:#{client_secret}"}
+    )
+    |> handle_token_response()
+  end
 
-    case Req.post(
-           idp_req,
-           url: idp_url,
-           form: %{
-             "grant_type" => "refresh_token",
-             "refresh_token" => refresh_token
-           },
-           auth: {:basic, "#{client_id}:#{client_secret}"}
-         ) do
-      {:ok, %Req.Response{status: 401}} ->
-        {:error, :unauthenticated}
+  defp idp_request do
+    Application.get_env(:bexio_api_client, :req_options, [])
+    |> Keyword.merge(retry: false)
+    |> Req.new()
+  end
 
-      {:ok, %Req.Response{} = response} ->
-        case response.body do
-          %{
-            "access_token" => access_token,
-            "expires_in" => expires_in
-          } ->
-            {:ok, access_token, expires_in}
+  defp handle_token_response(
+         {:ok,
+          %Req.Response{
+            status: status,
+            body: %{"access_token" => access_token, "expires_in" => expires_in} = body
+          }}
+       )
+       when status in 200..299 do
+    {:ok,
+     %{
+       access_token: access_token,
+       expires_in: expires_in,
+       refresh_token: Map.get(body, "refresh_token"),
+       id_token: Map.get(body, "id_token"),
+       scope: Map.get(body, "scope"),
+       token_type: Map.get(body, "token_type")
+     }}
+  end
 
-          _ ->
-            {:error, {:unexpected_response, response.body}}
-        end
+  defp handle_token_response({:ok, %Req.Response{} = response}) do
+    Logger.error("Unexpected token response: #{inspect(response)}")
+    {:error, {:unexpected_response, response.status, response.body}}
+  end
 
-      {:error, exception} ->
-        Logger.error("Could not fetch a new access token: #{inspect(exception)}")
-        {:error, exception}
-    end
+  defp handle_token_response({:error, exception}) do
+    Logger.error("Could not fetch a new access token: #{inspect(exception)}")
+    {:error, {:request_failed, exception}}
   end
 end
