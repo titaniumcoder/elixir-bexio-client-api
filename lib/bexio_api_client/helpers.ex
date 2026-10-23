@@ -232,6 +232,31 @@ defmodule BexioApiClient.Helpers do
 
   def to_enum(value, _values) when is_atom(value), do: value
 
+  @doc """
+  Converts a bexio document class name (`KbOffer`, `KbOrder`, `KbInvoice`,
+  `KbDelivery` — as returned by e.g. `kb_item_class` and `ref_class` fields)
+  into an idiomatic atom, keeping unknown class names as strings.
+
+  ## Examples
+
+      iex> BexioApiClient.Helpers.to_document_class("KbInvoice")
+      :kb_invoice
+
+      iex> BexioApiClient.Helpers.to_document_class("KbSomethingNew")
+      "KbSomethingNew"
+
+      iex> BexioApiClient.Helpers.to_document_class(nil)
+      nil
+  """
+  @spec to_document_class(nil | String.t()) ::
+          nil | :kb_offer | :kb_order | :kb_invoice | :kb_delivery | String.t()
+  def to_document_class(nil), do: nil
+  def to_document_class("KbOffer"), do: :kb_offer
+  def to_document_class("KbOrder"), do: :kb_order
+  def to_document_class("KbInvoice"), do: :kb_invoice
+  def to_document_class("KbDelivery"), do: :kb_delivery
+  def to_document_class(other), do: other
+
   @spec remove_document_no_if_nil(map() | nil) :: map() | nil
   def remove_document_no_if_nil(nil), do: nil
   def remove_document_no_if_nil(%{document_nr: nil} = map), do: Map.delete(map, :document_nr)

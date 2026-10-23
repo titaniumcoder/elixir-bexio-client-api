@@ -1295,8 +1295,7 @@ defmodule BexioApiClient.SalesOrderManagement do
     %DocumentSetting{
       id: id,
       text: text,
-      # kb_item_class has no documented enum values, so we keep the string
-      kb_item_class: kb_item_class,
+      kb_item_class: to_document_class(kb_item_class),
       enumeration_format: enumeration_format,
       automatic_enumeration?: use_automatic_enumeration,
       yearly_enumeration?: use_yearly_enumeration,

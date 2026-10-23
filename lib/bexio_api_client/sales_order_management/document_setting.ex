@@ -9,7 +9,13 @@ defmodule BexioApiClient.SalesOrderManagement.DocumentSetting do
   @type t :: %__MODULE__{
           id: integer(),
           text: String.t(),
-          kb_item_class: String.t(),
+          kb_item_class:
+            :kb_offer
+            | :kb_order
+            | :kb_invoice
+            | :kb_delivery
+            # unknown class names are kept as strings
+            | String.t(),
           enumeration_format: String.t(),
           automatic_enumeration?: boolean(),
           yearly_enumeration?: boolean(),
