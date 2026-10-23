@@ -8,7 +8,12 @@ defmodule BexioApiClient.Files.FileUsage do
   """
   @type t :: %__MODULE__{
           id: integer(),
-          ref_class: String.t(),
+          ref_class:
+            :kb_offer
+            | :kb_order
+            | :kb_invoice
+            | :kb_delivery
+            | String.t(),
           title: String.t(),
           document_nr: String.t()
         }

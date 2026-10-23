@@ -74,8 +74,8 @@ defmodule BexioApiClient.Files do
   defp remap(keywords) do
     if Keyword.has_key?(keywords, :archived?) do
       keywords
-      |> Keyword.put_new(:is_archived, Keyword.get(keywords, :archived?))
-      |> Keyword.delete(:arcvived?)
+      |> Keyword.put(:is_archived, Keyword.get(keywords, :archived?))
+      |> Keyword.delete(:archived?)
     else
       keywords
     end
@@ -272,7 +272,7 @@ defmodule BexioApiClient.Files do
        ) do
     %FileUsage{
       id: id,
-      ref_class: ref_class,
+      ref_class: document_class(ref_class),
       title: title,
       document_nr: document_nr
     }

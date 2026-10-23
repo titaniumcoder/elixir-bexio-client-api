@@ -227,7 +227,7 @@ defmodule BexioApiClient.FilesTest do
       assert result.uuid == "474cc93a-2d6f-47e9-bd3f-a5b5a1941314"
       assert result.name == "screenshot"
       assert result.size_in_bytes == 218_476
-      assert result.extension == :png
+      assert result.extension == "png"
       assert result.mime_type == "image/png"
       assert result.uploader_email == "contact@example.org"
       assert result.user_id == 1
@@ -404,7 +404,7 @@ defmodule BexioApiClient.FilesTest do
 
       assert usage == %BexioApiClient.Files.FileUsage{
                id: 1,
-               ref_class: "KbInvoice",
+               ref_class: :kb_invoice,
                title: "RE-00001",
                document_nr: "RE-00001"
              }
