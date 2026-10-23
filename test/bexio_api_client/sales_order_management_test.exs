@@ -14,7 +14,9 @@ defmodule BexioApiClient.SalesOrderManagementTest do
     PositionDefault,
     Quote,
     Order,
-    Invoice
+    Invoice,
+    Payment,
+    OrderRepetition
   }
 
   alias BexioApiClient.SearchCriteria
@@ -3760,5 +3762,899 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
       assert result == true
     end
+  end
+
+  describe "copying a quote" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_offer/4/copy"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        json_body = Jason.decode!(body)
+
+        assert json_body["contact_id"] == 14
+        assert json_body["contact_sub_id"] == nil
+        assert json_body["is_valid_from"] == "2019-06-24"
+        assert json_body["pr_project_id"] == 3
+        assert json_body["title"] == nil
+
+        json(conn, %{
+          "id" => 4,
+          "document_nr" => "AN-00002",
+          "title" => nil,
+          "contact_id" => 14,
+          "contact_sub_id" => nil,
+          "user_id" => 1,
+          "project_id" => nil,
+          "logopaper_id" => 1,
+          "language_id" => 1,
+          "bank_account_id" => 1,
+          "currency_id" => 1,
+          "payment_type_id" => 1,
+          "header" => "Header",
+          "footer" => "Footer",
+          "total_gross" => "17.800000",
+          "total_net" => "17.800000",
+          "total_taxes" => "1.3706",
+          "total" => "19.150000",
+          "total_rounding_difference" => -0.02,
+          "mwst_type" => 0,
+          "mwst_is_net" => true,
+          "show_position_taxes" => false,
+          "is_valid_from" => "2019-06-24",
+          "is_valid_until" => "2019-07-24",
+          "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+          "delivery_address_type" => 0,
+          "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+          "kb_item_status_id" => 3,
+          "api_reference" => nil,
+          "viewed_by_client_at" => nil,
+          "kb_terms_of_payment_template_id" => nil,
+          "show_total" => true,
+          "updated_at" => "2019-04-08 13:17:32",
+          "template_slug" => "581a8010821e01426b8b456b",
+          "taxs" => [
+            %{"percentage" => "7.70", "value" => "1.3706"}
+          ],
+          "network_link" => ""
+        })
+      end)
+
+      :ok
+    end
+
+    test "copies the quote" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} =
+        BexioApiClient.SalesOrderManagement.copy_quote(client, 4, 14,
+          is_valid_from: ~D[2019-06-24],
+          pr_project_id: 3
+        )
+
+      assert record.id == 4
+      assert record.document_nr == "AN-00002"
+      assert record.contact_id == 14
+      assert record.kb_item_status == :confirmed
+    end
+  end
+
+  describe "sending a quote" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_offer/4/send"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        json_body = Jason.decode!(body)
+
+        assert json_body["recipient_email"] == "example@bexio.com"
+        assert json_body["subject"] == "Your new document"
+        assert json_body["message"] == "Please find the document at [Network Link]"
+        assert json_body["mark_as_open"] == true
+        assert json_body["attach_pdf"] == true
+
+        json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.send_quote(
+          client,
+          4,
+          "example@bexio.com",
+          "Your new document",
+          "Please find the document at [Network Link]",
+          mark_as_open: true,
+          attach_pdf: true
+        )
+
+      assert result == true
+    end
+  end
+
+  describe "creating an order from a quote" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_offer/4/order"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        assert body == ""
+
+        json(conn, %{
+          "id" => 4,
+          "document_nr" => "AU-00001",
+          "title" => nil,
+          "contact_id" => 14,
+          "contact_sub_id" => nil,
+          "user_id" => 1,
+          "project_id" => nil,
+          "logopaper_id" => 1,
+          "language_id" => 1,
+          "bank_account_id" => 1,
+          "currency_id" => 1,
+          "payment_type_id" => 1,
+          "header" => "Header",
+          "footer" => "Footer",
+          "total_gross" => "17.800000",
+          "total_net" => "17.800000",
+          "total_taxes" => "1.3706",
+          "total" => "19.150000",
+          "total_rounding_difference" => -0.02,
+          "mwst_type" => 0,
+          "mwst_is_net" => true,
+          "show_position_taxes" => false,
+          "is_valid_from" => "2019-06-24",
+          "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+          "delivery_address_type" => 0,
+          "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+          "kb_item_status_id" => 5,
+          "is_recurring" => false,
+          "api_reference" => nil,
+          "viewed_by_client_at" => nil,
+          "updated_at" => "2019-04-08 13:17:32",
+          "template_slug" => "581a8010821e01426b8b456b",
+          "taxs" => [
+            %{"percentage" => "7.70", "value" => "1.3706"}
+          ],
+          "network_link" => ""
+        })
+      end)
+
+      :ok
+    end
+
+    test "creates the order" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} = BexioApiClient.SalesOrderManagement.create_order_from_quote(client, 4)
+
+      assert record.id == 4
+      assert record.document_nr == "AU-00001"
+      assert record.kb_item_status == :pending
+    end
+  end
+
+  describe "creating an invoice from a quote" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_offer/4/invoice"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        assert body == ""
+
+        json(conn, invoice_fixture())
+      end)
+
+      :ok
+    end
+
+    test "creates the invoice" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} = BexioApiClient.SalesOrderManagement.create_invoice_from_quote(client, 4)
+
+      assert record.id == 4
+      assert record.document_nr == "RE-00001"
+      assert record.kb_item_status == :draft
+    end
+  end
+
+  describe "creating a delivery from an order" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_order/4/delivery"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        assert body == ""
+
+        json(conn, %{
+          "id" => 4,
+          "document_nr" => "LS-00001",
+          "title" => nil,
+          "contact_id" => 14,
+          "contact_sub_id" => nil,
+          "user_id" => 1,
+          "logopaper_id" => 1,
+          "language_id" => 1,
+          "bank_account_id" => 1,
+          "currency_id" => 1,
+          "header" => nil,
+          "footer" => nil,
+          "total_gross" => "17.800000",
+          "total_net" => "17.800000",
+          "total_taxes" => "1.3706",
+          "total" => "19.150000",
+          "total_rounding_difference" => -0.02,
+          "mwst_type" => 0,
+          "mwst_is_net" => true,
+          "is_valid_from" => "2019-06-24",
+          "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+          "delivery_address_type" => 0,
+          "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+          "kb_item_status_id" => 10,
+          "api_reference" => nil,
+          "viewed_by_client_at" => nil,
+          "updated_at" => "2019-04-08 13:17:32",
+          "taxs" => [
+            %{"percentage" => "7.70", "value" => "1.3706"}
+          ]
+        })
+      end)
+
+      :ok
+    end
+
+    test "creates the delivery" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} = BexioApiClient.SalesOrderManagement.create_delivery_from_order(client, 4)
+
+      assert record.id == 4
+      assert record.document_nr == "LS-00001"
+      assert record.kb_item_status == :draft
+    end
+  end
+
+  describe "creating an invoice from an order" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_order/4/invoice"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        assert body == ""
+
+        json(conn, invoice_fixture())
+      end)
+
+      :ok
+    end
+
+    test "creates the invoice" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} = BexioApiClient.SalesOrderManagement.create_invoice_from_order(client, 4)
+
+      assert record.id == 4
+      assert record.document_nr == "RE-00001"
+      assert record.kb_item_status == :draft
+    end
+  end
+
+  describe "fetching the repetition of an order" do
+    setup do
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/kb_order/4/repetition"} = conn ->
+          json(conn, %{
+            "start" => "2019-01-01",
+            "end" => "2019-12-31",
+            "repetition" => %{"type" => "daily", "interval" => 1}
+          })
+
+        %{method: "GET", request_path: "/2.0/kb_order/99/repetition"} = conn ->
+          send_resp(conn, 404, "Order does not exist")
+      end)
+
+      :ok
+    end
+
+    test "shows the repetition" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} = BexioApiClient.SalesOrderManagement.fetch_order_repetition(client, 4)
+
+      assert record.start == ~D[2019-01-01]
+      assert record.end == ~D[2019-12-31]
+      assert record.repetition == %{type: :daily, interval: 1}
+    end
+
+    test "fails on unknown id" do
+      client = BexioApiClient.new("123")
+
+      assert {:error, :not_found, "Order does not exist"} =
+               BexioApiClient.SalesOrderManagement.fetch_order_repetition(client, 99)
+    end
+  end
+
+  describe "editing the repetition of an order" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_order/4/repetition"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        json_body = Jason.decode!(body)
+
+        assert json_body["start"] == "2019-01-01"
+        assert json_body["end"] == "2019-12-31"
+        assert json_body["repetition"]["type"] == "daily"
+        assert json_body["repetition"]["interval"] == 1
+
+        json(conn, %{
+          "start" => "2019-01-01",
+          "end" => "2019-12-31",
+          "repetition" => %{"type" => "daily", "interval" => 1}
+        })
+      end)
+
+      :ok
+    end
+
+    test "edits the repetition" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} =
+        BexioApiClient.SalesOrderManagement.edit_order_repetition(
+          client,
+          4,
+          OrderRepetition.new(%{
+            start: ~D[2019-01-01],
+            end: ~D[2019-12-31],
+            repetition: %{type: :daily, interval: 1}
+          })
+        )
+
+      assert record.start == ~D[2019-01-01]
+      assert record.repetition == %{type: :daily, interval: 1}
+    end
+  end
+
+  describe "deleting the repetition of an order" do
+    setup do
+      mock_request(fn %{method: "DELETE", request_path: "/2.0/kb_order/4/repetition"} = conn ->
+        json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.delete_order_repetition(client, 4)
+
+      assert result == true
+    end
+  end
+
+  describe "copying an invoice" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_invoice/4/copy"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        json_body = Jason.decode!(body)
+
+        assert json_body["contact_id"] == 14
+        assert json_body["contact_sub_id"] == nil
+        assert json_body["is_valid_from"] == "2019-06-24"
+        assert json_body["title"] == nil
+
+        json(conn, invoice_fixture())
+      end)
+
+      :ok
+    end
+
+    test "copies the invoice" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} =
+        BexioApiClient.SalesOrderManagement.copy_invoice(client, 4, 14,
+          is_valid_from: ~D[2019-06-24]
+        )
+
+      assert record.id == 4
+      assert record.contact_id == 14
+      assert record.kb_item_status == :draft
+    end
+  end
+
+  describe "cancelling an invoice" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_invoice/4/cancel"} = conn ->
+        json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.cancel_invoice(client, 4)
+
+      assert result == true
+    end
+  end
+
+  describe "marking an invoice as sent" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_invoice/4/mark_as_sent"} = conn ->
+        json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.mark_invoice_as_sent(client, 4)
+
+      assert result == true
+    end
+  end
+
+  describe "sending an invoice" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_invoice/4/send"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        json_body = Jason.decode!(body)
+
+        assert json_body["recipient_email"] == "example@bexio.com"
+        assert json_body["subject"] == "Your new document"
+        assert json_body["message"] == "Please find the document at [Network Link]"
+        assert json_body["mark_as_open"] == true
+        assert json_body["attach_pdf"] == true
+
+        json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.send_invoice(
+          client,
+          4,
+          "example@bexio.com",
+          "Your new document",
+          "Please find the document at [Network Link]",
+          mark_as_open: true,
+          attach_pdf: true
+        )
+
+      assert result == true
+    end
+  end
+
+  describe "fetching a list of invoice payments" do
+    setup do
+      mock_request(fn %{method: "GET", request_path: "/2.0/kb_invoice/4/payment"} = conn ->
+        json(conn, [payment_fixture()])
+      end)
+
+      :ok
+    end
+
+    test "shows valid records" do
+      client = BexioApiClient.new("123")
+
+      {:ok, [record]} = BexioApiClient.SalesOrderManagement.fetch_invoice_payments(client, 4)
+
+      assert record.id == 4
+      assert record.date == ~D[2019-06-29]
+      assert Decimal.equal?(record.value, Decimal.new("10.0"))
+      assert record.bank_account_id == 1
+      assert record.title == "Received Payment"
+      assert record.payment_service_id == nil
+      assert record.client_account_redemption? == false
+      assert record.cash_discount? == false
+      assert record.kb_invoice_id == 1
+      assert record.kb_credit_voucher_id == nil
+      assert record.kb_bill_id == nil
+      assert record.kb_credit_voucher_text == ""
+    end
+  end
+
+  describe "creating an invoice payment" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_invoice/4/payment"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        json_body = Jason.decode!(body)
+
+        assert json_body["date"] == "2019-06-29"
+        assert json_body["value"] == "10.0"
+        assert json_body["bank_account_id"] == 1
+        assert json_body["payment_service_id"] == nil
+
+        json(conn, payment_fixture())
+      end)
+
+      :ok
+    end
+
+    test "creates the payment" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} =
+        BexioApiClient.SalesOrderManagement.create_invoice_payment(
+          client,
+          4,
+          Payment.new(%{
+            date: ~D[2019-06-29],
+            value: Decimal.new("10.0"),
+            bank_account_id: 1
+          })
+        )
+
+      assert record.id == 4
+      assert record.date == ~D[2019-06-29]
+      assert Decimal.equal?(record.value, Decimal.new("10.0"))
+    end
+  end
+
+  describe "fetching a single invoice payment" do
+    setup do
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/kb_invoice/4/payment/2"} = conn ->
+          json(conn, payment_fixture())
+
+        %{method: "GET", request_path: "/2.0/kb_invoice/4/payment/99"} = conn ->
+          send_resp(conn, 404, "Payment does not exist")
+      end)
+
+      :ok
+    end
+
+    test "shows valid result" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} = BexioApiClient.SalesOrderManagement.fetch_invoice_payment(client, 4, 2)
+
+      assert record.id == 4
+      assert record.date == ~D[2019-06-29]
+      assert Decimal.equal?(record.value, Decimal.new("10.0"))
+      assert record.kb_invoice_id == 1
+    end
+
+    test "fails on unknown id" do
+      client = BexioApiClient.new("123")
+
+      assert {:error, :not_found, "Payment does not exist"} =
+               BexioApiClient.SalesOrderManagement.fetch_invoice_payment(client, 4, 99)
+    end
+  end
+
+  describe "deleting an invoice payment" do
+    setup do
+      mock_request(fn %{method: "DELETE", request_path: "/2.0/kb_invoice/4/payment/2"} = conn ->
+        json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.delete_invoice_payment(client, 4, 2)
+
+      assert result == true
+    end
+  end
+
+  describe "fetching a list of invoice reminders" do
+    setup do
+      mock_request(fn %{method: "GET", request_path: "/2.0/kb_invoice/4/kb_reminder"} = conn ->
+        json(conn, [reminder_fixture()])
+      end)
+
+      :ok
+    end
+
+    test "shows valid records" do
+      client = BexioApiClient.new("123")
+
+      {:ok, [record]} = BexioApiClient.SalesOrderManagement.fetch_invoice_reminders(client, 4)
+
+      assert record.id == 4
+      assert record.kb_invoice_id == 1
+      assert record.title == "First reminder"
+      assert record.valid_from == ~D[2019-06-24]
+      assert record.valid_to == ~D[2019-07-24]
+      assert record.reminder_period_in_days == 14
+      assert record.reminder_level == 1
+      assert record.show_positions? == true
+      assert Decimal.equal?(record.remaining_price, Decimal.new("17.8"))
+      assert Decimal.equal?(record.received_total, Decimal.new("0"))
+      assert record.sent? == false
+      assert record.header == nil
+      assert record.footer == nil
+    end
+  end
+
+  describe "creating an invoice reminder" do
+    setup do
+      mock_request(fn %{method: "POST", request_path: "/2.0/kb_invoice/4/kb_reminder"} = conn ->
+        {:ok, body, _} = read_body(conn)
+        assert body == ""
+
+        json(conn, reminder_fixture())
+      end)
+
+      :ok
+    end
+
+    test "creates the reminder" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} = BexioApiClient.SalesOrderManagement.create_invoice_reminder(client, 4)
+
+      assert record.id == 4
+      assert record.title == "First reminder"
+      assert record.reminder_level == 1
+      assert record.sent? == false
+    end
+  end
+
+  describe "searching invoice reminders" do
+    setup do
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/kb_invoice/4/kb_reminder/search"} = conn ->
+          {:ok, body, _} = read_body(conn)
+          json_body = Jason.decode!(body)
+
+          assert [%{"field" => "title", "value" => "First reminder"}] = json_body
+
+          json(conn, [reminder_fixture()])
+      end)
+
+      :ok
+    end
+
+    test "lists found results" do
+      client = BexioApiClient.new("123")
+
+      {:ok, [record]} =
+        BexioApiClient.SalesOrderManagement.search_invoice_reminders(client, 4, [
+          SearchCriteria.equal(:title, "First reminder")
+        ])
+
+      assert record.id == 4
+      assert record.title == "First reminder"
+    end
+  end
+
+  describe "fetching a single invoice reminder" do
+    setup do
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/kb_invoice/4/kb_reminder/2"} = conn ->
+          json(conn, reminder_fixture())
+
+        %{method: "GET", request_path: "/2.0/kb_invoice/4/kb_reminder/99"} = conn ->
+          send_resp(conn, 404, "Reminder does not exist")
+      end)
+
+      :ok
+    end
+
+    test "shows valid result" do
+      client = BexioApiClient.new("123")
+
+      {:ok, record} = BexioApiClient.SalesOrderManagement.fetch_invoice_reminder(client, 4, 2)
+
+      assert record.id == 4
+      assert record.title == "First reminder"
+      assert record.reminder_level == 1
+    end
+
+    test "fails on unknown id" do
+      client = BexioApiClient.new("123")
+
+      assert {:error, :not_found, "Reminder does not exist"} =
+               BexioApiClient.SalesOrderManagement.fetch_invoice_reminder(client, 4, 99)
+    end
+  end
+
+  describe "deleting an invoice reminder" do
+    setup do
+      mock_request(fn
+        %{method: "DELETE", request_path: "/2.0/kb_invoice/4/kb_reminder/2"} = conn ->
+          json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.delete_invoice_reminder(client, 4, 2)
+
+      assert result == true
+    end
+  end
+
+  describe "marking an invoice reminder as sent" do
+    setup do
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/kb_invoice/4/kb_reminder/2/mark_as_sent"} = conn ->
+          json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.mark_invoice_reminder_as_sent(client, 4, 2)
+
+      assert result == true
+    end
+  end
+
+  describe "marking an invoice reminder as unsent" do
+    setup do
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/kb_invoice/4/kb_reminder/2/mark_as_unsent"} = conn ->
+          json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.mark_invoice_reminder_as_unsent(client, 4, 2)
+
+      assert result == true
+    end
+  end
+
+  describe "sending an invoice reminder" do
+    setup do
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/kb_invoice/4/kb_reminder/2/send"} = conn ->
+          {:ok, body, _} = read_body(conn)
+          json_body = Jason.decode!(body)
+
+          assert json_body["recipient_email"] == "example@bexio.com"
+          assert json_body["subject"] == "Your new reminder"
+          assert json_body["message"] == "Please find the document at [Network Link]"
+
+          json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} =
+        BexioApiClient.SalesOrderManagement.send_invoice_reminder(
+          client,
+          4,
+          2,
+          "example@bexio.com",
+          "Your new reminder",
+          "Please find the document at [Network Link]"
+        )
+
+      assert result == true
+    end
+  end
+
+  describe "showing invoice reminder pdf" do
+    setup do
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/kb_invoice/4/kb_reminder/2/pdf"} = conn ->
+          json(conn, %{
+            "name" => "document-00005.pdf",
+            "size" => 9768,
+            "mime" => "application/pdf",
+            "content" => "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+          })
+      end)
+
+      :ok
+    end
+
+    test "succeeds" do
+      client = BexioApiClient.new("123")
+
+      {:ok, result} = BexioApiClient.SalesOrderManagement.invoice_reminder_pdf(client, 4, 2)
+
+      assert result.name == "document-00005.pdf"
+      assert result.size == 9768
+      assert result.mime == "application/pdf"
+      assert result.content == "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+    end
+  end
+
+  defp invoice_fixture do
+    %{
+      "id" => 4,
+      "document_nr" => "RE-00001",
+      "title" => nil,
+      "contact_id" => 14,
+      "contact_sub_id" => nil,
+      "user_id" => 1,
+      "project_id" => nil,
+      "logopaper_id" => 1,
+      "language_id" => 1,
+      "bank_account_id" => 1,
+      "currency_id" => 1,
+      "payment_type_id" => 1,
+      "header" => "Header",
+      "footer" => "Footer",
+      "total_gross" => "17.800000",
+      "total_net" => "17.800000",
+      "total_taxes" => "1.3706",
+      "total_received_payments" => "0.000000",
+      "total_credit_vouchers" => "0.000000",
+      "total_remaining_payments" => "19.150000",
+      "total" => "19.150000",
+      "total_rounding_difference" => -0.02,
+      "mwst_type" => 0,
+      "mwst_is_net" => true,
+      "show_position_taxes" => false,
+      "is_valid_from" => "2019-06-24",
+      "is_valid_to" => "2019-07-24",
+      "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
+      "kb_item_status_id" => 7,
+      "reference" => nil,
+      "api_reference" => nil,
+      "viewed_by_client_at" => nil,
+      "updated_at" => "2019-04-08 13:17:32",
+      "esr_id" => 1,
+      "qr_invoice_id" => 1,
+      "template_slug" => "581a8010821e01426b8b456b",
+      "taxs" => [
+        %{"percentage" => "7.70", "value" => "1.3706"}
+      ],
+      "network_link" => ""
+    }
+  end
+
+  defp payment_fixture do
+    %{
+      "id" => 4,
+      "date" => "2019-06-29",
+      "value" => "10.0000",
+      "bank_account_id" => 1,
+      "title" => "Received Payment",
+      "payment_service_id" => nil,
+      "is_client_account_redemption" => false,
+      "is_cash_discount" => false,
+      "kb_invoice_id" => 1,
+      "kb_credit_voucher_id" => nil,
+      "kb_bill_id" => nil,
+      "kb_credit_voucher_text" => ""
+    }
+  end
+
+  defp reminder_fixture do
+    %{
+      "id" => 4,
+      "kb_invoice_id" => 1,
+      "title" => "First reminder",
+      "is_valid_from" => "2019-06-24",
+      "is_valid_to" => "2019-07-24",
+      "reminder_period_in_days" => 14,
+      "reminder_level" => 1,
+      "show_positions" => true,
+      "remaining_price" => "17.8000",
+      "received_total" => "0.0000",
+      "is_sent" => false,
+      "header" => nil,
+      "footer" => nil
+    }
   end
 end

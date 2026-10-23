@@ -15,6 +15,9 @@ defmodule BexioApiClient.SalesOrderManagement do
     Invoice,
     DocumentSetting,
     Delivery,
+    Payment,
+    Reminder,
+    OrderRepetition,
     PositionSubposition,
     PositionPagebreak,
     PositionDiscount,
@@ -264,6 +267,99 @@ defmodule BexioApiClient.SalesOrderManagement do
         Req.get(req, url: "/2.0/kb_offer/#{quote_id}/pdf")
       end,
       &map_from_pdf/2
+    )
+  end
+
+  @doc """
+  Copy a quote.
+  """
+  @spec copy_quote(
+          req :: Req.Request.t(),
+          quote_id :: pos_integer(),
+          contact_id :: integer() | nil,
+          opts :: [
+            {:contact_sub_id, integer() | nil}
+            | {:is_valid_from, Date.t() | nil}
+            | {:pr_project_id, integer() | nil}
+            | {:title, String.t() | nil}
+          ]
+        ) :: {:ok, Quote.t()} | api_error_type
+  def copy_quote(req, quote_id, contact_id, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req,
+          url: "/2.0/kb_offer/#{quote_id}/copy",
+          json: %{
+            contact_id: contact_id,
+            contact_sub_id: Keyword.get(opts, :contact_sub_id),
+            is_valid_from: to_iso8601(Keyword.get(opts, :is_valid_from)),
+            pr_project_id: Keyword.get(opts, :pr_project_id),
+            title: Keyword.get(opts, :title)
+          }
+        )
+      end,
+      &map_from_quote/2
+    )
+  end
+
+  @doc """
+  Send a quote by email.
+  """
+  @spec send_quote(
+          req :: Req.Request.t(),
+          quote_id :: pos_integer(),
+          recipient_email :: String.t(),
+          subject :: String.t(),
+          message :: String.t(),
+          opts :: [{:mark_as_open, boolean()} | {:attach_pdf, boolean()}]
+        ) :: {:ok, boolean()} | api_error_type
+  def send_quote(req, quote_id, recipient_email, subject, message, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req,
+          url: "/2.0/kb_offer/#{quote_id}/send",
+          json: %{
+            recipient_email: recipient_email,
+            subject: subject,
+            message: message,
+            mark_as_open: Keyword.get(opts, :mark_as_open),
+            attach_pdf: Keyword.get(opts, :attach_pdf)
+          }
+        )
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Create an order from a quote.
+  """
+  @spec create_order_from_quote(
+          req :: Req.Request.t(),
+          quote_id :: pos_integer()
+        ) :: {:ok, Order.t()} | api_error_type
+  def create_order_from_quote(req, quote_id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/kb_offer/#{quote_id}/order")
+      end,
+      &map_from_order/2
+    )
+  end
+
+  @doc """
+  Create an invoice from a quote.
+  """
+  @spec create_invoice_from_quote(
+          req :: Req.Request.t(),
+          quote_id :: pos_integer()
+        ) :: {:ok, Invoice.t()} | api_error_type
+  def create_invoice_from_quote(req, quote_id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/kb_offer/#{quote_id}/invoice")
+      end,
+      &map_from_invoice/2
     )
   end
 
@@ -651,6 +747,90 @@ defmodule BexioApiClient.SalesOrderManagement do
     )
   end
 
+  @doc """
+  Create a delivery from an order.
+  """
+  @spec create_delivery_from_order(
+          req :: Req.Request.t(),
+          order_id :: pos_integer()
+        ) :: {:ok, Delivery.t()} | api_error_type
+  def create_delivery_from_order(req, order_id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/kb_order/#{order_id}/delivery")
+      end,
+      &map_from_delivery/2
+    )
+  end
+
+  @doc """
+  Create an invoice from an order.
+  """
+  @spec create_invoice_from_order(
+          req :: Req.Request.t(),
+          order_id :: pos_integer()
+        ) :: {:ok, Invoice.t()} | api_error_type
+  def create_invoice_from_order(req, order_id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/kb_order/#{order_id}/invoice")
+      end,
+      &map_from_invoice/2
+    )
+  end
+
+  @doc """
+  This action fetches the repetition of an order.
+  """
+  @spec fetch_order_repetition(
+          req :: Req.Request.t(),
+          order_id :: pos_integer()
+        ) :: {:ok, OrderRepetition.t()} | api_error_type
+  def fetch_order_repetition(req, order_id) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/kb_order/#{order_id}/repetition")
+      end,
+      &map_from_order_repetition/2
+    )
+  end
+
+  @doc """
+  Edit the repetition of an order.
+  """
+  @spec edit_order_repetition(
+          req :: Req.Request.t(),
+          order_id :: pos_integer(),
+          repetition :: OrderRepetition.t()
+        ) :: {:ok, OrderRepetition.t()} | api_error_type
+  def edit_order_repetition(req, order_id, repetition) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req,
+          url: "/2.0/kb_order/#{order_id}/repetition",
+          json: remap_order_repetition(repetition)
+        )
+      end,
+      &map_from_order_repetition/2
+    )
+  end
+
+  @doc """
+  Delete the repetition of an order.
+  """
+  @spec delete_order_repetition(
+          req :: Req.Request.t(),
+          order_id :: pos_integer()
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_order_repetition(req, order_id) do
+    bexio_body_handling(
+      fn ->
+        Req.delete(req, url: "/2.0/kb_order/#{order_id}/repetition")
+      end,
+      &success_response/2
+    )
+  end
+
   defp remap_order(
          %Order{
            positions: positions
@@ -793,6 +973,41 @@ defmodule BexioApiClient.SalesOrderManagement do
   defp order_kb_item_status(6), do: :done
   defp order_kb_item_status(15), do: :partial
   defp order_kb_item_status(21), do: :cancelled
+
+  defp remap_order_repetition(%OrderRepetition{
+         start: start,
+         end: end_date,
+         repetition: repetition
+       }) do
+    %{
+      start: Date.to_iso8601(start),
+      end: if(end_date, do: Date.to_iso8601(end_date)),
+      repetition: %{
+        type: Atom.to_string(repetition.type),
+        interval: repetition.interval
+      }
+    }
+  end
+
+  defp map_from_order_repetition(
+         %{
+           "start" => start,
+           "end" => end_date,
+           "repetition" => %{"type" => type, "interval" => interval}
+         },
+         _env
+       ) do
+    %OrderRepetition{
+      start: to_date(start),
+      end: to_date(end_date),
+      repetition: %{type: repetition_type(type), interval: interval}
+    }
+  end
+
+  defp repetition_type("daily"), do: :daily
+  defp repetition_type("weekly"), do: :weekly
+  defp repetition_type("monthly"), do: :monthly
+  defp repetition_type("yearly"), do: :yearly
 
   # Deliveries
 
@@ -1086,6 +1301,431 @@ defmodule BexioApiClient.SalesOrderManagement do
       end,
       &map_from_pdf/2
     )
+  end
+
+  @doc """
+  Copy an invoice.
+  """
+  @spec copy_invoice(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          contact_id :: integer() | nil,
+          opts :: [
+            {:contact_sub_id, integer() | nil}
+            | {:is_valid_from, Date.t() | nil}
+            | {:title, String.t() | nil}
+          ]
+        ) :: {:ok, Invoice.t()} | api_error_type
+  def copy_invoice(req, invoice_id, contact_id, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req,
+          url: "/2.0/kb_invoice/#{invoice_id}/copy",
+          json: %{
+            contact_id: contact_id,
+            contact_sub_id: Keyword.get(opts, :contact_sub_id),
+            is_valid_from: to_iso8601(Keyword.get(opts, :is_valid_from)),
+            title: Keyword.get(opts, :title)
+          }
+        )
+      end,
+      &map_from_invoice/2
+    )
+  end
+
+  @doc """
+  Cancel an invoice.
+  """
+  @spec cancel_invoice(
+          req :: Req.Request.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | api_error_type
+  def cancel_invoice(req, id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/kb_invoice/#{id}/cancel")
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Mark an invoice as sent.
+  """
+  @spec mark_invoice_as_sent(
+          req :: Req.Request.t(),
+          id :: non_neg_integer()
+        ) :: {:ok, boolean()} | api_error_type
+  def mark_invoice_as_sent(req, id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/kb_invoice/#{id}/mark_as_sent")
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Send an invoice by email.
+  """
+  @spec send_invoice(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          recipient_email :: String.t(),
+          subject :: String.t(),
+          message :: String.t(),
+          opts :: [{:mark_as_open, boolean()} | {:attach_pdf, boolean()}]
+        ) :: {:ok, boolean()} | api_error_type
+  def send_invoice(req, invoice_id, recipient_email, subject, message, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req,
+          url: "/2.0/kb_invoice/#{invoice_id}/send",
+          json: %{
+            recipient_email: recipient_email,
+            subject: subject,
+            message: message,
+            mark_as_open: Keyword.get(opts, :mark_as_open),
+            attach_pdf: Keyword.get(opts, :attach_pdf)
+          }
+        )
+      end,
+      &success_response/2
+    )
+  end
+
+  # Invoice Payments
+
+  @doc """
+  This action fetches a list of all payments for an invoice.
+  """
+  @spec fetch_invoice_payments(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [Payment.t()]} | api_error_type
+  def fetch_invoice_payments(req, invoice_id, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/kb_invoice/#{invoice_id}/payment", params: opts_to_query(opts))
+      end,
+      &map_from_payments/2
+    )
+  end
+
+  @doc """
+  Create a payment for an invoice.
+  """
+  @spec create_invoice_payment(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          payment :: Payment.t()
+        ) :: {:ok, Payment.t()} | api_error_type
+  def create_invoice_payment(req, invoice_id, payment) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req,
+          url: "/2.0/kb_invoice/#{invoice_id}/payment",
+          json: remap_payment(payment)
+        )
+      end,
+      &map_from_payment/2
+    )
+  end
+
+  @doc """
+  This action fetches a single payment of an invoice.
+  """
+  @spec fetch_invoice_payment(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          payment_id :: pos_integer()
+        ) :: {:ok, Payment.t()} | api_error_type
+  def fetch_invoice_payment(req, invoice_id, payment_id) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/kb_invoice/#{invoice_id}/payment/#{payment_id}")
+      end,
+      &map_from_payment/2
+    )
+  end
+
+  @doc """
+  Delete a payment of an invoice.
+  """
+  @spec delete_invoice_payment(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          payment_id :: pos_integer()
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_invoice_payment(req, invoice_id, payment_id) do
+    bexio_body_handling(
+      fn ->
+        Req.delete(req, url: "/2.0/kb_invoice/#{invoice_id}/payment/#{payment_id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  defp remap_payment(%Payment{
+         date: date,
+         value: value,
+         bank_account_id: bank_account_id,
+         payment_service_id: payment_service_id
+       }) do
+    %{
+      date: to_iso8601(date),
+      value: Decimal.to_string(value, :normal),
+      bank_account_id: bank_account_id,
+      payment_service_id: payment_service_id
+    }
+  end
+
+  defp map_from_payments(payments, _env), do: Enum.map(payments, &map_from_payment/1)
+
+  defp map_from_payment(
+         %{
+           "id" => id,
+           "date" => date,
+           "value" => value,
+           "bank_account_id" => bank_account_id,
+           "title" => title,
+           "payment_service_id" => payment_service_id,
+           "is_client_account_redemption" => client_account_redemption?,
+           "is_cash_discount" => cash_discount?,
+           "kb_invoice_id" => kb_invoice_id,
+           "kb_credit_voucher_id" => kb_credit_voucher_id,
+           "kb_bill_id" => kb_bill_id,
+           "kb_credit_voucher_text" => kb_credit_voucher_text
+         },
+         _env \\ nil
+       ) do
+    %Payment{
+      id: id,
+      date: to_date(date),
+      value: to_decimal(value),
+      bank_account_id: bank_account_id,
+      title: title,
+      payment_service_id: payment_service_id,
+      client_account_redemption?: client_account_redemption?,
+      cash_discount?: cash_discount?,
+      kb_invoice_id: kb_invoice_id,
+      kb_credit_voucher_id: kb_credit_voucher_id,
+      kb_bill_id: kb_bill_id,
+      kb_credit_voucher_text: kb_credit_voucher_text
+    }
+  end
+
+  # Invoice Reminders
+
+  @doc """
+  This action fetches a list of all reminders for an invoice.
+  """
+  @spec fetch_invoice_reminders(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer()
+        ) :: {:ok, [Reminder.t()]} | api_error_type
+  def fetch_invoice_reminders(req, invoice_id) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder")
+      end,
+      &map_from_reminders/2
+    )
+  end
+
+  @doc """
+  Create a reminder for an invoice.
+  """
+  @spec create_invoice_reminder(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer()
+        ) :: {:ok, Reminder.t()} | api_error_type
+  def create_invoice_reminder(req, invoice_id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder")
+      end,
+      &map_from_reminder/2
+    )
+  end
+
+  @doc """
+  Search the reminders of an invoice via query.
+  The following search fields are supported:
+
+  * title
+  * reminder_level
+  * is_sent
+  * is_valid_from
+  * is_valid_to
+  """
+  @spec search_invoice_reminders(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          criteria :: list(SearchCriteria.t())
+        ) :: {:ok, [Reminder.t()]} | api_error_type
+  def search_invoice_reminders(req, invoice_id, criteria) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder/search", json: criteria)
+      end,
+      &map_from_reminders/2
+    )
+  end
+
+  @doc """
+  This action fetches a single reminder of an invoice.
+  """
+  @spec fetch_invoice_reminder(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          reminder_id :: pos_integer()
+        ) :: {:ok, Reminder.t()} | api_error_type
+  def fetch_invoice_reminder(req, invoice_id, reminder_id) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder/#{reminder_id}")
+      end,
+      &map_from_reminder/2
+    )
+  end
+
+  @doc """
+  Delete a reminder of an invoice.
+  """
+  @spec delete_invoice_reminder(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          reminder_id :: pos_integer()
+        ) :: {:ok, boolean()} | api_error_type
+  def delete_invoice_reminder(req, invoice_id, reminder_id) do
+    bexio_body_handling(
+      fn ->
+        Req.delete(req, url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder/#{reminder_id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Mark a reminder of an invoice as sent.
+  """
+  @spec mark_invoice_reminder_as_sent(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          reminder_id :: pos_integer()
+        ) :: {:ok, boolean()} | api_error_type
+  def mark_invoice_reminder_as_sent(req, invoice_id, reminder_id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req,
+          url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder/#{reminder_id}/mark_as_sent"
+        )
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Mark a reminder of an invoice as unsent.
+  """
+  @spec mark_invoice_reminder_as_unsent(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          reminder_id :: pos_integer()
+        ) :: {:ok, boolean()} | api_error_type
+  def mark_invoice_reminder_as_unsent(req, invoice_id, reminder_id) do
+    bexio_body_handling(
+      fn ->
+        Req.post(
+          req,
+          url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder/#{reminder_id}/mark_as_unsent"
+        )
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  Send a reminder of an invoice by email.
+  """
+  @spec send_invoice_reminder(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          reminder_id :: pos_integer(),
+          recipient_email :: String.t(),
+          subject :: String.t(),
+          message :: String.t()
+        ) :: {:ok, boolean()} | api_error_type
+  def send_invoice_reminder(req, invoice_id, reminder_id, recipient_email, subject, message) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req,
+          url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder/#{reminder_id}/send",
+          json: %{
+            recipient_email: recipient_email,
+            subject: subject,
+            message: message
+          }
+        )
+      end,
+      &success_response/2
+    )
+  end
+
+  @doc """
+  This action returns a pdf document of the reminder of an invoice.
+  """
+  @spec invoice_reminder_pdf(
+          req :: Req.Request.t(),
+          invoice_id :: pos_integer(),
+          reminder_id :: pos_integer()
+        ) :: {:ok, map()} | api_error_type
+  def invoice_reminder_pdf(req, invoice_id, reminder_id) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/2.0/kb_invoice/#{invoice_id}/kb_reminder/#{reminder_id}/pdf")
+      end,
+      &map_from_pdf/2
+    )
+  end
+
+  defp map_from_reminders(reminders, _env), do: Enum.map(reminders, &map_from_reminder/1)
+
+  defp map_from_reminder(
+         %{
+           "id" => id,
+           "kb_invoice_id" => kb_invoice_id,
+           "title" => title,
+           "is_valid_from" => is_valid_from,
+           "is_valid_to" => is_valid_to,
+           "reminder_period_in_days" => reminder_period_in_days,
+           "reminder_level" => reminder_level,
+           "show_positions" => show_positions?,
+           "remaining_price" => remaining_price,
+           "received_total" => received_total,
+           "is_sent" => sent?,
+           "header" => header,
+           "footer" => footer
+         },
+         _env \\ nil
+       ) do
+    %Reminder{
+      id: id,
+      kb_invoice_id: kb_invoice_id,
+      title: title,
+      valid_from: to_date(is_valid_from),
+      valid_to: to_date(is_valid_to),
+      reminder_period_in_days: reminder_period_in_days,
+      reminder_level: reminder_level,
+      show_positions?: show_positions?,
+      remaining_price: to_decimal(remaining_price),
+      received_total: to_decimal(received_total),
+      sent?: sent?,
+      header: header,
+      footer: footer
+    }
   end
 
   defp remap_invoice(
