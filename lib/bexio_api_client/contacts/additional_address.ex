@@ -55,4 +55,28 @@ defmodule BexioApiClient.Contacts.AdditionalAddress do
     :subject,
     :description
   ]
+
+  @doc """
+  Create a new additional address
+  """
+  @spec new(map()) :: __MODULE__.t()
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        name: "",
+        name_addition: nil,
+        address: nil,
+        street_name: nil,
+        house_number: nil,
+        address_addition: nil,
+        postcode: nil,
+        city: nil,
+        country_id: nil,
+        subject: "",
+        description: ""
+      },
+      attrs
+    )
+  end
 end

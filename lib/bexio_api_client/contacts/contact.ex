@@ -123,4 +123,49 @@ defmodule BexioApiClient.Contacts.Contact do
     :updated_at,
     :profile_image
   ]
+
+  @doc """
+  Create a new contact
+  """
+  @spec new(map()) :: __MODULE__.t()
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        nr: nil,
+        contact_type: :company,
+        name_1: "",
+        name_2: nil,
+        salutation_id: nil,
+        salutation_form: nil,
+        title_id: nil,
+        birthday: nil,
+        address: nil,
+        street_name: nil,
+        house_number: nil,
+        address_addition: nil,
+        postcode: nil,
+        city: nil,
+        country_id: nil,
+        mail: nil,
+        mail_second: nil,
+        phone_fixed: nil,
+        phone_fixed_second: nil,
+        phone_mobile: nil,
+        fax: nil,
+        url: nil,
+        skype_name: nil,
+        remarks: nil,
+        lead?: false,
+        language_id: nil,
+        contact_group_ids: [],
+        contact_branch_ids: [],
+        user_id: nil,
+        owner_id: nil,
+        updated_at: nil,
+        profile_image: nil
+      },
+      attrs
+    )
+  end
 end

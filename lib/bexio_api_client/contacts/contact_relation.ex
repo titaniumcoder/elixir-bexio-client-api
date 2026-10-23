@@ -23,4 +23,21 @@ defmodule BexioApiClient.Contacts.ContactRelation do
         }
   @enforce_keys [:contact_id, :contact_sub_id]
   defstruct [:id, :contact_id, :contact_sub_id, :description, :updated_at]
+
+  @doc """
+  Create a new contact relation
+  """
+  @spec new(map()) :: __MODULE__.t()
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        contact_id: nil,
+        contact_sub_id: nil,
+        description: "",
+        updated_at: nil
+      },
+      attrs
+    )
+  end
 end
