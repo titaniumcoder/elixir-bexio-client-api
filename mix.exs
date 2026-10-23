@@ -47,7 +47,7 @@ defmodule BexioApiClient.MixProject do
   defp deps do
     [
       # API Client, for now focusing on req
-      {:req, "~> 0.5.6"},
+      {:req, "~> 0.7"},
 
       # The API is completely in JSON
       {:jason, ">= 1.0.0"},
@@ -56,7 +56,7 @@ defmodule BexioApiClient.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
 
       # Decimal for the money amounts
-      {:decimal, "~> 2.0"},
+      {:decimal, "~> 3.0"},
 
       # Credo support
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
@@ -65,7 +65,7 @@ defmodule BexioApiClient.MixProject do
       {:telemetry, "~> 1.0"},
 
       # Create documentation
-      {:ex_doc, "~> 0.29.4", only: :dev},
+      {:ex_doc, "~> 0.40", only: :dev},
       {:earmark, "~> 1.4", only: :dev},
       {:plug, "~> 1.0", only: :test}
     ]
