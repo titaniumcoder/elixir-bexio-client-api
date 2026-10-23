@@ -9,10 +9,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING**: `Country` field renamed from `iso_3166_alpha2` to the documented
-  `iso3166_alpha2` (the docs' spelling wins even though it looks like a typo on
-  their side). Migration: replace `country.iso_3166_alpha2` with
-  `country.iso3166_alpha2`. The parser still accepts both response spellings.
+- **BREAKING — more "Elixir style" API (major release)**: this release makes the client
+  idiomatic Elixir instead of mirroring bexio's raw JSON naming. The JSON keys sent to and
+  received from the API are unchanged — only the parsed struct representation changes.
+  Changes to **existing** struct fields and types (these are the breaking parts):
+
+  | bexio JSON value | before | now |
+  |---|---|---|
+  | `Country.iso_3166_alpha2` | `country.iso_3166_alpha2` (string) | `country.iso3166_alpha2` (the docs' spelling wins even though it looks like a typo on their side; parser accepts both response spellings) |
+  | `File.extension` | `:png` (atom via `String.to_atom/1`) | `"png"` (string — the extension set is open, not a documented enum) |
+  | `DocumentSetting.kb_item_class` | `:KbOffer` (PascalCase atom) | `:kb_offer` / `:kb_order` / `:kb_invoice` / `:kb_delivery`; unknown class names stay strings |
+  | `Permission.permissions` keys and scopes | atoms for every key | atoms for the documented components/scopes; unknown components and scopes stay strings |
+
+  All **new** fields and structs in this release already follow the new convention
+  (predicate-style booleans such as `lead?`/`annual_reporting?`/`salary?`/
+  `editing_restricted?`/`default_billable?`, and document class atoms such as
+  `:kb_invoice` in `JournalEntry.ref_class`/`FileUsage.ref_class`) — since they are new,
+  this is not breaking for existing users. Going forward the convention is enforced by
+  AGENTS.md: documented enums are converted with `String.to_existing_atom/1` over the
+  listed values (`BexioApiClient.Helpers.to_enum/2`), document class names with
+  `BexioApiClient.Helpers.to_document_class/1`, and values with unknown/open sets are
+  kept as strings.
 
 ### Added
 
