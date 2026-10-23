@@ -57,3 +57,13 @@ assigned automatically") and the list example shows `"nr": null`. The library
 previously called `String.to_integer/1` unconditionally, which crashed on the
 documented `null`. It now maps `nil` to `nil` (and still converts numeric
 strings to integers).
+
+## 5. Create-file response sample is an array
+
+**Docs say:** the 200 response sample of `POST /3.0/files` (create new file) is
+an array containing a single file object.
+
+**What we do now:** `BexioApiClient.Files.create_file/2` normalizes the response
+to a single `File` struct — a one-element list is unwrapped, a single object is
+used directly. Evidence: the sibling endpoints `GET`/`PATCH` `/3.0/files/{file_id}`
+return a single object and the endpoint creates exactly one file.
