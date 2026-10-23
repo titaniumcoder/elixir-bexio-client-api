@@ -185,7 +185,7 @@ defmodule BexioApiClient.Accounting do
          "start" => start,
          "end" => end_date,
          "is_vat_subject" => vat_subject?,
-         "is_annual_reporting" => is_annual_reporting,
+         "is_annual_reporting" => annual_reporting?,
          "created_at" => created_at,
          "updated_at" => updated_at,
          "vat_accounting_method" => vat_accounting_method,
@@ -196,7 +196,7 @@ defmodule BexioApiClient.Accounting do
       start: to_date(start),
       end: to_date(end_date),
       vat_subject?: vat_subject?,
-      is_annual_reporting: is_annual_reporting,
+      annual_reporting?: annual_reporting?,
       created_at: to_offset_datetime(created_at),
       updated_at: to_offset_datetime(updated_at),
       # both fields are null when the calendar year is not subjected to vat

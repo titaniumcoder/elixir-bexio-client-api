@@ -33,7 +33,7 @@ defmodule BexioApiClient.Contacts.Contact do
     * `:url` - homepage url
     * `:skype_name` - Skype Name
     * `:remarks` - free text for remarks
-    * `:is_lead` - whether the contact is a lead
+    * `:lead?` - whether the contact is a lead
     * `:language_id` - reference to a TODO: language object
     * `:contact_group_ids` - reference to multiple TODO: contact group objects
     * `:contact_branch_ids` - reference to multiple TODO: contact sector objects
@@ -68,7 +68,7 @@ defmodule BexioApiClient.Contacts.Contact do
           url: String.t(),
           skype_name: String.t(),
           remarks: String.t(),
-          is_lead: boolean(),
+          lead?: boolean(),
           language_id: integer(),
           contact_group_ids: [integer()],
           contact_branch_ids: [integer()],
@@ -81,7 +81,7 @@ defmodule BexioApiClient.Contacts.Contact do
     :id,
     :nr,
     :contact_type,
-    :is_lead,
+    :lead?,
     :name_1,
     :contact_group_ids,
     :contact_branch_ids,
@@ -114,7 +114,7 @@ defmodule BexioApiClient.Contacts.Contact do
     :url,
     :skype_name,
     :remarks,
-    :is_lead,
+    :lead?,
     :language_id,
     :contact_group_ids,
     :contact_branch_ids,

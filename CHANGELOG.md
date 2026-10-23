@@ -20,14 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reconstruction of the bexio API, regenerated from the live docs; not the
   source of truth for this library.
 - `Contact`: new fields `street_name`, `house_number`, `address_addition`,
-  `is_lead` and `profile_image` (show response only).
+  `lead?` (bexio's `is_lead`) and `profile_image` (show response only).
 - `AdditionalAddress`: new fields `name_addition`, `street_name`, `house_number`,
   `address_addition`.
 - `File`: new field `source_id` (deprecated by bexio in favor of `source_type`).
 - `Item`: new fields `account_id`, `expense_account_id` and `html_text`
   (deprecated by bexio).
 - `Tax`: new fields `start_month`, `end_month`.
-- `CalendarYear`: new field `is_annual_reporting`.
+- `CalendarYear`: new field `annual_reporting?` (bexio's `is_annual_reporting`).
 - `Currency`: new embedded default exchange rate fields `exchange_rate`,
   `exchange_rate_date`, `exchange_rate_id`, `exchange_rate_to_ratio`, `ratio`,
   `source`, `source_reason` (`nil` for the base currency).

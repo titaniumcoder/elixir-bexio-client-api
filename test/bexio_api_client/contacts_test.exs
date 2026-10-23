@@ -120,7 +120,7 @@ defmodule BexioApiClient.ContactsTest do
       assert result1.street_name == "Teststrasse"
       assert result1.house_number == "999"
       assert result1.address_addition == nil
-      assert result1.is_lead == false
+      assert result1.lead? == false
       assert result1.postcode == "9999"
       assert result1.city == "Testcity"
       assert result1.country_id == 3
@@ -284,7 +284,7 @@ defmodule BexioApiClient.ContactsTest do
       assert result1.street_name == "Teststrasse"
       assert result1.house_number == "999"
       assert result1.address_addition == nil
-      assert result1.is_lead == false
+      assert result1.lead? == false
       assert result1.postcode == "9999"
       assert result1.city == "Testcity"
       assert result1.country_id == 3
