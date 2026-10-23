@@ -185,6 +185,7 @@ defmodule BexioApiClient.Accounting do
          "start" => start,
          "end" => end_date,
          "is_vat_subject" => vat_subject?,
+         "is_annual_reporting" => annual_reporting?,
          "created_at" => created_at,
          "updated_at" => updated_at,
          "vat_accounting_method" => vat_accounting_method,
@@ -195,10 +196,12 @@ defmodule BexioApiClient.Accounting do
       start: to_date(start),
       end: to_date(end_date),
       vat_subject?: vat_subject?,
+      annual_reporting?: annual_reporting?,
       created_at: to_offset_datetime(created_at),
       updated_at: to_offset_datetime(updated_at),
-      vat_accounting_method: String.to_atom(vat_accounting_method),
-      vat_accounting_type: String.to_atom(vat_accounting_type)
+      # both fields are null when the calendar year is not subjected to vat
+      vat_accounting_method: to_enum(vat_accounting_method, [:effective, :net_tax]),
+      vat_accounting_type: to_enum(vat_accounting_type, [:agreed, :collected])
     }
   end
 
@@ -221,15 +224,19 @@ defmodule BexioApiClient.Accounting do
   defp map_from_currencies(currencies, _env),
     do: Enum.map(currencies, &map_from_currency/1)
 
-  defp map_from_currency(%{
-         "id" => id,
-         "name" => name,
-         "round_factor" => round_factor
-       }) do
+  defp map_from_currency(%{"id" => id, "name" => name, "round_factor" => round_factor} = currency) do
     %Currency{
       id: id,
       name: name,
-      round_factor: round_factor
+      round_factor: round_factor,
+      # embedded default exchange rate fields; not present/null for the base currency
+      exchange_rate: Map.get(currency, "exchange_rate"),
+      exchange_rate_date: to_date(Map.get(currency, "exchange_rate_date")),
+      exchange_rate_id: Map.get(currency, "exchange_rate_id"),
+      exchange_rate_to_ratio: Map.get(currency, "exchange_rate_to_ratio"),
+      ratio: Map.get(currency, "ratio"),
+      source: Map.get(currency, "source"),
+      source_reason: Map.get(currency, "source_reason")
     }
   end
 
@@ -309,6 +316,8 @@ defmodule BexioApiClient.Accounting do
          "net_tax_value" => net_tax_value,
          "start_year" => start_year,
          "end_year" => end_year,
+         "start_month" => start_month,
+         "end_month" => end_month,
          "is_active" => active?,
          "display_name" => display_name
        }) do
@@ -318,13 +327,26 @@ defmodule BexioApiClient.Accounting do
       name: name,
       code: code,
       digit: digit,
-      type: String.to_atom(type),
+      type:
+        to_enum(type, [
+          :net_tax,
+          :non_consideration_sales_tax,
+          :pre_customs_tax_investment,
+          :pre_customs_tax_material,
+          :pre_regards_tax_investment,
+          :pre_regards_tax_material,
+          :pre_tax_investment,
+          :pre_tax_material,
+          :sales_tax
+        ]),
       account_id: account_id,
       tax_settlement_type: tax_settlement_type,
       value: value,
       net_tax_value: net_tax_value,
       start_year: start_year,
       end_year: end_year,
+      start_month: start_month,
+      end_month: end_month,
       active?: active?,
       display_name: display_name
     }

@@ -22,6 +22,13 @@ An Elixir API client library for the [Bexio business management platform API](ht
 - Keep typespecs (`@spec`) complete on all public functions — the project has strict dialyzer flags (`-Wunmatched_returns`, `:error_handling`, `:underspecs`).
 - Keep `@doc` documentation current; this library's docs are published to HexDocs via `ex_doc`.
 - Do not add dependencies unless truly necessary; `:telemetry` (~> 1.0) is already available for events.
+- **Enums and atoms**: never use `String.to_atom/1` on API response values (unbounded
+  atom creation). If the API documents an enum, list its values as atom literals in the
+  code (struct type, module attribute or call site) and convert with
+  `String.to_existing_atom/1` — `BexioApiClient.Helpers.to_enum/2` does exactly this and
+  falls back to keeping the string for unknown values. If the values are unknown or open
+  (e.g. file extensions, permission keys not in the documented set), keep the string and
+  type the field accordingly.
 - Tests must never make real network calls — stub `Req` responses (e.g. `Req.Test` or by mocking the IDP URL config).
 
 ## OAuth / token handling notes

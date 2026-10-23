@@ -20,6 +20,7 @@ defmodule BexioApiClient.SalesOrderManagement.Order do
     * `:kb_item_status` is converted from `kb_item_status_id` rest field
     * `:api_reference` - this field can only be read and edited by the api. it can be used to save references to other systems
     * `:template_slug` - references a document template slug
+    * `:logopaper_id` - deprecated by bexio in favor of `:template_slug`
     * `:taxs` - map of percentage as key and absolute values as value
     * `:network_link` - the network link of the order
   """
@@ -55,6 +56,7 @@ defmodule BexioApiClient.SalesOrderManagement.Order do
           viewed_by_client_at: NaiveDateTime.t() | nil,
           updated_at: NaiveDateTime.t(),
           template_slug: String.t() | nil,
+          logopaper_id: integer() | nil,
           taxs: list(%{percentage: Decimal.t(), value: Decimal.t()}),
           network_link: String.t() | nil
         }
@@ -111,6 +113,8 @@ defmodule BexioApiClient.SalesOrderManagement.Order do
     :viewed_by_client_at,
     :updated_at,
     :template_slug,
+    # deprecated by bexio in favor of template_slug
+    :logopaper_id,
     :taxs,
     :network_link,
     :positions

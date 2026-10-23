@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **BREAKING — more "Elixir style" API (major release)**: this release makes the client
+  idiomatic Elixir instead of mirroring bexio's raw JSON naming. The JSON keys sent to and
+  received from the API are unchanged — only the parsed struct representation changes.
+  Changes to **existing** struct fields and types (these are the breaking parts):
+
+  | bexio JSON value | before | now |
+  |---|---|---|
+  | `Country.iso_3166_alpha2` | `country.iso_3166_alpha2` (string) | `country.iso3166_alpha2` (the docs' spelling wins even though it looks like a typo on their side; parser accepts both response spellings) |
+  | `File.extension` | `:png` (atom via `String.to_atom/1`) | `"png"` (string — the extension set is open, not a documented enum) |
+  | `DocumentSetting.kb_item_class` | `:KbOffer` (PascalCase atom) | `:kb_offer` / `:kb_order` / `:kb_invoice` / `:kb_delivery`; unknown class names stay strings |
+  | `Permission.permissions` keys and scopes | atoms for every key | atoms for the documented components/scopes; unknown components and scopes stay strings |
+
+
+### Added
+
+- `docs/bexio-openapi.json` / `docs/bexio-openapi.yaml` — unofficial OpenAPI 3.0
+  reconstruction of the bexio API, regenerated from the live docs; not the
+  source of truth for this library.
+- `Contact`: new fields `street_name`, `house_number`, `address_addition`,
+  `lead?` (bexio's `is_lead`) and `profile_image` (show response only).
+- `AdditionalAddress`: new fields `name_addition`, `street_name`, `house_number`,
+  `address_addition`.
+- `File`: new field `source_id` (deprecated by bexio in favor of `source_type`).
+- `Item`: new fields `account_id`, `expense_account_id` and `html_text`
+  (deprecated by bexio).
+- `Tax`: new fields `start_month`, `end_month`.
+- `CalendarYear`: new field `annual_reporting?` (bexio's `is_annual_reporting`).
+- `Currency`: new embedded default exchange rate fields `exchange_rate`,
+  `exchange_rate_date`, `exchange_rate_id`, `exchange_rate_to_ratio`, `ratio`,
+  `source`, `source_reason` (`nil` for the base currency).
+- `Quote`, `Order`, `Invoice`, `Delivery`: new field `logopaper_id`
+  (deprecated by bexio in favor of `template_slug`).
+- `Delivery`: new fields `viewed_by_client_at` and `template_slug`.
+- `docs/UNTRUTHS.md` — documented divergences between the official docs and
+  this library / the real API.
+
+### Changed
+
+- `File.extension` is kept as a string: the set of extensions is open, not a documented
+  enum, and must not be converted to atoms dynamically.
+- `DocumentSetting.kb_item_class` is converted to idiomatic atoms
+  (`:kb_offer`/`:kb_order`/`:kb_invoice`/`:kb_delivery`); unknown class names are kept
+  as strings.
+- `Permission.permissions` keys are atoms for the documented components; unknown
+  components are kept as string keys. Values of unknown scopes are kept as strings.
+
+### Fixed
+
+- `Contact.nr` no longer crashes when bexio returns `null` (documented as
+  "string or null"); `nil` is mapped to `nil`.
+- `CalendarYear.vat_accounting_method`/`vat_accounting_type` no longer crash
+  when they are `null` (calendar year not subjected to VAT).
+- `File.source_type` no longer crashes when it is `null`.
+
 ## [1.0.0] - 2026-10-19
 
 First stable release. The library has been actively maintained and used in

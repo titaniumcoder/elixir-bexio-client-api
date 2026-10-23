@@ -20,7 +20,9 @@ defmodule BexioApiClient.Others.CompanyProfile do
             | :foundation
             | :corporation
             | :limited_liability_company
-            | :association,
+            | :association
+            # undocumented values are kept as strings
+            | String.t(),
           mail: String.t(),
           phone_fixed: String.t(),
           phone_mobile: String.t(),

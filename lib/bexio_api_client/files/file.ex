@@ -11,12 +11,13 @@ defmodule BexioApiClient.Files.File do
           uuid: String.t(),
           name: String.t(),
           size_in_bytes: non_neg_integer(),
-          extension: :atom,
+          extension: String.t(),
           mime_type: String.t(),
           uploader_email: String.t() | nil,
           user_id: integer(),
           archived?: boolean(),
           source_type: :web | :email | :mobile | nil,
+          source_id: integer() | nil,
           referenced?: boolean(),
           created_at: DateTime.t()
         }
@@ -43,6 +44,8 @@ defmodule BexioApiClient.Files.File do
     :user_id,
     :archived?,
     :source_type,
+    # deprecated by bexio in favor of `:source_type`
+    :source_id,
     :referenced?,
     :created_at
   ]

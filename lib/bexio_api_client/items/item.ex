@@ -31,6 +31,8 @@ defmodule BexioApiClient.Items.Item do
           tax_income_id: integer() | nil,
           tax_id: integer() | nil,
           tax_expense_id: integer() | nil,
+          account_id: integer() | nil,
+          expense_account_id: integer() | nil,
           unit_id: integer() | nil,
           stock?: boolean(),
           stock_id: integer() | nil,
@@ -47,6 +49,7 @@ defmodule BexioApiClient.Items.Item do
           weight: integer() | nil,
           volume: integer() | nil,
           remarks: String.t() | nil,
+          html_text: String.t() | nil,
           delivery_price: Decimal.t() | nil,
           article_group_id: integer() | nil
         }
@@ -84,6 +87,8 @@ defmodule BexioApiClient.Items.Item do
     :tax_income_id,
     :tax_id,
     :tax_expense_id,
+    :account_id,
+    :expense_account_id,
     :unit_id,
     :stock?,
     :stock_id,
@@ -100,6 +105,7 @@ defmodule BexioApiClient.Items.Item do
     :weight,
     :volume,
     :remarks,
+    :html_text,
     :delivery_price,
     :article_group_id
   ]

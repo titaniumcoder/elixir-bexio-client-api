@@ -98,7 +98,15 @@ defmodule BexioApiClient.Others do
       postcode: postcode,
       city: city,
       country_id: country_id,
-      legal_form: String.to_atom(legal_form),
+      legal_form:
+        to_enum(legal_form, [
+          :sole_proprietorship,
+          :joint_partnership,
+          :foundation,
+          :corporation,
+          :limited_liability_company,
+          :association
+        ]),
       country_name: country_name,
       mail: mail,
       phone_fixed: phone_fixed,
@@ -185,16 +193,16 @@ defmodule BexioApiClient.Others do
          %{
            "id" => id,
            "name" => name,
-           "name_short" => name_short,
-           "iso_3166_alpha2" => iso_3166_alpha2
-         },
+           "name_short" => name_short
+         } = country,
          _env \\ nil
        ) do
     %Country{
       id: id,
       name: name,
       name_short: name_short,
-      iso_3166_alpha2: iso_3166_alpha2
+      # documented name is iso3166_alpha2; accept the old iso_3166_alpha2 spelling too
+      iso3166_alpha2: Map.get(country, "iso3166_alpha2") || Map.get(country, "iso_3166_alpha2")
     }
   end
 
@@ -389,7 +397,7 @@ defmodule BexioApiClient.Others do
        ) do
     %User{
       id: id,
-      salutation_type: String.to_atom(salutation_type),
+      salutation_type: to_enum(salutation_type, [:male, :female]),
       firstname: firstname,
       lastname: lastname,
       email: email,
@@ -414,7 +422,7 @@ defmodule BexioApiClient.Others do
        ) do
     %FictionalUser{
       id: id,
-      salutation_type: String.to_atom(salutation_type),
+      salutation_type: to_enum(salutation_type, [:male, :female]),
       firstname: firstname,
       lastname: lastname,
       email: email,
@@ -446,8 +454,44 @@ defmodule BexioApiClient.Others do
     }
   end
 
-  defp map_permission({k, properties}) do
-    map_part(String.to_atom(k), properties, %{})
+  @permission_components [
+    :accounting_reports,
+    :admin,
+    :analytics,
+    :article,
+    :banking,
+    :banking_direct,
+    :banking_sync,
+    :bill_administration,
+    :contact,
+    :dashboard_widget_sales,
+    :expense,
+    :fm,
+    :history,
+    :kb_account_statement,
+    :kb_article_order,
+    :kb_bill,
+    :kb_credit_voucher,
+    :kb_delivery,
+    :kb_invoice,
+    :kb_offer,
+    :kb_order,
+    :kb_wizard_recurring_invoices,
+    :kb_wizard_reminder,
+    :mailchimp,
+    :mailxpert,
+    :monitoring,
+    :pingen,
+    :project,
+    :project_show_conditions,
+    :stockmanagement,
+    :stockmanagement_changes,
+    :todo,
+    :user_administration
+  ]
+
+  defp map_permission({k, properties}) when is_binary(k) do
+    map_part(to_enum(k, @permission_components), properties, %{})
   end
 
   defp map_part(k, %{"activation" => activation} = map, acc) do

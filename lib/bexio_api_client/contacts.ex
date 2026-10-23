@@ -123,6 +123,9 @@ defmodule BexioApiClient.Contacts do
            "title_id" => title_id,
            "birthday" => birthday,
            "address" => address,
+           "street_name" => street_name,
+           "house_number" => house_number,
+           "address_addition" => address_addition,
            "postcode" => postcode,
            "city" => city,
            "country_id" => country_id,
@@ -135,18 +138,20 @@ defmodule BexioApiClient.Contacts do
            "url" => url,
            "skype_name" => skype_name,
            "remarks" => remarks,
+           "is_lead" => lead?,
            "language_id" => language_id,
            "contact_group_ids" => contact_group_ids,
            "contact_branch_ids" => contact_branch_ids,
            "user_id" => user_id,
            "owner_id" => owner_id,
            "updated_at" => updated_at
-         },
+         } = contact,
          _env \\ nil
        ) do
     %Contact{
       id: id,
-      nr: String.to_integer(nr),
+      # nr is "string or null" in the API; it is nil when assigned automatically
+      nr: if(is_nil(nr), do: nil, else: String.to_integer(nr)),
       contact_type: contact_type(contact_type_id),
       name_1: name_1,
       name_2: name_2,
@@ -155,6 +160,9 @@ defmodule BexioApiClient.Contacts do
       title_id: title_id,
       birthday: to_date(birthday),
       address: address,
+      street_name: street_name,
+      house_number: house_number,
+      address_addition: address_addition,
       postcode: postcode,
       city: city,
       country_id: country_id,
@@ -167,12 +175,15 @@ defmodule BexioApiClient.Contacts do
       url: url,
       skype_name: skype_name,
       remarks: remarks,
+      lead?: lead?,
       language_id: language_id,
       contact_group_ids: string_to_array(contact_group_ids),
       contact_branch_ids: string_to_array(contact_branch_ids),
       user_id: user_id,
       owner_id: owner_id,
-      updated_at: to_datetime(updated_at)
+      updated_at: to_datetime(updated_at),
+      # profile_image is only part of the show-contact response, not of list/search
+      profile_image: Map.get(contact, "profile_image")
     }
   end
 
@@ -484,7 +495,11 @@ defmodule BexioApiClient.Contacts do
          %{
            "id" => id,
            "name" => name,
+           "name_addition" => name_addition,
            "address" => address,
+           "street_name" => street_name,
+           "house_number" => house_number,
+           "address_addition" => address_addition,
            "postcode" => postcode,
            "city" => city,
            "country_id" => country_id,
@@ -496,7 +511,11 @@ defmodule BexioApiClient.Contacts do
     %AdditionalAddress{
       id: id,
       name: name,
+      name_addition: name_addition,
       address: address,
+      street_name: street_name,
+      house_number: house_number,
+      address_addition: address_addition,
       postcode: postcode,
       city: city,
       country_id: country_id,

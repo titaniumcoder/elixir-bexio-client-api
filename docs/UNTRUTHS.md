@@ -7,7 +7,7 @@ are wrong we do **not** bend the library to match them; where the library
 intentionally deviates for design reasons, it is recorded here too.
 
 Maintained as part of the `fix/api-docs-alignment` audit (PR: docs snapshot of
-2026-10-23, reconstructed in `docs/reference/` / `docs/bexio-openapi.json`).
+2026-10-23, reconstructed in `docs/bexio-openapi.json`).
 
 ## 1. Document responses include `positions` — this library does not embed them
 

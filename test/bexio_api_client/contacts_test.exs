@@ -32,6 +32,9 @@ defmodule BexioApiClient.ContactsTest do
               "title_id" => 2,
               "birthday" => nil,
               "address" => "Teststrasse 999",
+              "street_name" => "Teststrasse",
+              "house_number" => "999",
+              "address_addition" => nil,
               "postcode" => "9999",
               "city" => "Testcity",
               "country_id" => 3,
@@ -44,8 +47,8 @@ defmodule BexioApiClient.ContactsTest do
               "url" => "http://unbekannte.url",
               "skype_name" => "ich.bin.in.skype",
               "remarks" => "Lange schoene Bemerkungen",
-              "language_id" => 4,
               "is_lead" => false,
+              "language_id" => 4,
               "contact_group_ids" => "2,22,2,3",
               "contact_branch_ids" => "3,33,3,99",
               "user_id" => 5,
@@ -63,6 +66,9 @@ defmodule BexioApiClient.ContactsTest do
               "title_id" => nil,
               "birthday" => "1973-06-29",
               "address" => nil,
+              "street_name" => "Teststrasse",
+              "house_number" => "999",
+              "address_addition" => nil,
               "postcode" => nil,
               "city" => nil,
               "country_id" => nil,
@@ -75,8 +81,8 @@ defmodule BexioApiClient.ContactsTest do
               "url" => nil,
               "skype_name" => nil,
               "remarks" => nil,
-              "language_id" => nil,
               "is_lead" => false,
+              "language_id" => nil,
               "contact_group_ids" => nil,
               "contact_branch_ids" => nil,
               "user_id" => 2,
@@ -111,6 +117,10 @@ defmodule BexioApiClient.ContactsTest do
       assert result1.title_id == 2
       assert result1.birthday == nil
       assert result1.address == "Teststrasse 999"
+      assert result1.street_name == "Teststrasse"
+      assert result1.house_number == "999"
+      assert result1.address_addition == nil
+      assert result1.lead? == false
       assert result1.postcode == "9999"
       assert result1.city == "Testcity"
       assert result1.country_id == 3
@@ -182,6 +192,9 @@ defmodule BexioApiClient.ContactsTest do
               "title_id" => 2,
               "birthday" => nil,
               "address" => "Teststrasse 999",
+              "street_name" => "Teststrasse",
+              "house_number" => "999",
+              "address_addition" => nil,
               "postcode" => "9999",
               "city" => "Testcity",
               "country_id" => 3,
@@ -194,8 +207,8 @@ defmodule BexioApiClient.ContactsTest do
               "url" => "http://unbekannte.url",
               "skype_name" => "ich.bin.in.skype",
               "remarks" => "Lange schoene Bemerkungen",
-              "language_id" => 4,
               "is_lead" => false,
+              "language_id" => 4,
               "contact_group_ids" => "2,22,2,3",
               "contact_branch_ids" => "3,33,3,99",
               "user_id" => 5,
@@ -213,6 +226,9 @@ defmodule BexioApiClient.ContactsTest do
               "title_id" => nil,
               "birthday" => "1973-06-29",
               "address" => nil,
+              "street_name" => "Teststrasse",
+              "house_number" => "999",
+              "address_addition" => nil,
               "postcode" => nil,
               "city" => nil,
               "country_id" => nil,
@@ -225,8 +241,8 @@ defmodule BexioApiClient.ContactsTest do
               "url" => nil,
               "skype_name" => nil,
               "remarks" => nil,
-              "language_id" => nil,
               "is_lead" => false,
+              "language_id" => nil,
               "contact_group_ids" => nil,
               "contact_branch_ids" => nil,
               "user_id" => 2,
@@ -265,6 +281,10 @@ defmodule BexioApiClient.ContactsTest do
       assert result1.title_id == 2
       assert result1.birthday == nil
       assert result1.address == "Teststrasse 999"
+      assert result1.street_name == "Teststrasse"
+      assert result1.house_number == "999"
+      assert result1.address_addition == nil
+      assert result1.lead? == false
       assert result1.postcode == "9999"
       assert result1.city == "Testcity"
       assert result1.country_id == 3
@@ -329,6 +349,9 @@ defmodule BexioApiClient.ContactsTest do
             "title_id" => 2,
             "birthday" => nil,
             "address" => "Teststrasse 999",
+            "street_name" => "Teststrasse",
+            "house_number" => "999",
+            "address_addition" => nil,
             "postcode" => "9999",
             "city" => "Testcity",
             "country_id" => 3,
@@ -365,6 +388,9 @@ defmodule BexioApiClient.ContactsTest do
             "title_id" => 2,
             "birthday" => nil,
             "address" => "Teststrasse 999",
+            "street_name" => "Teststrasse",
+            "house_number" => "999",
+            "address_addition" => nil,
             "postcode" => "9999",
             "city" => "Testcity",
             "country_id" => 3,
@@ -377,8 +403,8 @@ defmodule BexioApiClient.ContactsTest do
             "url" => "http://unbekannte.url",
             "skype_name" => "ich.bin.in.skype",
             "remarks" => "Lange schoene Bemerkungen",
-            "language_id" => 4,
             "is_lead" => false,
+            "language_id" => 4,
             "contact_group_ids" => "2,22,2,3",
             "contact_branch_ids" => "3,33,3,99",
             "user_id" => 5,
@@ -436,6 +462,53 @@ defmodule BexioApiClient.ContactsTest do
       assert {:error, :not_found, "Contact does not exist"} =
                BexioApiClient.Contacts.fetch_contact(client, 99)
     end
+  end
+
+  test "handles null nr and profile_image from the show response" do
+    mock_request(fn
+      %{method: "GET", request_path: "/2.0/contact/55"} = conn ->
+        json(conn, %{
+          "id" => 55,
+          "nr" => nil,
+          "contact_type_id" => 1,
+          "name_1" => "Tester AG",
+          "name_2" => nil,
+          "salutation_id" => nil,
+          "salutation_form" => nil,
+          "title_id" => nil,
+          "birthday" => nil,
+          "address" => nil,
+          "street_name" => nil,
+          "house_number" => nil,
+          "address_addition" => nil,
+          "postcode" => nil,
+          "city" => nil,
+          "country_id" => nil,
+          "mail" => nil,
+          "mail_second" => nil,
+          "phone_fixed" => nil,
+          "phone_fixed_second" => nil,
+          "phone_mobile" => nil,
+          "fax" => nil,
+          "url" => nil,
+          "skype_name" => nil,
+          "remarks" => nil,
+          "is_lead" => false,
+          "language_id" => nil,
+          "contact_group_ids" => nil,
+          "contact_branch_ids" => nil,
+          "user_id" => 5,
+          "owner_id" => 6,
+          "updated_at" => "2022-09-13 09:14:21",
+          "profile_image" => "aGVsbG8="
+        })
+    end)
+
+    client = BexioApiClient.new("123")
+
+    assert {:ok, result} = BexioApiClient.Contacts.fetch_contact(client, 55, false)
+    assert result.nr == nil
+    assert result.profile_image == "aGVsbG8="
   end
 
   describe "fetching a list of contact relations" do
@@ -728,7 +801,11 @@ defmodule BexioApiClient.ContactsTest do
             %{
               "id" => 1,
               "name" => "My new address",
+              "name_addition" => nil,
               "address" => "Walter Street 22",
+              "street_name" => "Teststrasse",
+              "house_number" => "999",
+              "address_addition" => nil,
               "postcode" => 9000,
               "city" => "St. Gallen",
               "country_id" => 1,
@@ -738,7 +815,11 @@ defmodule BexioApiClient.ContactsTest do
             %{
               "id" => 2,
               "name" => "My new address",
+              "name_addition" => nil,
               "address" => "Walter Street 22",
+              "street_name" => "Teststrasse",
+              "house_number" => "999",
+              "address_addition" => nil,
               "postcode" => 9000,
               "city" => "St. Gallen",
               "country_id" => 1,
@@ -781,7 +862,11 @@ defmodule BexioApiClient.ContactsTest do
             %{
               "id" => 1,
               "name" => "My new address",
+              "name_addition" => nil,
               "address" => "Walter Street 22",
+              "street_name" => "Teststrasse",
+              "house_number" => "999",
+              "address_addition" => nil,
               "postcode" => 9000,
               "city" => "St. Gallen",
               "country_id" => 1,
@@ -791,7 +876,11 @@ defmodule BexioApiClient.ContactsTest do
             %{
               "id" => 2,
               "name" => "My new address",
+              "name_addition" => nil,
               "address" => "Walter Street 22",
+              "street_name" => "Teststrasse",
+              "house_number" => "999",
+              "address_addition" => nil,
               "postcode" => 9000,
               "city" => "St. Gallen",
               "country_id" => 1,
@@ -832,7 +921,11 @@ defmodule BexioApiClient.ContactsTest do
           json(conn, %{
             "id" => 1,
             "name" => "My new address",
+            "name_addition" => nil,
             "address" => "Walter Street 22",
+            "street_name" => "Teststrasse",
+            "house_number" => "999",
+            "address_addition" => nil,
             "postcode" => 9000,
             "city" => "St. Gallen",
             "country_id" => 1,

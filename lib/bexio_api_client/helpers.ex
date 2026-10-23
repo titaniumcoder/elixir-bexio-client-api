@@ -200,6 +200,63 @@ defmodule BexioApiClient.Helpers do
 
   def decimal_nil_as_zero(number) when is_float(number), do: Decimal.from_float(number)
 
+  @doc """
+  Converts a string into an atom when the value is a member of the documented
+  `values` enum, otherwise keeps the string.
+
+  The atom literals in `values` must be written in compiled code (e.g. as a
+  literal list at the call site or in a module attribute) so that
+  `String.to_existing_atom/1` cannot create new atoms at runtime.
+
+  ## Examples
+
+      iex> BexioApiClient.Helpers.to_enum("effective", [:effective, :net_tax])
+      :effective
+
+      iex> BexioApiClient.Helpers.to_enum("something_new", [:effective, :net_tax])
+      "something_new"
+
+      iex> BexioApiClient.Helpers.to_enum(nil, [:effective, :net_tax])
+      nil
+  """
+  @spec to_enum(nil | String.t() | atom(), [atom()]) :: nil | atom() | String.t()
+  def to_enum(nil, _values), do: nil
+
+  def to_enum(value, values) when is_binary(value) do
+    if value in Enum.map(values, &Atom.to_string/1) do
+      String.to_existing_atom(value)
+    else
+      value
+    end
+  end
+
+  def to_enum(value, _values) when is_atom(value), do: value
+
+  @doc """
+  Converts a bexio document class name (`KbOffer`, `KbOrder`, `KbInvoice`,
+  `KbDelivery` — as returned by e.g. `kb_item_class` and `ref_class` fields)
+  into an idiomatic atom, keeping unknown class names as strings.
+
+  ## Examples
+
+      iex> BexioApiClient.Helpers.document_class("KbInvoice")
+      :kb_invoice
+
+      iex> BexioApiClient.Helpers.document_class("KbSomethingNew")
+      "KbSomethingNew"
+
+      iex> BexioApiClient.Helpers.document_class(nil)
+      nil
+  """
+  @spec document_class(nil | String.t()) ::
+          nil | :kb_offer | :kb_order | :kb_invoice | :kb_delivery | String.t()
+  def document_class(nil), do: nil
+  def document_class("KbOffer"), do: :kb_offer
+  def document_class("KbOrder"), do: :kb_order
+  def document_class("KbInvoice"), do: :kb_invoice
+  def document_class("KbDelivery"), do: :kb_delivery
+  def document_class(other), do: other
+
   @spec remove_document_no_if_nil(map() | nil) :: map() | nil
   def remove_document_no_if_nil(nil), do: nil
   def remove_document_no_if_nil(%{document_nr: nil} = map), do: Map.delete(map, :document_nr)

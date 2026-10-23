@@ -190,7 +190,7 @@ defmodule BexioApiClient.OthersTest do
               "id" => 1,
               "name" => "Kiribati",
               "name_short" => "KI",
-              "iso_3166_alpha2" => "KI"
+              "iso3166_alpha2" => "KI"
             }
           ])
       end)
@@ -206,7 +206,32 @@ defmodule BexioApiClient.OthersTest do
       assert result.id == 1
       assert result.name == "Kiribati"
       assert result.name_short == "KI"
-      assert result.iso_3166_alpha2 == "KI"
+      assert result.iso3166_alpha2 == "KI"
+    end
+  end
+
+  describe "fetching countries with legacy iso field spelling" do
+    setup do
+      mock_request(fn
+        %{method: "GET", request_path: "/2.0/country"} = conn ->
+          json(conn, [
+            %{
+              "id" => 1,
+              "name" => "Kiribati",
+              "name_short" => "KI",
+              "iso_3166_alpha2" => "KI"
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "still maps the legacy iso_3166_alpha2 field" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, [result]} = BexioApiClient.Others.fetch_countries(client)
+      assert result.iso3166_alpha2 == "KI"
     end
   end
 
@@ -222,7 +247,7 @@ defmodule BexioApiClient.OthersTest do
               "id" => 1,
               "name" => "Kiribati",
               "name_short" => "KI",
-              "iso_3166_alpha2" => "KI"
+              "iso3166_alpha2" => "KI"
             }
           ])
       end)
@@ -242,7 +267,7 @@ defmodule BexioApiClient.OthersTest do
       assert result.id == 1
       assert result.name == "Kiribati"
       assert result.name_short == "KI"
-      assert result.iso_3166_alpha2 == "KI"
+      assert result.iso3166_alpha2 == "KI"
     end
   end
 
@@ -254,7 +279,7 @@ defmodule BexioApiClient.OthersTest do
             "id" => 1,
             "name" => "Kiribati",
             "name_short" => "KI",
-            "iso_3166_alpha2" => "KI"
+            "iso3166_alpha2" => "KI"
           })
 
         %{method: "GET", request_path: "/2.0/country/99"} = conn ->
@@ -270,7 +295,7 @@ defmodule BexioApiClient.OthersTest do
       assert result.id == 1
       assert result.name == "Kiribati"
       assert result.name_short == "KI"
-      assert result.iso_3166_alpha2 == "KI"
+      assert result.iso3166_alpha2 == "KI"
     end
 
     test "fails on unknown id" do
@@ -751,8 +776,8 @@ defmodule BexioApiClient.OthersTest do
 
       assert length(result.components) == 49
 
-      assert result.permissions.writer.activation == :enabled
-      assert result.permissions.gdrive.activation == :enabled
+      assert result.permissions["writer"].activation == :enabled
+      assert result.permissions["gdrive"].activation == :enabled
       assert result.permissions.kb_offer.edit == :all
       assert result.permissions.kb_offer.show == :all
     end

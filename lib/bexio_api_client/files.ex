@@ -115,7 +115,7 @@ defmodule BexioApiClient.Files do
            "source_type" => source_type,
            "is_referenced" => referenced?,
            "created_at" => created_at
-         },
+         } = file,
          _response \\ nil
        ) do
     %File{
@@ -123,14 +123,18 @@ defmodule BexioApiClient.Files do
       uuid: uuid,
       name: name,
       size_in_bytes: size_in_bytes,
-      extension: String.to_atom(extension),
+      # the extension is an open set, not a documented enum, so we keep the string
+      extension: extension,
       mime_type: mime_type,
       uploader_email: uploader_email,
       user_id: user_id,
       archived?: archived?,
-      source_type: String.to_atom(source_type),
+      # source_type is nullable in the API
+      source_type: to_enum(source_type, [:web, :email, :mobile]),
       referenced?: referenced?,
-      created_at: to_offset_datetime(created_at)
+      created_at: to_offset_datetime(created_at),
+      # deprecated by bexio in favor of source_type; not always present
+      source_id: Map.get(file, "source_id")
     }
   end
 
