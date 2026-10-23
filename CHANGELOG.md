@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-23
+
 ### Changed
 
 - **BREAKING — more "Elixir style" API (major release)**: this release makes the client
@@ -356,7 +358,8 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html) applies in full.
 
 - Removed dependency on `tesla`
 
-[Unreleased]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/2.0.0...HEAD
+[2.0.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/1.0.0...2.0.0
 [1.0.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.9.0...1.0.0
 [0.9.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/titaniumcoder/elixir-bexio-client-api/compare/0.7.1...0.8.0
