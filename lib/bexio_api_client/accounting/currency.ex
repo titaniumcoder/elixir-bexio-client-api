@@ -46,6 +46,29 @@ defmodule BexioApiClient.Accounting.Currency do
   ]
 
   @doc """
+  Create a new currency (for `create_currency/2`).
+  The id and the embedded default exchange rate fields are ignored when creating.
+  """
+  @spec new(map()) :: __MODULE__.t()
+  def new(attrs \\ %{}) do
+    Map.merge(
+      %__MODULE__{
+        id: nil,
+        name: nil,
+        round_factor: nil,
+        exchange_rate: nil,
+        exchange_rate_date: nil,
+        exchange_rate_id: nil,
+        exchange_rate_to_ratio: nil,
+        ratio: nil,
+        source: nil,
+        source_reason: nil
+      },
+      attrs
+    )
+  end
+
+  @doc """
   Rounds an amount to the given currency round factor
   """
   def round(nil, _currency), do: nil

@@ -104,7 +104,8 @@ defmodule BexioApiClient.Helpers do
            | :could_not_be_saved
            | :rate_limited
            | :unexpected_api_condition
-           | :api_not_available, nil | any()}
+           | :api_not_available
+           | :conflict, nil | any()}
           | {:error, nil | any()}
 
   @spec bexio_body_handling(
@@ -144,6 +145,7 @@ defmodule BexioApiClient.Helpers do
   defp error_code(415), do: :invalid_data
   defp error_code(422), do: :could_not_be_saved
   defp error_code(429), do: :rate_limited
+  defp error_code(409), do: :conflict
   defp error_code(500), do: :unexpected_api_condition
   defp error_code(502), do: :bad_gateway
   defp error_code(503), do: :api_not_available
