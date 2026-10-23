@@ -26,7 +26,7 @@ defmodule BexioApiClient.Accounting.CalendarYear do
           annual_reporting?: boolean(),
           created_at: DateTime.t(),
           updated_at: DateTime.t(),
-          vat_accounting_method: :effect | :net_tax | nil,
+          vat_accounting_method: :effective | :net_tax | nil,
           vat_accounting_type: :agreed | :collected | nil
         }
   @enforce_keys [
