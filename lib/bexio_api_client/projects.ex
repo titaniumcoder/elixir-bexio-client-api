@@ -9,6 +9,7 @@ defmodule BexioApiClient.Projects do
   alias BexioApiClient.Projects.Project
   alias BexioApiClient.Projects.ProjectState
   alias BexioApiClient.Projects.ProjectType
+  alias BexioApiClient.Projects.{Milestone, WorkPackage}
 
   alias BexioApiClient.GlobalArguments
   import BexioApiClient.GlobalArguments, only: [opts_to_query: 1]
@@ -314,4 +315,254 @@ defmodule BexioApiClient.Projects do
   defp budget_type_id(:budget_per_employee), do: 4
   defp budget_type_id(nil), do: nil
   defp budget_type_id(other) when is_integer(other), do: other
+
+  @doc """
+  Fetch a list of milestones of a project.
+  """
+  @spec fetch_milestones(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [Milestone.t()]} | api_error_type()
+  def fetch_milestones(req, project_id, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/3.0/projects/#{project_id}/milestones", params: opts_to_query(opts))
+      end,
+      &map_from_milestones/2
+    )
+  end
+
+  @doc """
+  Create a milestone of a project.
+  """
+  @spec create_milestone(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          milestone :: Milestone.t()
+        ) :: {:ok, Milestone.t()} | api_error_type()
+  def create_milestone(req, project_id, milestone) do
+    bexio_body_handling(
+      fn ->
+        Req.post(
+          req,
+          url: "/3.0/projects/#{project_id}/milestones",
+          json: remap_milestone(milestone)
+        )
+      end,
+      &map_from_milestone/2
+    )
+  end
+
+  @doc """
+  Fetch a single milestone of a project.
+  """
+  @spec fetch_milestone(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          milestone_id :: integer()
+        ) :: {:ok, Milestone.t()} | api_error_type()
+  def fetch_milestone(req, project_id, milestone_id) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/3.0/projects/#{project_id}/milestones/#{milestone_id}")
+      end,
+      &map_from_milestone/2
+    )
+  end
+
+  @doc """
+  Edit a single milestone of a project.
+  """
+  @spec edit_milestone(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          milestone :: Milestone.t()
+        ) :: {:ok, Milestone.t()} | api_error_type()
+  def edit_milestone(req, project_id, milestone) do
+    bexio_body_handling(
+      fn ->
+        Req.post(
+          req,
+          url: "/3.0/projects/#{project_id}/milestones/#{milestone.id}",
+          json: remap_milestone(milestone)
+        )
+      end,
+      &map_from_milestone/2
+    )
+  end
+
+  @doc """
+  Delete a single milestone of a project.
+  """
+  @spec delete_milestone(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          milestone_id :: integer()
+        ) :: {:ok, boolean()} | api_error_type()
+  def delete_milestone(req, project_id, milestone_id) do
+    bexio_body_handling(
+      fn ->
+        Req.delete(req, url: "/3.0/projects/#{project_id}/milestones/#{milestone_id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  defp map_from_milestones(milestones, _env), do: Enum.map(milestones, &map_from_milestone/1)
+
+  defp map_from_milestone(%{"id" => id, "name" => name} = milestone, _env \\ nil) do
+    %Milestone{
+      id: id,
+      name: name,
+      end_date: to_date(Map.get(milestone, "end_date")),
+      comment: Map.get(milestone, "comment"),
+      pr_parent_milestone_id: Map.get(milestone, "pr_parent_milestone_id")
+    }
+  end
+
+  defp remap_milestone(%Milestone{
+         name: name,
+         end_date: end_date,
+         comment: comment,
+         pr_parent_milestone_id: pr_parent_milestone_id
+       }) do
+    %{
+      name: name,
+      end_date: to_iso8601(end_date),
+      comment: comment,
+      pr_parent_milestone_id: pr_parent_milestone_id
+    }
+  end
+
+  @doc """
+  Fetch a list of work packages of a project.
+  """
+  @spec fetch_work_packages(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          opts :: [GlobalArguments.offset_without_order_by_arg()]
+        ) :: {:ok, [WorkPackage.t()]} | api_error_type()
+  def fetch_work_packages(req, project_id, opts \\ []) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/3.0/projects/#{project_id}/packages", params: opts_to_query(opts))
+      end,
+      &map_from_work_packages/2
+    )
+  end
+
+  @doc """
+  Create a work package of a project.
+  """
+  @spec create_work_package(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          work_package :: WorkPackage.t()
+        ) :: {:ok, WorkPackage.t()} | api_error_type()
+  def create_work_package(req, project_id, work_package) do
+    bexio_body_handling(
+      fn ->
+        Req.post(
+          req,
+          url: "/3.0/projects/#{project_id}/packages",
+          json: remap_work_package(work_package)
+        )
+      end,
+      &map_from_work_package/2
+    )
+  end
+
+  @doc """
+  Fetch a single work package of a project.
+  """
+  @spec fetch_work_package(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          package_id :: integer()
+        ) :: {:ok, WorkPackage.t()} | api_error_type()
+  def fetch_work_package(req, project_id, package_id) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/3.0/projects/#{project_id}/packages/#{package_id}")
+      end,
+      &map_from_work_package/2
+    )
+  end
+
+  @doc """
+  Edit a single work package of a project.
+  """
+  @spec edit_work_package(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          work_package :: WorkPackage.t()
+        ) :: {:ok, WorkPackage.t()} | api_error_type()
+  def edit_work_package(req, project_id, work_package) do
+    bexio_body_handling(
+      fn ->
+        Req.patch(
+          req,
+          url: "/3.0/projects/#{project_id}/packages/#{work_package.id}",
+          json: remap_work_package(work_package)
+        )
+      end,
+      &map_from_work_package/2
+    )
+  end
+
+  @doc """
+  Delete a single work package of a project.
+  """
+  @spec delete_work_package(
+          req :: Req.Request.t(),
+          project_id :: integer(),
+          package_id :: integer()
+        ) :: {:ok, boolean()} | api_error_type()
+  def delete_work_package(req, project_id, package_id) do
+    bexio_body_handling(
+      fn ->
+        Req.delete(req, url: "/3.0/projects/#{project_id}/packages/#{package_id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  defp map_from_work_packages(work_packages, _env),
+    do: Enum.map(work_packages, &map_from_work_package/1)
+
+  defp map_from_work_package(%{"id" => id, "name" => name} = work_package, _env \\ nil) do
+    %WorkPackage{
+      id: id,
+      name: name,
+      spent_time_in_hours: decimal_from(Map.get(work_package, "spent_time_in_hours")),
+      estimated_time_in_hours: decimal_from(Map.get(work_package, "estimated_time_in_hours")),
+      comment: Map.get(work_package, "comment"),
+      pr_milestone_id: Map.get(work_package, "pr_milestone_id")
+    }
+  end
+
+  defp remap_work_package(%WorkPackage{
+         name: name,
+         spent_time_in_hours: spent_time_in_hours,
+         estimated_time_in_hours: estimated_time_in_hours,
+         comment: comment,
+         pr_milestone_id: pr_milestone_id
+       }) do
+    %{
+      name: name,
+      spent_time_in_hours: decimal_to_string(spent_time_in_hours),
+      estimated_time_in_hours: decimal_to_string(estimated_time_in_hours),
+      comment: comment,
+      pr_milestone_id: pr_milestone_id
+    }
+  end
+
+  defp decimal_from(nil), do: nil
+  defp decimal_from(%Decimal{} = value), do: value
+  defp decimal_from(value), do: decimal_nil_as_zero(value)
+
+  defp decimal_to_string(nil), do: nil
+  defp decimal_to_string(%Decimal{} = value), do: to_string(value)
+  defp decimal_to_string(value), do: value |> decimal_nil_as_zero() |> to_string()
 end
