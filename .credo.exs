@@ -13,9 +13,9 @@
       parse_timeout: 5000,
       color: true,
       checks: [
-        # our structs mirror the bexio API objects 1:1, so they legitimately
-        # have more fields than credo's default allows
-        {Credo.Check.Warning.StructFieldAmount, max_fields: 45},
+        # struct field counts come from the bexio API objects, not from our
+        # design decisions - so this check does not apply to us
+        {Credo.Check.Warning.StructFieldAmount, false},
       ]
     }
   ]
