@@ -776,8 +776,8 @@ defmodule BexioApiClient.OthersTest do
 
       assert length(result.components) == 49
 
-      assert result.permissions.writer.activation == :enabled
-      assert result.permissions.gdrive.activation == :enabled
+      assert result.permissions["writer"].activation == :enabled
+      assert result.permissions["gdrive"].activation == :enabled
       assert result.permissions.kb_offer.edit == :all
       assert result.permissions.kb_offer.show == :all
     end

@@ -123,13 +123,14 @@ defmodule BexioApiClient.Files do
       uuid: uuid,
       name: name,
       size_in_bytes: size_in_bytes,
-      extension: String.to_atom(extension),
+      # the extension is an open set, not a documented enum, so we keep the string
+      extension: extension,
       mime_type: mime_type,
       uploader_email: uploader_email,
       user_id: user_id,
       archived?: archived?,
       # source_type is nullable in the API
-      source_type: if(is_nil(source_type), do: nil, else: String.to_atom(source_type)),
+      source_type: to_enum(source_type, [:web, :email, :mobile]),
       referenced?: referenced?,
       created_at: to_offset_datetime(created_at),
       # deprecated by bexio in favor of source_type; not always present

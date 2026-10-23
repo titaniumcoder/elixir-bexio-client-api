@@ -2220,7 +2220,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
 
       assert result.id == 1
       assert result.text == "Quote"
-      assert result.kb_item_class == :KbOffer
+      assert result.kb_item_class == "KbOffer"
 
       # TODO add remaining test comparison
     end

@@ -37,6 +37,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/UNTRUTHS.md` — documented divergences between the official docs and
   this library / the real API.
 
+### Changed
+
+- `File.extension` is kept as a string: the set of extensions is open, not a documented
+  enum, and must not be converted to atoms dynamically.
+- `DocumentSetting.kb_item_class` is kept as a string (no documented enum values).
+- `Permission.permissions` keys are atoms for the documented components; unknown
+  components are kept as string keys. Values of unknown scopes are kept as strings.
+
 ### Fixed
 
 - `Contact.nr` no longer crashes when bexio returns `null` (documented as

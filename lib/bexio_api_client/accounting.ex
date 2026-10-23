@@ -200,10 +200,8 @@ defmodule BexioApiClient.Accounting do
       created_at: to_offset_datetime(created_at),
       updated_at: to_offset_datetime(updated_at),
       # both fields are null when the calendar year is not subjected to vat
-      vat_accounting_method:
-        if(is_nil(vat_accounting_method), do: nil, else: String.to_atom(vat_accounting_method)),
-      vat_accounting_type:
-        if(is_nil(vat_accounting_type), do: nil, else: String.to_atom(vat_accounting_type))
+      vat_accounting_method: to_enum(vat_accounting_method, [:effective, :net_tax]),
+      vat_accounting_type: to_enum(vat_accounting_type, [:agreed, :collected])
     }
   end
 
@@ -329,7 +327,18 @@ defmodule BexioApiClient.Accounting do
       name: name,
       code: code,
       digit: digit,
-      type: String.to_atom(type),
+      type:
+        to_enum(type, [
+          :net_tax,
+          :non_consideration_sales_tax,
+          :pre_customs_tax_investment,
+          :pre_customs_tax_material,
+          :pre_regards_tax_investment,
+          :pre_regards_tax_material,
+          :pre_tax_investment,
+          :pre_tax_material,
+          :sales_tax
+        ]),
       account_id: account_id,
       tax_settlement_type: tax_settlement_type,
       value: value,

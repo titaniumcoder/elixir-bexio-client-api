@@ -11,7 +11,7 @@ defmodule BexioApiClient.Files.File do
           uuid: String.t(),
           name: String.t(),
           size_in_bytes: non_neg_integer(),
-          extension: :atom,
+          extension: String.t(),
           mime_type: String.t(),
           uploader_email: String.t() | nil,
           user_id: integer(),
