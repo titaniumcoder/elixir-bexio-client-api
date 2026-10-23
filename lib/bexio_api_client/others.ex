@@ -9,6 +9,7 @@ defmodule BexioApiClient.Others do
   alias BexioApiClient.Others.{
     CompanyProfile,
     Country,
+    DocumentTemplate,
     Language,
     Permission,
     Todo,
@@ -207,6 +208,52 @@ defmodule BexioApiClient.Others do
   end
 
   @doc """
+  Create a country.
+  """
+  @spec create_country(req :: Req.Request.t(), country :: Country.t()) ::
+          {:ok, Country.t()} | api_error_type()
+  def create_country(req, country) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/country", json: remap_country(country))
+      end,
+      &map_from_country/2
+    )
+  end
+
+  @doc """
+  Edit a country.
+  """
+  @spec edit_country(req :: Req.Request.t(), country :: Country.t()) ::
+          {:ok, Country.t()} | api_error_type()
+  def edit_country(req, country) do
+    bexio_body_handling(
+      fn ->
+        Req.post(req, url: "/2.0/country/#{country.id}", json: remap_country(country))
+      end,
+      &map_from_country/2
+    )
+  end
+
+  @doc """
+  Delete a country.
+  """
+  @spec delete_country(req :: Req.Request.t(), id :: integer()) ::
+          {:ok, boolean()} | api_error_type()
+  def delete_country(req, id) do
+    bexio_body_handling(
+      fn ->
+        Req.delete(req, url: "/2.0/country/#{id}")
+      end,
+      &success_response/2
+    )
+  end
+
+  defp remap_country(country) do
+    Map.take(country, [:name, :name_short, :iso3166_alpha2])
+  end
+
+  @doc """
   Fetch a list of languages.
   """
   @spec fetch_languages(req :: Req.Request.t()) ::
@@ -296,6 +343,20 @@ defmodule BexioApiClient.Others do
     bexio_body_handling(
       fn ->
         Req.get(req, url: "/3.0/users/#{user_id}")
+      end,
+      &map_from_user/2
+    )
+  end
+
+  @doc """
+  Fetch the authenticated user.
+  """
+  @spec fetch_me(req :: Req.Request.t()) ::
+          {:ok, User.t()} | api_error_type()
+  def fetch_me(req) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/3.0/users/me")
       end,
       &map_from_user/2
     )
@@ -987,4 +1048,53 @@ defmodule BexioApiClient.Others do
       &body_to_map/2
     )
   end
+
+  @doc """
+  Fetch a list of document templates.
+  """
+  @spec fetch_document_templates(req :: Req.Request.t()) ::
+          {:ok, [DocumentTemplate.t()]} | api_error_type()
+  def fetch_document_templates(req) do
+    bexio_body_handling(
+      fn ->
+        Req.get(req, url: "/3.0/document_templates")
+      end,
+      &map_from_document_templates/2
+    )
+  end
+
+  defp map_from_document_templates(document_templates, _env),
+    do: Enum.map(document_templates, &map_from_document_template/1)
+
+  defp map_from_document_template(
+         %{
+           "template_slug" => template_slug,
+           "name" => name,
+           "is_default" => default?,
+           "default_for_document_types" => default_for_document_types
+         },
+         _env \\ nil
+       ) do
+    %DocumentTemplate{
+      template_slug: template_slug,
+      name: name,
+      default?: default?,
+      default_for_document_types: to_document_types(default_for_document_types)
+    }
+  end
+
+  @document_types [
+    :type_offer,
+    :type_order,
+    :type_invoice,
+    :type_delivery,
+    :type_credit_voucher,
+    :type_account_statement,
+    :type_article_order
+  ]
+
+  defp to_document_types(types) when is_list(types),
+    do: Enum.map(types, &to_enum(&1, @document_types))
+
+  defp to_document_types(other), do: other
 end

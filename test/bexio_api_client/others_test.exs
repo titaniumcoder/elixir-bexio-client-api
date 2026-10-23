@@ -5,7 +5,7 @@ defmodule BexioApiClient.OthersTest do
 
   doctest BexioApiClient.Others
 
-  alias BexioApiClient.Others.{FictionalUser, Todo, Note}
+  alias BexioApiClient.Others.{Country, DocumentTemplate, FictionalUser, Todo, Note}
   alias BexioApiClient.SearchCriteria
 
   describe "fetching a list of company profiles" do
@@ -306,6 +306,99 @@ defmodule BexioApiClient.OthersTest do
     end
   end
 
+  describe "creating a country" do
+    setup do
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/country"} = conn ->
+          {:ok, body, _} = read_body(conn)
+          body_json = Jason.decode!(body)
+          assert body_json["name"] == "Kiribati"
+          assert body_json["name_short"] == "KI"
+          assert body_json["iso3166_alpha2"] == "KI"
+
+          json(conn, %{
+            "id" => 1,
+            "name" => "Kiribati",
+            "name_short" => "KI",
+            "iso3166_alpha2" => "KI"
+          })
+      end)
+
+      :ok
+    end
+
+    test "creates the new country" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} =
+               BexioApiClient.Others.create_country(
+                 client,
+                 Country.new(%{name: "Kiribati", name_short: "KI", iso3166_alpha2: "KI"})
+               )
+
+      assert result.id == 1
+      assert result.name == "Kiribati"
+      assert result.name_short == "KI"
+      assert result.iso3166_alpha2 == "KI"
+    end
+  end
+
+  describe "editing a country" do
+    setup do
+      mock_request(fn
+        %{method: "POST", request_path: "/2.0/country/1"} = conn ->
+          {:ok, body, _} = read_body(conn)
+          body_json = Jason.decode!(body)
+          assert body_json["name"] == "Kiribati"
+          assert body_json["name_short"] == "KI"
+          assert body_json["iso3166_alpha2"] == "KI"
+
+          json(conn, %{
+            "id" => 1,
+            "name" => "Kiribati",
+            "name_short" => "KI",
+            "iso3166_alpha2" => "KI"
+          })
+      end)
+
+      :ok
+    end
+
+    test "edits the country" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} =
+               BexioApiClient.Others.edit_country(
+                 client,
+                 Country.new(%{id: 1, name: "Kiribati", name_short: "KI", iso3166_alpha2: "KI"})
+               )
+
+      assert result.id == 1
+      assert result.name == "Kiribati"
+      assert result.name_short == "KI"
+      assert result.iso3166_alpha2 == "KI"
+    end
+  end
+
+  describe "deleting a country" do
+    setup do
+      mock_request(fn
+        %{method: "DELETE", request_path: "/2.0/country/1"} = conn ->
+          json(conn, %{"success" => true})
+      end)
+
+      :ok
+    end
+
+    test "deletes the country" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} = BexioApiClient.Others.delete_country(client, 1)
+
+      assert result == true
+    end
+  end
+
   describe "fetching a list of languages" do
     setup do
       mock_request(fn
@@ -449,6 +542,42 @@ defmodule BexioApiClient.OthersTest do
       client = BexioApiClient.new("123")
 
       assert {:ok, result} = BexioApiClient.Others.fetch_user(client, 4)
+
+      assert result.id == 4
+      assert result.salutation_type == :male
+      assert result.firstname == "Rudolph"
+      assert result.lastname == "Smith"
+      assert result.email == "rudolph.smith@example.com"
+      assert result.superadmin? == true
+      assert result.accountant? == false
+    end
+  end
+
+  describe "fetching the authenticated user" do
+    setup do
+      mock_request(fn
+        %{
+          method: "GET",
+          request_path: "/3.0/users/me"
+        } = conn ->
+          json(conn, %{
+            "id" => 4,
+            "salutation_type" => "male",
+            "firstname" => "Rudolph",
+            "lastname" => "Smith",
+            "email" => "rudolph.smith@example.com",
+            "is_superadmin" => true,
+            "is_accountant" => false
+          })
+      end)
+
+      :ok
+    end
+
+    test "shows the authenticated user" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, result} = BexioApiClient.Others.fetch_me(client)
 
       assert result.id == 4
       assert result.salutation_type == :male
@@ -1640,6 +1769,56 @@ defmodule BexioApiClient.OthersTest do
 
       assert Enum.count(result) == 1
       assert result[1] == "Cash"
+    end
+  end
+
+  describe "fetching a list of document templates" do
+    setup do
+      mock_request(fn
+        %{
+          method: "GET",
+          request_path: "/3.0/document_templates"
+        } = conn ->
+          json(conn, [
+            %{
+              "template_slug" => "5f118cbc200a0c76ef1f34b2",
+              "name" => "Standard template",
+              "is_default" => true,
+              "default_for_document_types" => [
+                "type_offer",
+                "type_order",
+                "type_invoice",
+                "type_delivery",
+                "type_credit_voucher",
+                "type_account_statement",
+                "type_article_order"
+              ]
+            }
+          ])
+      end)
+
+      :ok
+    end
+
+    test "lists valid results" do
+      client = BexioApiClient.new("123")
+
+      assert {:ok, [result]} = BexioApiClient.Others.fetch_document_templates(client)
+      assert %DocumentTemplate{} = result
+
+      assert result.template_slug == "5f118cbc200a0c76ef1f34b2"
+      assert result.name == "Standard template"
+      assert result.default? == true
+
+      assert result.default_for_document_types == [
+               :type_offer,
+               :type_order,
+               :type_invoice,
+               :type_delivery,
+               :type_credit_voucher,
+               :type_account_statement,
+               :type_article_order
+             ]
     end
   end
 end
