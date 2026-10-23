@@ -3,6 +3,13 @@
 This is a simple client for the API described at <https://docs.bexio.com/>. It will support all functionality while also replacing enums with atoms and
 making the structs more useful in elixir.
 
+> **Unofficial OpenAPI spec:** because docs.bexio.com publishes no machine-readable
+> spec, this repository ships one reconstructed from the official documentation —
+> [`docs/bexio-openapi.json`](docs/bexio-openapi.json) / [`docs/bexio-openapi.yaml`](docs/bexio-openapi.yaml)
+> (OpenAPI 3.0.3). It is regenerated from the docs by `scripts/extract_bexio_api_docs.py`
+> and is a reference only — it is **not** bexio AG's responsibility and not the source
+> of truth for this library, which is hand-written against the documented behaviour.
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

@@ -29,7 +29,9 @@ defmodule BexioApiClient.MixProject do
       maintainers: ["Rico Metzger"],
       licenses: ["MIT"],
       links: %{
-        "GitHub" => "https://github.com/rmse-ch/elixir-bexio-client-api",
+        "GitHub" => "https://github.com/titaniumcoder/elixir-bexio-client-api",
+        "Changelog" => "https://github.com/titaniumcoder/elixir-bexio-client-api/blob/main/CHANGELOG.md",
+        "OpenAPI spec" => "https://github.com/titaniumcoder/elixir-bexio-client-api/blob/main/docs/bexio-openapi.yaml",
         "Docs" => "https://hexdocs.pm/bexio_api_client/",
         "Bexio API Docs" => "https://docs.bexio.com"
       }
