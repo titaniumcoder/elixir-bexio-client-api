@@ -11,14 +11,39 @@ defmodule BexioApiClient.Accounting.Currency do
     * `:id` - automatic id given by bexio
     * `:name` - Currency Name
     * `:round_factor` - How to round the given currency
+    * `:exchange_rate` - default exchange rate of the currency, `nil` for the base currency
+    * `:exchange_rate_date` - date of the default exchange rate
+    * `:exchange_rate_id` - id of the default exchange rate
+    * `:exchange_rate_to_ratio` - ratio part of the default exchange rate
+    * `:ratio` - other ratio part of the default exchange rate
+    * `:source` - source of the default exchange rate
+    * `:source_reason` - reason for the source of the default exchange rate
   """
   @type t :: %__MODULE__{
           id: integer(),
           name: String.t(),
-          round_factor: float()
+          round_factor: float(),
+          exchange_rate: float() | nil,
+          exchange_rate_date: Date.t() | nil,
+          exchange_rate_id: integer() | nil,
+          exchange_rate_to_ratio: float() | nil,
+          ratio: float() | nil,
+          source: String.t() | nil,
+          source_reason: String.t() | nil
         }
   @enforce_keys [:id, :name, :round_factor]
-  defstruct [:id, :name, :round_factor]
+  defstruct [
+    :id,
+    :name,
+    :round_factor,
+    :exchange_rate,
+    :exchange_rate_date,
+    :exchange_rate_id,
+    :exchange_rate_to_ratio,
+    :ratio,
+    :source,
+    :source_reason
+  ]
 
   @doc """
   Rounds an amount to the given currency round factor

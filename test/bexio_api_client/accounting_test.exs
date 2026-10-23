@@ -172,6 +172,7 @@ defmodule BexioApiClient.AccountingTest do
               "start" => "2018-01-01",
               "end" => "2018-12-31",
               "is_vat_subject" => true,
+              "is_annual_reporting" => false,
               "created_at" => "2017-04-28T19:58:58+00:00",
               "updated_at" => "2018-04-30T19:58:58+00:00",
               "vat_accounting_method" => "effective",
@@ -275,6 +276,8 @@ defmodule BexioApiClient.AccountingTest do
               "net_tax_value" => nil,
               "start_year" => 2017,
               "end_year" => 2018,
+              "start_month" => 1,
+              "end_month" => 12,
               "is_active" => true,
               "display_name" => "ZOLLM  - Import Mat/SV 100.00%"
             }

@@ -489,6 +489,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       show_total?: show_total?,
       updated_at: to_datetime(updated_at),
       template_slug: template_slug,
+      # deprecated by bexio in favor of template_slug; may be absent in newer responses
+      logopaper_id: Map.get(map, "logopaper_id"),
       taxs: Enum.map(taxs, &to_tax/1),
       network_link: network_link
     }
@@ -776,6 +778,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       is_recurring?: is_recurring?,
       updated_at: to_datetime(updated_at),
       template_slug: template_slug,
+      # deprecated by bexio in favor of template_slug; may be absent in newer responses
+      logopaper_id: Map.get(map, "logopaper_id"),
       taxs: Enum.map(taxs, &to_tax/1),
       network_link: network_link
     }
@@ -868,6 +872,7 @@ defmodule BexioApiClient.SalesOrderManagement do
            "delivery_address" => delivery_address,
            "kb_item_status_id" => kb_item_status_id,
            "api_reference" => api_reference,
+           "viewed_by_client_at" => viewed_by_client_at,
            "updated_at" => updated_at,
            "taxs" => taxs
          } = map,
@@ -898,7 +903,11 @@ defmodule BexioApiClient.SalesOrderManagement do
       delivery_address: delivery_address,
       kb_item_status: delivery_kb_item_status(kb_item_status_id),
       api_reference: api_reference,
+      viewed_by_client_at: to_datetime(viewed_by_client_at),
       updated_at: to_datetime(updated_at),
+      # deprecated by bexio in favor of template_slug; may be absent in newer responses
+      logopaper_id: Map.get(map, "logopaper_id"),
+      template_slug: Map.get(map, "template_slug"),
       taxs: Enum.map(taxs, &to_tax/1)
     }
     |> map_delivery_positions(Map.get(map, "positions"))
@@ -1210,6 +1219,8 @@ defmodule BexioApiClient.SalesOrderManagement do
       viewed_by_client_at: to_datetime(viewed_by_client_at),
       updated_at: to_datetime(updated_at),
       template_slug: template_slug,
+      # deprecated by bexio in favor of template_slug; may be absent in newer responses
+      logopaper_id: Map.get(map, "logopaper_id"),
       taxs: Enum.map(taxs, &to_tax/1),
       network_link: network_link,
       esr_id: esr_id,

@@ -148,6 +148,8 @@ defmodule BexioApiClient.Items do
            "tax_income_id" => tax_income_id,
            "tax_id" => tax_id,
            "tax_expense_id" => tax_expense_id,
+           "account_id" => account_id,
+           "expense_account_id" => expense_account_id,
            "unit_id" => unit_id,
            "is_stock" => stock?,
            "stock_id" => stock_id,
@@ -164,6 +166,7 @@ defmodule BexioApiClient.Items do
            "weight" => weight,
            "volume" => volume,
            "remarks" => remarks,
+           "html_text" => html_text,
            "delivery_price" => delivery_price,
            "article_group_id" => article_group_id
          },
@@ -188,6 +191,8 @@ defmodule BexioApiClient.Items do
       tax_income_id: tax_income_id,
       tax_id: tax_id,
       tax_expense_id: tax_expense_id,
+      account_id: account_id,
+      expense_account_id: expense_account_id,
       unit_id: unit_id,
       stock?: stock?,
       stock_id: stock_id,
@@ -204,6 +209,7 @@ defmodule BexioApiClient.Items do
       weight: weight,
       volume: volume,
       remarks: remarks,
+      html_text: html_text,
       delivery_price: to_decimal(delivery_price),
       article_group_id: article_group_id
     }

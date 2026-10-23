@@ -9,7 +9,7 @@ defmodule BexioApiClient.Contacts.Contact do
   ## Fields:
 
     * `:id` - automatic id given by bexio
-    * `:nr` - must be a number, can also be used as integer
+    * `:nr` - must be a number, can also be used as integer; `nil` when assigned automatically
     * `:contact_type` - either `:company` or `:person`
     * `:name_1` - for `:company` the company name and for `:person` the last name
     * `:name_2` - for `:company` the company addition and for `:person` the first name
@@ -18,6 +18,9 @@ defmodule BexioApiClient.Contacts.Contact do
     * `:title_id` - reference to a TODO: title object
     * `:birthday` - birthday (`:person`) or foundation date (`:company`)
     * `:address` - street and additional address information
+    * `:street_name` - street name (the `:address` field is deprecated by bexio in favor of the structured address fields)
+    * `:house_number` - house number
+    * `:address_addition` - additional address information
     * `:postcode` - postal code / zip
     * `:city` - city
     * `:country_id` - reference to a TODO: country object
@@ -30,16 +33,18 @@ defmodule BexioApiClient.Contacts.Contact do
     * `:url` - homepage url
     * `:skype_name` - Skype Name
     * `:remarks` - free text for remarks
+    * `:is_lead` - whether the contact is a lead
     * `:language_id` - reference to a TODO: language object
     * `:contact_group_ids` - reference to multiple TODO: contact group objects
     * `:contact_branch_ids` - reference to multiple TODO: contact sector objects
     * `:user_id` - creator of the record, reference to a TODO: user object
     * `:owner_id` - owner of the record, reference to a TODO: user object
     * `:updated_at` - date time of the last update (zurich time zone)
+    * `:profile_image` - base64 encoded profile image (only part of the show-contact response)
   """
   @type t :: %__MODULE__{
           id: integer(),
-          nr: integer(),
+          nr: integer() | nil,
           contact_type: :company | :person,
           name_1: String.t(),
           name_2: String.t(),
@@ -48,6 +53,9 @@ defmodule BexioApiClient.Contacts.Contact do
           title_id: integer(),
           birthday: Date.t(),
           address: String.t(),
+          street_name: String.t() | nil,
+          house_number: String.t() | nil,
+          address_addition: String.t() | nil,
           postcode: String.t(),
           city: String.t(),
           country_id: integer(),
@@ -60,17 +68,20 @@ defmodule BexioApiClient.Contacts.Contact do
           url: String.t(),
           skype_name: String.t(),
           remarks: String.t(),
+          is_lead: boolean(),
           language_id: integer(),
           contact_group_ids: [integer()],
           contact_branch_ids: [integer()],
           user_id: integer(),
           owner_id: integer(),
-          updated_at: NaiveDateTime.t()
+          updated_at: NaiveDateTime.t(),
+          profile_image: String.t() | nil
         }
   @enforce_keys [
     :id,
     :nr,
     :contact_type,
+    :is_lead,
     :name_1,
     :contact_group_ids,
     :contact_branch_ids,
@@ -88,6 +99,9 @@ defmodule BexioApiClient.Contacts.Contact do
     :title_id,
     :birthday,
     :address,
+    :street_name,
+    :house_number,
+    :address_addition,
     :postcode,
     :city,
     :country_id,
@@ -100,11 +114,13 @@ defmodule BexioApiClient.Contacts.Contact do
     :url,
     :skype_name,
     :remarks,
+    :is_lead,
     :language_id,
     :contact_group_ids,
     :contact_branch_ids,
     :user_id,
     :owner_id,
-    :updated_at
+    :updated_at,
+    :profile_image
   ]
 end

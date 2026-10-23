@@ -185,16 +185,16 @@ defmodule BexioApiClient.Others do
          %{
            "id" => id,
            "name" => name,
-           "name_short" => name_short,
-           "iso_3166_alpha2" => iso_3166_alpha2
-         },
+           "name_short" => name_short
+         } = country,
          _env \\ nil
        ) do
     %Country{
       id: id,
       name: name,
       name_short: name_short,
-      iso_3166_alpha2: iso_3166_alpha2
+      # documented name is iso3166_alpha2; accept the old iso_3166_alpha2 spelling too
+      iso3166_alpha2: Map.get(country, "iso3166_alpha2") || Map.get(country, "iso_3166_alpha2")
     }
   end
 

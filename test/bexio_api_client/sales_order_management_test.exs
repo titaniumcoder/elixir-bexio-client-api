@@ -1280,6 +1280,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
           json(conn, [
             %{
               "api_reference" => nil,
+              "viewed_by_client_at" => nil,
               "bank_account_id" => 1,
               "contact_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
               "contact_id" => 14,
@@ -1388,6 +1389,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
             "delivery_address" => "UTA Immobilien AG\nStadtturmstrasse 15\n5400 Baden",
             "kb_item_status_id" => 18,
             "api_reference" => nil,
+            "viewed_by_client_at" => nil,
             "updated_at" => "2019-04-08 13:17:32",
             "taxs" => [
               %{
@@ -1514,6 +1516,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
               "reference" => nil,
               "api_reference" => nil,
               "viewed_by_client_at" => nil,
+              "viewed_by_client_at" => nil,
               "updated_at" => "2019-04-08 13:17:32",
               "esr_id" => 1,
               "qr_invoice_id" => 1,
@@ -1625,6 +1628,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
               "reference" => nil,
               "api_reference" => nil,
               "viewed_by_client_at" => nil,
+              "viewed_by_client_at" => nil,
               "updated_at" => "2019-04-08 13:17:32",
               "esr_id" => 1,
               "qr_invoice_id" => 1,
@@ -1735,6 +1739,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
             "kb_item_status_id" => 7,
             "reference" => nil,
             "api_reference" => nil,
+            "viewed_by_client_at" => nil,
             "viewed_by_client_at" => nil,
             "updated_at" => "2019-04-08 13:17:32",
             "esr_id" => 1,
@@ -1882,6 +1887,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
             "reference" => nil,
             "api_reference" => nil,
             "viewed_by_client_at" => nil,
+            "viewed_by_client_at" => nil,
             "updated_at" => "2019-04-08 13:17:32",
             "esr_id" => 1,
             "qr_invoice_id" => 1,
@@ -2006,6 +2012,7 @@ defmodule BexioApiClient.SalesOrderManagementTest do
             "kb_item_status_id" => 7,
             "reference" => nil,
             "api_reference" => nil,
+            "viewed_by_client_at" => nil,
             "viewed_by_client_at" => nil,
             "updated_at" => "2019-04-08 13:17:32",
             "esr_id" => 1,

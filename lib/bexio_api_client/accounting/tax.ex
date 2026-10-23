@@ -19,6 +19,8 @@ defmodule BexioApiClient.Accounting.Tax do
     * `:net_tax_value` - the net tax percentage (this field is only used, it the tax has the type `net_tax`)
     * `start_year` - the start year from which on the tax is valid. if set to nil every year before end_year
     * `:end_year` - the end year until the tax is valid. if set to nil every year after start_year
+    * `:start_month` - the start month from which on the tax is valid
+    * `:end_month` - the end month until the tax is valid
     * `:active?` - whether the tax is active
     * `:display_name` - a human readable of the tax, including the code
   """
@@ -44,6 +46,8 @@ defmodule BexioApiClient.Accounting.Tax do
           net_tax_value: float() | nil,
           start_year: pos_integer() | nil,
           end_year: pos_integer() | nil,
+          start_month: pos_integer() | nil,
+          end_month: pos_integer() | nil,
           active?: boolean(),
           display_name: String.t()
         }
@@ -72,6 +76,8 @@ defmodule BexioApiClient.Accounting.Tax do
     :net_tax_value,
     :start_year,
     :end_year,
+    :start_month,
+    :end_month,
     :active?,
     :display_name
   ]

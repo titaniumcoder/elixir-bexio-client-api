@@ -17,6 +17,7 @@ defmodule BexioApiClient.Files.File do
           user_id: integer(),
           archived?: boolean(),
           source_type: :web | :email | :mobile | nil,
+          source_id: integer() | nil,
           referenced?: boolean(),
           created_at: DateTime.t()
         }
@@ -43,6 +44,8 @@ defmodule BexioApiClient.Files.File do
     :user_id,
     :archived?,
     :source_type,
+    # deprecated by bexio in favor of `:source_type`
+    :source_id,
     :referenced?,
     :created_at
   ]
