@@ -1,3 +1,0 @@
-# API basics
-
-API basics

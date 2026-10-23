@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract the bexio API documentation snapshot into Markdown reference + OpenAPI spec.
+"""Extract the bexio API documentation into an OpenAPI spec (markdown reference optional).
 
 bexio does not publish an OpenAPI/Swagger definition (their FAQ explicitly says so),
 so this script reconstructs one from a saved single-page snapshot (MHTML) of
@@ -9,14 +9,14 @@ Usage:
     python3 scripts/extract_bexio_api_docs.py [--mhtml PATH] [--out-dir docs]
 
 Outputs (default under docs/):
-    reference/           Markdown reference (one file per API group + info pages)
-    reference/operations.json   machine-readable operation index
     bexio-openapi.json   reconstructed OpenAPI 3.0 spec (unofficial)
     bexio-openapi.yaml   same spec as YAML
 
-The snapshot must be saved with "save page as MHTML" (e.g. Blink/Chrome) from
-https://docs.bexio.com/ with all sections expanded. Re-run this script whenever
-a fresh snapshot is saved to see what changed in the docs.
+With --markdown, additionally writes the Markdown reference that used to live
+in docs/reference/ (one file per API tag + info pages + operations.json index).
+
+The docs are downloaded from https://docs.bexio.com/ by default. Re-run this
+script whenever the docs change to see (git diff) what changed.
 """
 import argparse
 import datetime
@@ -859,19 +859,19 @@ def main():
                     help="URL of https://docs.bexio.com/, or a path to a raw HTML file "
                          "or an MHTML snapshot (default: download the live docs)")
     ap.add_argument("--out-dir", default=os.path.join(os.path.dirname(__file__), "..", "docs"))
+    ap.add_argument("--markdown", action="store_true",
+                    help="also write the Markdown reference (docs/reference/) "
+                         "and the operations.json index")
     args = ap.parse_args()
     out_dir = os.path.normpath(args.out_dir)
     ref_dir = os.path.join(out_dir, "reference")
-    os.makedirs(ref_dir, exist_ok=True)
 
     print(f"loading docs from {args.source} ...", file=sys.stderr)
     html_text, snapshot_date = load_source(args.source)
     ops, pages, _ = extract(html_text)
     ops = [parse_operation(o) for o in ops]
 
-    # ---- markdown reference ----
-    for f in os.listdir(ref_dir):
-        os.remove(os.path.join(ref_dir, f))
+    # ---- markdown reference (optional) ----
     files = OrderedDict()
     for op in ops:
         files.setdefault(op["group"] or "Other", []).append(op)
@@ -892,8 +892,10 @@ def main():
             index.append({"group": op.get("top_group") or grp, "tag": grp,
                           "method": op["method"].upper(), "path": op["path"],
                           "title": op["title"], "operationId": op["operationId"]})
-        with open(os.path.join(ref_dir, fn), "w") as f:
-            f.write("\n".join(md))
+        if args.markdown:
+            os.makedirs(ref_dir, exist_ok=True)
+            with open(os.path.join(ref_dir, fn), "w") as f:
+                f.write("\n".join(md))
 
     summary = ["# bexio API reference (extracted from docs.bexio.com snapshot)", "",
                "Source: `bexio API documentation.mhtml` (saved from https://docs.bexio.com).",
@@ -913,15 +915,18 @@ def main():
         summary.append("")
     for sid, title, _body in pages:
         summary.append(f"- {title} → `page-{slugify(title)[:60]}.md`")
-    for sid, title, body in pages:
-        with open(os.path.join(ref_dir, f"page-{slugify(title)[:60]}.md"), "w") as f:
-            f.write(f"# {title}\n\n{body}\n")
-    with open(os.path.join(ref_dir, "README.md"), "w") as f:
-        f.write("\n".join(summary) + "\n")
-    with open(os.path.join(ref_dir, "operations.json"), "w") as f:
-        json.dump(index, f, indent=2)
+    if args.markdown:
+        os.makedirs(ref_dir, exist_ok=True)
+        for sid, title, body in pages:
+            with open(os.path.join(ref_dir, f"page-{slugify(title)[:60]}.md"), "w") as f:
+                f.write(f"# {title}\n\n{body}\n")
+        with open(os.path.join(ref_dir, "README.md"), "w") as f:
+            f.write("\n".join(summary) + "\n")
+        with open(os.path.join(ref_dir, "operations.json"), "w") as f:
+            json.dump(index, f, indent=2)
 
     # ---- OpenAPI ----
+    os.makedirs(out_dir, exist_ok=True)
     spec = build_openapi(ops, snapshot_date)
     with open(os.path.join(out_dir, "bexio-openapi.json"), "w") as f:
         json.dump(spec, f, indent=2)
@@ -929,8 +934,9 @@ def main():
     with open(os.path.join(out_dir, "bexio-openapi.yaml"), "w") as f:
         f.write(to_yaml(spec) + "\n")
 
-    print(f"groups={len(files)} operations={len(ops)} pages={len(pages)}")
-    print(f"openapi paths={len(spec['paths'])}")
+    print(f"operations={len(ops)}")
+    print(f"openapi paths={len(spec['paths'])}"
+          + (" + markdown reference" if args.markdown else ""))
 
 
 if __name__ == "__main__":
