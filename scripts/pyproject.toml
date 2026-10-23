@@ -1,0 +1,28 @@
+[project]
+name = "bexio-docs-extractor"
+version = "0.1.0"
+description = "Extract the bexio API documentation (docs.bexio.com) into an unofficial OpenAPI 3.0 spec"
+requires-python = ">=3.12"
+
+[dependency-groups]
+dev = ["ruff>=0.14"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # isort
+    "UP",  # pyupgrade (modern python idioms)
+    "B",   # bugbear
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific rules
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["extract_bexio_api_docs"]

@@ -18,6 +18,7 @@ in docs/reference/ (one file per API tag + info pages + operations.json index).
 The docs are downloaded from https://docs.bexio.com/ by default. Re-run this
 script whenever the docs change to see (git diff) what changed.
 """
+
 import argparse
 import datetime
 import email
@@ -38,7 +39,7 @@ VOID = {"br", "hr", "img", "meta", "link", "input", "polygon", "path", "circle"}
 
 
 class Node:
-    __slots__ = ("tag", "attrs", "children", "text", "parent")
+    __slots__ = ("attrs", "children", "parent", "tag", "text")
 
     def __init__(self, tag, attrs, parent=None):
         self.tag, self.attrs, self.parent = tag, dict(attrs), parent
@@ -95,6 +96,7 @@ class DocParser(HTMLParser):
 
 
 # ---------------------------------------------------------------- tree helpers
+
 
 def parse_html(html_text):
     p = DocParser()
@@ -156,8 +158,8 @@ def desc_md(node):
     raw = re.sub(r"<(p|div|br|ul|ol|tr|h[1-6])[^>]*/?>", "\n", raw)
     raw = re.sub(r"<[^>]+>", "", raw)
     raw = htmllib.unescape(raw)
-    lines = [re.sub(r"\s+", " ", l).strip() for l in raw.split("\n")]
-    return "\n".join(l for l in lines if l).strip()
+    lines = [re.sub(r"\s+", " ", line).strip() for line in raw.split("\n")]
+    return "\n".join(line for line in lines if line).strip()
 
 
 def pre_block(pre):
@@ -178,8 +180,14 @@ def pre_block(pre):
 
 # ------------------------------------------------------------- schema parsing
 
-BASIC_TYPES = {"string": "string", "integer": "integer", "number": "number",
-               "boolean": "boolean", "date": "string", "object": "object"}
+BASIC_TYPES = {
+    "string": "string",
+    "integer": "integer",
+    "number": "number",
+    "boolean": "boolean",
+    "date": "string",
+    "object": "object",
+}
 
 
 def cell_tokens(val_cell):
@@ -211,12 +219,10 @@ def parse_type(tokens):
         r"^(?:Array of )?(object|objects|string|integer|number|boolean|strings|date|date-time)\b",
         raw,
     )
-    one_of = None
     if not m:
         # oneOf renderings, e.g. "Array of PositionCustom (object) or PositionArticle (object)"
         names = re.findall(r"([A-Za-z][\w]*)\s*\(object\)", raw)
         if names:
-            one_of = names
             if raw.startswith("Array of "):
                 s["type"] = "array"
                 s["items"] = {"type": "object", "x-schema-names": names}
@@ -238,7 +244,7 @@ def parse_type(tokens):
             s.update(type="string", format="date-time")
         else:
             s["type"] = t
-        rest = raw[m.end():]
+        rest = raw[m.end() :]
     if " or null" in raw:
         s["nullable"] = True
     fm = re.search(r"<(int32|int64|float|double|date|date-time|byte|binary)>", rest)
@@ -289,7 +295,9 @@ def parse_schema_table(tbl):
             continue  # enum-value sub-row (redundant: Enum: is part of the parent row text)
         name = text_of(pname)
         deprecated = " deprecated" in name_cell.cls()
-        required = any(text_of(d) == "required" for d in find_all(name_cell, lambda n: n.tag == "div"))
+        required = any(
+            text_of(d) == "required" for d in find_all(name_cell, lambda n: n.tag == "div")
+        )
         # NOTE: rows carrying the expandable-marker class are *top-level* properties whose
         # nested child rows are collapsed (not rendered) in the snapshot. Depth is always 0.
         depth = 0
@@ -301,11 +309,17 @@ def parse_schema_table(tbl):
                     desc = t
         tokens = cell_tokens(val_cell) if val_cell is not None else []
         schema, raw = parse_type(tokens)
-        rows.append({
-            "name": name, "depth": depth, "required": required,
-            "deprecated": deprecated, "schema": schema, "description": desc,
-            "raw": raw,
-        })
+        rows.append(
+            {
+                "name": name,
+                "depth": depth,
+                "required": required,
+                "deprecated": deprecated,
+                "schema": schema,
+                "description": desc,
+                "raw": raw,
+            }
+        )
     return rows
 
 
@@ -322,8 +336,12 @@ def rows_to_schema(rows, top_array=False):
     """Build an OpenAPI schema object from parsed rows (max 2 levels of nesting)."""
     top = rows[0] if rows else None
     # body-level array?
-    if top_array or (top and top["schema"].get("type") == "array" and top["depth"] == 0
-                     and not any(r["depth"] == 0 for r in rows[1:])):
+    if top_array or (
+        top
+        and top["schema"].get("type") == "array"
+        and top["depth"] == 0
+        and not any(r["depth"] == 0 for r in rows[1:])
+    ):
         item_rows = [r for r in rows[1:] if r["depth"] >= 0]
         items = rows_to_schema(item_rows) if item_rows else {"type": "object"}
         s = dict(top["schema"]) if top else {"type": "array"}
@@ -385,6 +403,7 @@ def rows_to_params(tbl, location):
 
 # ---------------------------------------------------------------- md helpers
 
+
 def md_param_table(rows):
     lines = ["| Parameter | Type | Description |", "|---|---|---|"]
     for r in rows:
@@ -433,6 +452,7 @@ def json_from_redoc(node):
 
 # ---------------------------------------------------------------- YAML output
 
+
 def to_yaml(obj, indent=0):
     pad = "  " * indent
     if obj is None:
@@ -442,11 +462,15 @@ def to_yaml(obj, indent=0):
     if isinstance(obj, (int, float)):
         return str(obj)
     if isinstance(obj, str):
-        if obj == "" or re.search(r"[:#\-\n{}[\],&*?|>'\"%@`]", obj) or obj != obj.strip() \
-                or obj.lower() in ("true", "false", "null", "yes", "no", "on", "off", "~") \
-                or re.fullmatch(r"[-+]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?", obj) \
-                or re.fullmatch(r"0[xXoObB][\da-fA-F]+", obj) \
-                or re.fullmatch(r"[-\w./ ]+", obj) is None:
+        if (
+            obj == ""
+            or re.search(r"[:#\-\n{}[\],&*?|>'\"%@`]", obj)
+            or obj != obj.strip()
+            or obj.lower() in ("true", "false", "null", "yes", "no", "on", "off", "~")
+            or re.fullmatch(r"[-+]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?", obj)
+            or re.fullmatch(r"0[xXoObB][\da-fA-F]+", obj)
+            or re.fullmatch(r"[-\w./ ]+", obj) is None
+        ):
             return json.dumps(obj)
         return obj
     if isinstance(obj, list):
@@ -457,7 +481,7 @@ def to_yaml(obj, indent=0):
             if isinstance(v, (dict, list)) and v:
                 block = to_yaml(v, indent + 1)
                 first, _, rest = block.partition("\n")
-                lines.append(f"{pad}- {first[len(pad) + 2:]}")
+                lines.append(f"{pad}- {first[len(pad) + 2 :]}")
                 if rest:
                     lines.append(rest)
             else:
@@ -491,6 +515,7 @@ def load_source(source):
     """
     if re.match(r"^https?://", source):
         import urllib.request
+
         req = urllib.request.Request(source, headers={"User-Agent": "bexio-api-docs-extractor/1.0"})
         with urllib.request.urlopen(req, timeout=120) as resp:
             data = resp.read()
@@ -504,7 +529,9 @@ def load_source(source):
     if head.startswith(b"From:") or b"multipart/related" in data[:2000]:
         msg = email.message_from_bytes(data, policy=email.policy.default)
         part = next(p for p in msg.walk() if p.get_content_type() == "text/html")
-        return part.get_payload(decode=True).decode("utf-8", "replace"), str(msg.get("Date", "")).strip()
+        return part.get_payload(decode=True).decode("utf-8", "replace"), str(
+            msg.get("Date", "")
+        ).strip()
     return data.decode("utf-8", "replace"), datetime.date.today().isoformat()
 
 
@@ -586,10 +613,14 @@ def extract(html_text):
                 if text_of(h5) == "Authorizations:":
                     auth = [text_of(i) for i in find_all(h5.parent, lambda n: n.tag == "i")]
             op = {
-                "operationId": op_id, "group": grp,
-                "top_group": op_group.get(op_id, grp), "method": verb, "path": path,
+                "operationId": op_id,
+                "group": grp,
+                "top_group": op_group.get(op_id, grp),
+                "method": verb,
+                "path": path,
                 "title": text_of(h2) if h2 else op_id,
-                "auth": auth, "node": s,
+                "auth": auth,
+                "node": s,
             }
             ops.append(op)
     return ops, pages, group_of
@@ -598,8 +629,6 @@ def extract(html_text):
 def parse_operation(op):
     """Extract markdown block + structured OpenAPI pieces from an operation section."""
     s = op["node"]
-    h2 = find_first(s, lambda n: n.tag == "h2")
-    verb, path, op_id = op["method"], op["path"], op["operationId"]
     desc = ""
     for d in find_all(s, lambda x: x.attrs.get("html")):
         t = desc_md(d)
@@ -612,7 +641,7 @@ def parse_operation(op):
         label = text_of(h5)
         sibs = h5.parent.children
         idx = sibs.index(h5)
-        tbl = next((c for c in sibs[idx + 1:] if c.tag == "table"), None)
+        tbl = next((c for c in sibs[idx + 1 :] if c.tag == "table"), None)
         if tbl is None:
             after = tables_after(h5.parent, h5)
             tbl = after[0] if after else None
@@ -629,13 +658,23 @@ def parse_operation(op):
                 # body may itself be an array (e.g. bulk create)
                 first = rows[0]["schema"] if rows else {"type": "object"}
                 is_array_body = first.get("type") == "array" and not any(
-                    r["depth"] == 0 and r["schema"].get("type") != "array" for r in rows[1:])
+                    r["depth"] == 0 and r["schema"].get("type") != "array" for r in rows[1:]
+                )
                 body_schema = rows_to_schema(rows, top_array=is_array_body)
         elif "Parameters" in label and tbl:
-            loc = "path" if label.startswith("path") else \
-                  "query" if label.startswith("query") else "header"
+            loc = (
+                "path"
+                if label.startswith("path")
+                else "query"
+                if label.startswith("query")
+                else "header"
+            )
             for p in rows_to_params(tbl, loc):
-                if p["in"] == "header" and p["name"].lower() in ("accept", "authorization", "content-type"):
+                if p["in"] == "header" and p["name"].lower() in (
+                    "accept",
+                    "authorization",
+                    "content-type",
+                ):
                     continue
                 parameters.append(p)
 
@@ -650,19 +689,26 @@ def parse_operation(op):
                 while d is None and sib is not None:
                     sibs = sib.parent.children
                     idx = sibs.index(sib)
-                    d = next((c for c in sibs[idx + 1:] if c.attrs.get("html")), False)
+                    d = next((c for c in sibs[idx + 1 :] if c.attrs.get("html")), False)
                     sib = sib.parent
                 responses.setdefault(code, {"description": desc_md(d) if d else ""})
         elif "Response samples" in label:
             panels = find_all(h3.parent, lambda n: "react-tabs__tab-panel" in n.cls())
-            tabs = [text_of(t) for t in find_all(h3.parent, lambda n: n.tag == "li" and "react-tabs__tab" in n.cls())]
+            tabs = [
+                text_of(t)
+                for t in find_all(
+                    h3.parent, lambda n: n.tag == "li" and "react-tabs__tab" in n.cls()
+                )
+            ]
             for pi, panel in enumerate(panels):
                 code = tabs[pi] if pi < len(tabs) else None
                 json_div = find_first(panel, lambda n: "redoc-json" in n.cls())
                 if json_div:
                     sample = json_from_redoc(json_div)
                     if sample is not None and code and code in responses:
-                        responses[code].setdefault("content", {})["application/json"] = {"example": sample}
+                        responses[code].setdefault("content", {})["application/json"] = {
+                            "example": sample
+                        }
 
     request_sample = None
     for h3 in find_all(s, lambda n: n.tag == "h3" and "Request samples" in text_of(n)):
@@ -675,33 +721,61 @@ def parse_operation(op):
                     request_sample = sample
                     break
 
-    op.update({
-        "description": desc, "parameters": parameters, "body_schema": body_schema,
-        "body_required": body_required, "body_ctype": body_ctype,
-        "responses": responses, "request_sample": request_sample,
-    })
+    op.update(
+        {
+            "description": desc,
+            "parameters": parameters,
+            "body_schema": body_schema,
+            "body_required": body_required,
+            "body_ctype": body_ctype,
+            "responses": responses,
+            "request_sample": request_sample,
+        }
+    )
     return op
 
 
 def build_markdown_block(op):
-    lines = [f"## `{op['method'].upper()}` `{op['path']}` — {op['title']}", "",
-             f"operationId: `{op['operationId']}`", ""]
+    lines = [
+        f"## `{op['method'].upper()}` `{op['path']}` — {op['title']}",
+        "",
+        f"operationId: `{op['operationId']}`",
+        "",
+    ]
     if op["description"]:
         lines += [op["description"], ""]
     if op["auth"]:
-        lines += [f"### Authorizations", ", ".join(op["auth"]), ""]
-    loc_labels = {"path": "path Parameters", "query": "query Parameters", "header": "header Parameters"}
+        lines += ["### Authorizations", ", ".join(op["auth"]), ""]
+    loc_labels = {
+        "path": "path Parameters",
+        "query": "query Parameters",
+        "header": "header Parameters",
+    }
     for loc in ("path", "query", "header"):
         ps = [p for p in op["parameters"] if p["in"] == loc]
         if ps:
-            rows = [{"name": p["name"], "depth": 0, "required": p.get("required", False),
-                     "deprecated": p.get("deprecated", False), "schema": p["schema"],
-                     "description": p.get("description", ""), "raw": raw_type(p["schema"])} for p in ps]
+            rows = [
+                {
+                    "name": p["name"],
+                    "depth": 0,
+                    "required": p.get("required", False),
+                    "deprecated": p.get("deprecated", False),
+                    "schema": p["schema"],
+                    "description": p.get("description", ""),
+                    "raw": raw_type(p["schema"]),
+                }
+                for p in ps
+            ]
             lines += [f"### {loc_labels[loc]}", "", md_param_table(rows), ""]
     if op["body_schema"] is not None:
         rows = schema_to_md_rows(op["body_schema"])
-        lines += [f"### Request Body schema: {op['body_ctype']}" +
-                  (" *(required)*" if op["body_required"] else ""), "", md_param_table(rows), ""]
+        lines += [
+            f"### Request Body schema: {op['body_ctype']}"
+            + (" *(required)*" if op["body_required"] else ""),
+            "",
+            md_param_table(rows),
+            "",
+        ]
     codes = ", ".join(op["responses"].keys()) or "_none_"
     lines += ["### Responses", "", codes, ""]
     for code, r in op["responses"].items():
@@ -710,11 +784,23 @@ def build_markdown_block(op):
             lines += [f"**{code}** — {desc}", ""]
         ex = r.get("content", {}).get("application/json", {}).get("example")
         if ex is not None:
-            lines += [f"**Response samples** ({code}):", "", "```json",
-                      json.dumps(ex, indent=2), "```", ""]
+            lines += [
+                f"**Response samples** ({code}):",
+                "",
+                "```json",
+                json.dumps(ex, indent=2),
+                "```",
+                "",
+            ]
     if op["request_sample"] is not None:
-        lines += ["**Request sample**:", "", "```json",
-                  json.dumps(op["request_sample"], indent=2), "```", ""]
+        lines += [
+            "**Request sample**:",
+            "",
+            "```json",
+            json.dumps(op["request_sample"], indent=2),
+            "```",
+            "",
+        ]
     return "\n".join(lines)
 
 
@@ -725,11 +811,11 @@ def raw_type(schema):
     if schema.get("nullable"):
         parts.append("or null")
     if "default" in schema:
-        parts.append(f'Default: {schema["default"]}')
+        parts.append(f"Default: {schema['default']}")
     if "enum" in schema:
         parts.append("Enum: " + " ".join(str(e) for e in schema["enum"]))
     if "minItems" in schema or "maxItems" in schema:
-        parts.append(f'[{schema.get("minItems", 0)} .. {schema.get("maxItems", "∞")}] items')
+        parts.append(f"[{schema.get('minItems', 0)} .. {schema.get('maxItems', '∞')}] items")
     return " ".join(str(p) for p in parts)
 
 
@@ -738,9 +824,17 @@ def schema_to_md_rows(schema, prefix="", depth=0):
     if schema.get("type") == "object" and schema.get("properties"):
         for name, sub in schema["properties"].items():
             full = f"{prefix}.{name}" if prefix else name
-            rows.append({"name": full, "depth": depth, "required": name in schema.get("required", []),
-                         "deprecated": sub.get("deprecated", False), "schema": sub,
-                         "description": sub.get("description", ""), "raw": raw_type(sub)})
+            rows.append(
+                {
+                    "name": full,
+                    "depth": depth,
+                    "required": name in schema.get("required", []),
+                    "deprecated": sub.get("deprecated", False),
+                    "schema": sub,
+                    "description": sub.get("description", ""),
+                    "raw": raw_type(sub),
+                }
+            )
             rows += schema_to_md_rows(sub, full, depth + 1)
     elif schema.get("type") == "array" and isinstance(schema.get("items"), dict):
         rows += schema_to_md_rows(schema["items"], prefix + "[]", depth)
@@ -752,8 +846,26 @@ def build_openapi(ops, snapshot_date):
     date_part = ""
     m = re.search(r"(\d{1,2} \w+ \d{4})", snapshot_date)
     if m:
-        months = {m_: i for i, m_ in enumerate(
-            ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], 1)}
+        months = {
+            m_: i
+            for i, m_ in enumerate(
+                [
+                    "Jan",
+                    "Feb",
+                    "Mar",
+                    "Apr",
+                    "May",
+                    "Jun",
+                    "Jul",
+                    "Aug",
+                    "Sep",
+                    "Oct",
+                    "Nov",
+                    "Dec",
+                ],
+                1,
+            )
+        }
         d = m.group(1).split()
         if len(d) == 3 and d[1][:3] in months:
             date_part = f"{d[2]}-{months[d[1][:3]]:02d}-{int(d[0]):02d}"
@@ -766,7 +878,8 @@ def build_openapi(ops, snapshot_date):
             "bexio does not publish an OpenAPI/Swagger definition; this document was "
             "reconstructed programmatically from https://docs.bexio.com by "
             "`scripts/extract_bexio_api_docs.py` in the "
-            "[elixir-bexio-client-api](https://github.com/titaniumcoder/elixir-bexio-client-api) repository.\n\n"
+            "[elixir-bexio-client-api](https://github.com/titaniumcoder/elixir-bexio-client-api) "
+            "repository.\n\n"
             "It is provided as-is, without any warranty of any kind. bexio is a product of "
             "bexio AG; bexio AG is **not** the author of this document, does not maintain it "
             "and is **not** responsible for its content in any way. For questions, corrections "
@@ -788,10 +901,16 @@ def build_openapi(ops, snapshot_date):
     }
     spec["servers"] = [{"url": "https://api.bexio.com"}]
     spec["security"] = [{"bearerAuth": []}]
-    spec["components"] = {"securitySchemes": {
-        "bearerAuth": {"type": "http", "scheme": "bearer",
-                       "description": "OAuth 2.0 access token obtained from auth.bexio.com "
-                                      "(see https://docs.bexio.com/#section/Authentication)"}}}
+    spec["components"] = {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "description": "OAuth 2.0 access token obtained from auth.bexio.com "
+                "(see https://docs.bexio.com/#section/Authentication)",
+            }
+        }
+    }
     groups = []
     paths = OrderedDict()
     for op in ops:
@@ -818,14 +937,22 @@ def build_openapi(ops, snapshot_date):
         # ensure every path placeholder has a parameter entry
         have = {p_["name"] for p_ in params if p_["in"] == "path"}
         for nm in sorted(path_names - have):
-            params.append({"name": nm, "in": "path", "required": True,
-                           "schema": {"type": "integer"},
-                           "description": "path parameter (not documented individually in the snapshot)"})
+            params.append(
+                {
+                    "name": nm,
+                    "in": "path",
+                    "required": True,
+                    "schema": {"type": "integer"},
+                    "description": "path parameter (not documented individually in the snapshot)",
+                }
+            )
         if params:
             o["parameters"] = params
         if op["body_schema"] is not None:
-            rb = {"required": op["body_required"],
-                  "content": {op["body_ctype"]: {"schema": op["body_schema"]}}}
+            rb = {
+                "required": op["body_required"],
+                "content": {op["body_ctype"]: {"schema": op["body_schema"]}},
+            }
             if op["request_sample"] is not None:
                 rb["content"][op["body_ctype"]]["example"] = op["request_sample"]
             o["requestBody"] = rb
@@ -855,13 +982,18 @@ def main():
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    ap.add_argument("--source", default=DEFAULT_URL,
-                    help="URL of https://docs.bexio.com/, or a path to a raw HTML file "
-                         "or an MHTML snapshot (default: download the live docs)")
+    ap.add_argument(
+        "--source",
+        default=DEFAULT_URL,
+        help="URL of https://docs.bexio.com/, or a path to a raw HTML file "
+        "or an MHTML snapshot (default: download the live docs)",
+    )
     ap.add_argument("--out-dir", default=os.path.join(os.path.dirname(__file__), "..", "docs"))
-    ap.add_argument("--markdown", action="store_true",
-                    help="also write the Markdown reference (docs/reference/) "
-                         "and the operations.json index")
+    ap.add_argument(
+        "--markdown",
+        action="store_true",
+        help="also write the Markdown reference (docs/reference/) and the operations.json index",
+    )
     args = ap.parse_args()
     out_dir = os.path.normpath(args.out_dir)
     ref_dir = os.path.join(out_dir, "reference")
@@ -879,31 +1011,48 @@ def main():
     for grp, group_ops in files.items():
         fn = f"{slugify(grp)}.md"
         top = group_ops[0].get("top_group") or grp
-        md = [f"# {grp}", "",
-              f"Part of **{top}**. Extracted from docs.bexio.com"
-             + (f" (snapshot {snapshot_date})" if snapshot_date else "") +
-             f". {len(group_ops)} operations.", ""]
+        md = [
+            f"# {grp}",
+            "",
+            f"Part of **{top}**. Extracted from docs.bexio.com"
+            + (f" (snapshot {snapshot_date})" if snapshot_date else "")
+            + f". {len(group_ops)} operations.",
+            "",
+        ]
         md += ["| Method | Path | Title |", "|---|---|---|"]
         for op in group_ops:
             md.append(f"| `{op['method'].upper()}` | `{op['path']}` | {op['title']} |")
         md.append("")
         for op in group_ops:
             md += [build_markdown_block(op), "---", ""]
-            index.append({"group": op.get("top_group") or grp, "tag": grp,
-                          "method": op["method"].upper(), "path": op["path"],
-                          "title": op["title"], "operationId": op["operationId"]})
+            index.append(
+                {
+                    "group": op.get("top_group") or grp,
+                    "tag": grp,
+                    "method": op["method"].upper(),
+                    "path": op["path"],
+                    "title": op["title"],
+                    "operationId": op["operationId"],
+                }
+            )
         if args.markdown:
             os.makedirs(ref_dir, exist_ok=True)
             with open(os.path.join(ref_dir, fn), "w") as f:
                 f.write("\n".join(md))
 
-    summary = ["# bexio API reference (extracted from docs.bexio.com snapshot)", "",
-               "Source: `bexio API documentation.mhtml` (saved from https://docs.bexio.com).",
-               "Regenerate with `python3 scripts/extract_bexio_api_docs.py`.", "",
-               "Machine-readable index: [`operations.json`](operations.json) — "
-               "OpenAPI spec: [`../bexio-openapi.json`](../bexio-openapi.json) / "
-               "[`../bexio-openapi.yaml`](../bexio-openapi.yaml).", "",
-               "Groups:", ""]
+    summary = [
+        "# bexio API reference (extracted from docs.bexio.com snapshot)",
+        "",
+        "Source: `bexio API documentation.mhtml` (saved from https://docs.bexio.com).",
+        "Regenerate with `python3 scripts/extract_bexio_api_docs.py`.",
+        "",
+        "Machine-readable index: [`operations.json`](operations.json) — "
+        "OpenAPI spec: [`../bexio-openapi.json`](../bexio-openapi.json) / "
+        "[`../bexio-openapi.yaml`](../bexio-openapi.yaml).",
+        "",
+        "Groups:",
+        "",
+    ]
     tops = OrderedDict()
     for grp, group_ops in files.items():
         tops.setdefault(group_ops[0].get("top_group") or grp, []).append((grp, group_ops))
@@ -911,13 +1060,15 @@ def main():
         summary.append(f"### {top}")
         summary.append("")
         for grp, group_ops in entries:
-            summary.append(f"- **{grp}** → [`{slugify(grp)}.md`]({slugify(grp)}.md) ({len(group_ops)} operations)")
+            n = len(group_ops)
+            fn = slugify(grp) + ".md"
+            summary.append(f"- **{grp}** → [`{fn}`]({fn}) ({n} operations)")
         summary.append("")
-    for sid, title, _body in pages:
+    for _sid, title, _body in pages:
         summary.append(f"- {title} → `page-{slugify(title)[:60]}.md`")
     if args.markdown:
         os.makedirs(ref_dir, exist_ok=True)
-        for sid, title, body in pages:
+        for _sid, title, body in pages:
             with open(os.path.join(ref_dir, f"page-{slugify(title)[:60]}.md"), "w") as f:
                 f.write(f"# {title}\n\n{body}\n")
         with open(os.path.join(ref_dir, "README.md"), "w") as f:
@@ -935,8 +1086,9 @@ def main():
         f.write(to_yaml(spec) + "\n")
 
     print(f"operations={len(ops)}")
-    print(f"openapi paths={len(spec['paths'])}"
-          + (" + markdown reference" if args.markdown else ""))
+    print(
+        f"openapi paths={len(spec['paths'])}" + (" + markdown reference" if args.markdown else "")
+    )
 
 
 if __name__ == "__main__":

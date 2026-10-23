@@ -26,3 +26,6 @@ bexio_api_client-*.tar
 /tmp/
 
 /.elixir-tools/
+__pycache__/
+*.pyc
+.venv/
