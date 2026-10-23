@@ -118,6 +118,28 @@ defmodule BexioApiClient.Helpers do
     end)
   end
 
+  @doc """
+  Like `bexio_body_handling/2`, but for endpoints that respond with `204 No Content`
+  (e.g. the payroll v4 endpoints) on success instead of a JSON body.
+
+  Returns `{:ok, true}` for a `204` response, otherwise behaves like
+  `bexio_handling/2` (the `callback` is only invoked for `200`/`201` responses).
+  """
+  @spec bexio_no_content_handling(
+          call :: (-> body_callback_type),
+          callback :: (body_callback_type, Req.Response.t() -> handler_callback_result_type)
+        ) ::
+          {:ok, handler_callback_result_type} | api_error_type
+  def bexio_no_content_handling(call, callback \\ fn _body, _env -> true end) do
+    case call.() do
+      {:ok, %Req.Response{status: 204}} ->
+        {:ok, true}
+
+      response ->
+        bexio_handling(fn -> response end, callback)
+    end
+  end
+
   @spec bexio_handling(
           call :: (-> body_callback_type),
           callback :: (body_callback_type, Req.Response.t() -> handler_callback_result_type)
