@@ -21,15 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   | `DocumentSetting.kb_item_class` | `:KbOffer` (PascalCase atom) | `:kb_offer` / `:kb_order` / `:kb_invoice` / `:kb_delivery`; unknown class names stay strings |
   | `Permission.permissions` keys and scopes | atoms for every key | atoms for the documented components/scopes; unknown components and scopes stay strings |
 
-  All **new** fields and structs in this release already follow the new convention
-  (predicate-style booleans such as `lead?`/`annual_reporting?`/`salary?`/
-  `editing_restricted?`/`default_billable?`, and document class atoms such as
-  `:kb_invoice` in `JournalEntry.ref_class`/`FileUsage.ref_class`) — since they are new,
-  this is not breaking for existing users. Going forward the convention is enforced by
-  AGENTS.md: documented enums are converted with `String.to_existing_atom/1` over the
-  listed values (`BexioApiClient.Helpers.to_enum/2`), document class names with
-  `BexioApiClient.Helpers.to_document_class/1`, and values with unknown/open sets are
-  kept as strings.
 
 ### Added
 
